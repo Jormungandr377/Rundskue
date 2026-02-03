@@ -1,0 +1,14 @@
+{
+  "name": "finance-tracker",
+  "version": "1.0.0",
+  "description": "Personal Finance Tracker with Plaid Integration",
+  "scripts": {
+    "build": "cd frontend && npm ci && npm run build",
+    "install-backend": "cd backend && pip install -r requirements.txt",
+    "start": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "python": ">=3.9.0"
+  }
+}

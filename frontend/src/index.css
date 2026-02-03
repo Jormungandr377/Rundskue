@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Card animations */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-100 transition-shadow hover:shadow-md;
+}
+
+/* Status colors */
+.text-income {
+  @apply text-green-600;
+}
+
+.text-expense {
+  @apply text-red-600;
+}
+
+.bg-income {
+  @apply bg-green-100;
+}
+
+.bg-expense {
+  @apply bg-red-100;
+}
