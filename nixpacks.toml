@@ -3,7 +3,7 @@ nixPkgs = ["python39", "nodejs", "postgresql"]
 
 [phases.install]
 cmds = [
-  "cd frontend && npm ci",
+  "cd frontend && npm install",
   "cd backend && pip install -r requirements.txt"
 ]
 
