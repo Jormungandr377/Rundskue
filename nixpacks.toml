@@ -1,10 +1,10 @@
 [phases.setup]
-nixPkgs = ["python39", "nodejs", "postgresql"]
+nixPkgs = ["python39", "python39Packages.pip", "nodejs", "postgresql"]
 
 [phases.install]
 cmds = [
   "cd frontend && npm install",
-  "cd backend && pip install -r requirements.txt"
+  "cd backend && python -m pip install -r requirements.txt"
 ]
 
 [phases.build]
