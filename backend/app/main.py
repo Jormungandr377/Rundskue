@@ -1,6 +1,7 @@
 """
 Finance Tracker API
 Main FastAPI application entry point
+Updated: Fixed import paths for deployment
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
