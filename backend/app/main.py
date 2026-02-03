@@ -12,10 +12,10 @@ from apscheduler.triggers.cron import CronTrigger
 import os
 from pathlib import Path
 
-from app.config import get_settings
-from app.routers import plaid, accounts, transactions, budgets, analytics, profiles
-# from app.routers import tsp  # Temporarily disabled - needs TSPSimulator class
-from app.services.sync_service import sync_all_items
+from .config import get_settings
+from .routers import plaid, accounts, transactions, budgets, analytics, profiles
+# from .routers import tsp  # Temporarily disabled - needs TSPSimulator class
+from .services.sync_service import sync_all_items
 
 settings = get_settings()
 
