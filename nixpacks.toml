@@ -7,13 +7,8 @@ nixPkgs = ["nodejs-18_x", "npm", "python39", "pip"]
 
 [phases.build]
 cmds = [
-    "npm install",
-    "echo 'Installing frontend dependencies...'",
-    "cd frontend && npm install",
-    "echo 'Building React frontend...'",
-    "cd frontend && npm run build",
-    "echo 'Installing Python backend dependencies...'",
-    "cd backend && pip install -r requirements.txt"
+    "echo 'Installing frontend dependencies...' && cd frontend && npm install && npm run build && cd ..",
+    "echo 'Installing Python backend dependencies...' && cd backend && pip install -r requirements.txt"
 ]
 
 [phases.start]
