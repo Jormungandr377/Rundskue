@@ -1,7 +1,7 @@
 """Analytics API router - spending reports, trends, and insights."""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, extract
+from sqlalchemy import func, and_, extract, case
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 from datetime import date, datetime, timedelta
@@ -239,13 +239,13 @@ def get_monthly_trends(
         extract('year', Transaction.date).label('year'),
         extract('month', Transaction.date).label('month'),
         func.sum(
-            func.case(
+            case(
                 (Transaction.amount < 0, Transaction.amount),
                 else_=0
             )
         ).label('income'),
         func.sum(
-            func.case(
+            case(
                 (Transaction.amount > 0, Transaction.amount),
                 else_=0
             )

@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from collections import defaultdict
 from typing import List, Dict
-from sqlalchemy import func, and_, or_, extract
+from sqlalchemy import func, and_, or_, extract, case
 from sqlalchemy.orm import Session
 
 from ..models import (
@@ -98,13 +98,13 @@ def get_cash_flow(
     query = db.query(
         date_trunc.label("period"),
         func.sum(
-            func.case(
+            case(
                 (Transaction.amount < 0, -Transaction.amount),  # Income (negative in Plaid)
                 else_=Decimal("0")
             )
         ).label("income"),
         func.sum(
-            func.case(
+            case(
                 (Transaction.amount > 0, Transaction.amount),  # Expense (positive in Plaid)
                 else_=Decimal("0")
             )
