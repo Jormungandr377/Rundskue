@@ -97,6 +97,18 @@ async def health_check():
     }
 
 
+@app.get("/api/debug/paths")
+async def debug_paths():
+    """Temporary debug endpoint to check static file paths."""
+    return {
+        "static_dir": str(static_dir),
+        "static_dir_exists": static_dir.exists(),
+        "index_exists": (static_dir / "index.html").exists(),
+        "cwd": os.getcwd(),
+        "main_py_location": str(Path(__file__)),
+    }
+
+
 # Serve static files from the React build
 static_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
 if static_dir.exists():
