@@ -1,4 +1,3 @@
 # This file tells Railpack this is a Python project
-# Actual dependencies are in backend/requirements.txt
-# This is just for Railpack detection
--r backend/requirements.txt
+# Actual dependencies will be installed by build.sh
+# Railpack needs this file to detect Python and install the correct runtime
