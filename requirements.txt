@@ -1,0 +1,4 @@
+# This file tells Railpack this is a Python project
+# Actual dependencies are in backend/requirements.txt
+# This is just for Railpack detection
+-r backend/requirements.txt
