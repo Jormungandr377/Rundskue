@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     plaid_products: str = "transactions"
     plaid_country_codes: str = "US"
     plaid_redirect_uri: Optional[str] = None
+    plaid_webhook_url: Optional[str] = None
 
     # Security
     encryption_key: str = _default_fernet_key

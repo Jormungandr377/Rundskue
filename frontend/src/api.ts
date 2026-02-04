@@ -35,17 +35,21 @@ export const profiles = {
 
 // Plaid
 export const plaid = {
-  getLinkToken: (profileId: number) => 
-    client.post<{ link_token: string; expiration: string }>(`/plaid/link-token/${profileId}`).then(r => r.data),
+  getLinkToken: (profileId: number) =>
+    client.post<{ link_token: string; expiration: string }>('/plaid/link-token', { profile_id: profileId }).then(r => r.data),
   exchangeToken: (profileId: number, publicToken: string, institutionId?: string, institutionName?: string) =>
-    client.post<PlaidItem>(`/plaid/exchange-token/${profileId}`, {
+    client.post<PlaidItem>('/plaid/exchange-token', {
+      profile_id: profileId,
       public_token: publicToken,
       institution_id: institutionId,
       institution_name: institutionName,
     }).then(r => r.data),
-  listItems: (profileId: number) => client.get<PlaidItem[]>(`/plaid/items/${profileId}`).then(r => r.data),
-  syncItem: (itemId: number) => client.post<{ added: number; modified: number; removed: number }>(`/plaid/sync/${itemId}`).then(r => r.data),
-  syncAll: (profileId: number) => client.post(`/plaid/sync-all/${profileId}`).then(r => r.data),
+  listItems: (profileId?: number) => {
+    const params = profileId ? { profile_id: profileId } : {};
+    return client.get<PlaidItem[]>('/plaid/items', { params }).then(r => r.data);
+  },
+  syncItem: (itemId: number) => client.post<{ added: number; modified: number; removed: number }>('/plaid/sync', { item_id: itemId }).then(r => r.data),
+  syncAll: () => client.post('/plaid/sync').then(r => r.data),
   removeItem: (itemId: number) => client.delete(`/plaid/items/${itemId}`),
 };
 
