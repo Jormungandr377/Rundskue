@@ -17,6 +17,7 @@ from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
 # from .routers import tsp  # Temporarily disabled - needs TSPSimulator class
 from .services.sync_service import sync_all_items
+from .init_db import init_db
 
 settings = get_settings()
 
@@ -29,7 +30,10 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler - runs on startup and shutdown."""
     # Startup
     print("Starting Finance Tracker API...")
-    
+
+    # Initialize database tables and default data
+    init_db()
+
     # Schedule daily Plaid sync
     scheduler.add_job(
         sync_all_items,
