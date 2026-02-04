@@ -1,17 +1,16 @@
 [providers]
-python = "3.9"
 node = "18"
+python = "3.9"
 
-[build]
-cmd = """
-# Install Node dependencies and build React app
-npm install
-npm run build
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm", "python39", "pip"]
 
-# Install Python dependencies
-cd backend
-pip install -r requirements.txt
-"""
+[phases.build]
+cmds = [
+    "npm install",
+    "npm run build",
+    "cd backend && pip install -r requirements.txt"
+]
 
-[start]
-cmd = "python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
+[phases.start]
+cmd = "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
