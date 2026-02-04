@@ -1,0 +1,17 @@
+[providers]
+python = "3.9"
+node = "18"
+
+[build]
+cmd = """
+# Install Node dependencies and build React app
+npm install
+npm run build
+
+# Install Python dependencies
+cd backend
+pip install -r requirements.txt
+"""
+
+[start]
+cmd = "python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
