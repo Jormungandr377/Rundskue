@@ -1,0 +1,24 @@
+# Railway ignore file
+# These files should be ignored during Railway deployment
+
+# Development files
+.git
+.env.example
+.gitignore
+
+# Node modules (will be installed during build)
+frontend/node_modules
+
+# Python virtual environment
+backend/venv
+backend/.venv
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
