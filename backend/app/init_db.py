@@ -168,7 +168,6 @@ def create_categories(db, categories, parent_id=None):
             cat = Category(
                 **cat_data,
                 parent_id=parent_id,
-                is_income=cat_data.get("is_income", False),
                 is_system=True
             )
             db.add(cat)

@@ -11,10 +11,7 @@ import os
 load_dotenv()
 
 # PostgreSQL connection string
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://finance_user:finance_password@localhost:5432/finance_tracker"
-)
+DATABASE_URL = os.getenv("DATABASE_URL") or "postgresql://finance_user:finance_password@localhost:5432/finance_tracker"
 
 # Create engine with connection pooling
 engine = create_engine(
