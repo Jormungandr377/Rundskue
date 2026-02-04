@@ -84,7 +84,7 @@ export const transactions = {
     search?: string;
     limit?: number;
     offset?: number;
-  }) => client.get<{ items: Transaction[]; total: number }>('/transactions', { params }).then(r => r.data),
+  }) => client.get<{ transactions: Transaction[]; total: number; page: number; page_size: number; total_pages: number }>('/transactions', { params }).then(r => r.data),
   get: (id: number) => client.get<Transaction>(`/transactions/${id}`).then(r => r.data),
   update: (id: number, data: {
     category_id?: number;

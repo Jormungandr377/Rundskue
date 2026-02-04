@@ -160,7 +160,7 @@ export default function Transactions() {
               </tr>
             </thead>
             <tbody>
-              {txnData?.items.map((txn) => (
+              {txnData?.transactions?.map((txn) => (
                 <tr 
                   key={txn.id} 
                   className={`border-b border-gray-100 hover:bg-gray-50 ${

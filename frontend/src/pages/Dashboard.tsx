@@ -235,7 +235,7 @@ export default function Dashboard() {
         <div className="card p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Transactions</h3>
           <div className="space-y-3">
-            {recentTxns?.items.slice(0, 8).map((txn) => (
+            {recentTxns?.transactions?.slice(0, 8).map((txn) => (
               <div key={txn.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                 <div>
                   <p className="font-medium text-gray-900">{txn.custom_name || txn.merchant_name || txn.name}</p>
@@ -246,7 +246,7 @@ export default function Dashboard() {
                 </p>
               </div>
             ))}
-            {(!recentTxns?.items || recentTxns.items.length === 0) && (
+            {(!recentTxns?.transactions || recentTxns.transactions.length === 0) && (
               <p className="text-gray-500 text-center py-4">No transactions yet</p>
             )}
           </div>
