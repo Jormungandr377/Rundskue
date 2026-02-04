@@ -12,8 +12,8 @@ alembic==1.13.1
 plaid-python==38.1.0
 
 # Data processing
-pandas==2.2.0
-numpy==1.26.3
+pandas==2.2.3
+numpy==2.0.0
 
 # HTTP client
 httpx==0.26.0
