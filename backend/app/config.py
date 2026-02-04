@@ -1,7 +1,11 @@
 """Application configuration using Pydantic Settings."""
 from pydantic_settings import BaseSettings
+from cryptography.fernet import Fernet
 from functools import lru_cache
 from typing import Optional
+
+# Generate a default Fernet key for development
+_default_fernet_key = Fernet.generate_key().decode()
 
 
 class Settings(BaseSettings):
@@ -24,7 +28,7 @@ class Settings(BaseSettings):
     plaid_redirect_uri: Optional[str] = None
 
     # Security
-    encryption_key: str = "change-this-32-character-key-now"
+    encryption_key: str = _default_fernet_key
     
     # Frontend URL (for CORS)
     frontend_url: str = "http://localhost:3000"
