@@ -82,8 +82,8 @@ export const transactions = {
     start_date?: string;
     end_date?: string;
     search?: string;
-    limit?: number;
-    offset?: number;
+    page?: number;
+    page_size?: number;
   }) => client.get<{ transactions: Transaction[]; total: number; page: number; page_size: number; total_pages: number }>('/transactions', { params }).then(r => r.data),
   get: (id: number) => client.get<Transaction>(`/transactions/${id}`).then(r => r.data),
   update: (id: number, data: {
@@ -144,19 +144,17 @@ export const analytics = {
 
 // TSP
 export const tsp = {
-  listScenarios: (profileId: number) => client.get<TSPScenario[]>(`/tsp/scenarios/${profileId}`).then(r => r.data),
-  getScenario: (id: number) => client.get<TSPScenario>(`/tsp/scenarios/detail/${id}`).then(r => r.data),
+  listScenarios: (profileId: number) =>
+    client.get<TSPScenario[]>('/tsp/scenarios', { params: { profile_id: profileId } }).then(r => r.data),
+  getScenario: (id: number) => client.get<TSPScenario>(`/tsp/scenarios/${id}`).then(r => r.data),
   createScenario: (data: Partial<TSPScenario>) => client.post<TSPScenario>('/tsp/scenarios', data).then(r => r.data),
   updateScenario: (id: number, data: Partial<TSPScenario>) =>
     client.put<TSPScenario>(`/tsp/scenarios/${id}`, data).then(r => r.data),
   deleteScenario: (id: number) => client.delete(`/tsp/scenarios/${id}`),
-  project: (id: number, years?: number) =>
-    client.get<TSPProjectionResult>(`/tsp/project/${id}`, { params: { years } }).then(r => r.data),
+  project: (id: number) =>
+    client.get<TSPProjectionResult>(`/tsp/scenarios/${id}/project`).then(r => r.data),
   compare: (scenarioIds: number[]) =>
-    client.post<{ scenarios: TSPProjectionResult[]; comparison: Record<string, number>[] }>(
-      '/tsp/compare',
-      { scenario_ids: scenarioIds }
-    ).then(r => r.data),
+    client.get<{ comparisons: any[] }>('/tsp/compare', { params: { scenario_ids: scenarioIds.join(',') } }).then(r => r.data),
   fundHistory: (years?: number) =>
     client.get<Record<string, TSPFundHistory>>('/tsp/fund-history', { params: { years } }).then(r => r.data),
 };

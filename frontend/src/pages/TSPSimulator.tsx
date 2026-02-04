@@ -43,7 +43,13 @@ export default function TSPSimulator() {
 
   const { data: scenarios, isLoading: scenariosLoading } = useQuery({
     queryKey: ['tsp', 'scenarios', profileId],
-    queryFn: () => tsp.listScenarios(profileId),
+    queryFn: async () => {
+      try {
+        return await tsp.listScenarios(profileId);
+      } catch {
+        return [];
+      }
+    },
   });
 
   const { data: fundPerformance } = useQuery({
@@ -69,13 +75,27 @@ export default function TSPSimulator() {
 
   const { data: projection, isLoading: projectionLoading } = useQuery({
     queryKey: ['tsp', 'projection', selectedScenarioId],
-    queryFn: () => selectedScenarioId ? tsp.project(selectedScenarioId) : null,
+    queryFn: async () => {
+      if (!selectedScenarioId) return null;
+      try {
+        return await tsp.project(selectedScenarioId);
+      } catch {
+        return null;
+      }
+    },
     enabled: !!selectedScenarioId,
   });
 
   const { data: comparison } = useQuery({
     queryKey: ['tsp', 'comparison', compareIds],
-    queryFn: () => compareIds.length >= 2 ? tsp.compare(compareIds) : null,
+    queryFn: async () => {
+      if (compareIds.length < 2) return null;
+      try {
+        return await tsp.compare(compareIds);
+      } catch {
+        return null;
+      }
+    },
     enabled: compareIds.length >= 2,
   });
 
@@ -262,8 +282,9 @@ export default function TSPSimulator() {
                 <h3 className="font-semibold text-gray-900 mb-4">Fund Allocation</h3>
                 <div className="flex items-center gap-4">
                   {(['G', 'F', 'C', 'S', 'I'] as const).map((fund) => {
-                    const alloc = selectedScenario[`allocation_${fund.toLowerCase()}` as keyof TSPScenario] as number;
-                    if (alloc === 0) return null;
+                    const allocObj = (selectedScenario as any).allocation;
+                    const alloc = allocObj ? allocObj[fund.toLowerCase()] : (selectedScenario as any)[`allocation_${fund.toLowerCase()}`] || 0;
+                    if (!alloc || alloc === 0) return null;
                     return (
                       <div key={fund} className="flex items-center gap-2">
                         <div
@@ -278,7 +299,7 @@ export default function TSPSimulator() {
                   })}
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  Expected return: {projection.average_annual_return.toFixed(1)}% annually
+                  Expected return: {(projection.average_return_rate ?? 0).toFixed(1)}% annually
                 </p>
               </div>
 
@@ -287,18 +308,21 @@ export default function TSPSimulator() {
                 <h3 className="font-semibold text-gray-900 mb-4">Balance Projection</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={projection.projections}>
+                    <AreaChart data={projection.projections || []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
                       <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
                       <Tooltip
                         formatter={(value: number, name: string) => [formatCurrency(value), name]}
-                        labelFormatter={(label) => `Year ${label}${projection.projections.find(p => p.year === label)?.age ? ` (Age ${projection.projections.find(p => p.year === label)?.age})` : ''}`}
+                        labelFormatter={(label) => {
+                          const p = projection.projections?.find(p => p.year === label);
+                          return `Year ${label}${p?.age ? ` (Age ${p.age})` : ''}`;
+                        }}
                       />
                       <Legend />
                       <Area
                         type="monotone"
-                        dataKey="balance"
+                        dataKey="ending_balance"
                         name="Balance"
                         stroke="#3b82f6"
                         fill="#3b82f6"
@@ -320,7 +344,7 @@ export default function TSPSimulator() {
                       <tr>
                         <th className="text-left py-3 px-4 font-medium text-gray-600">Year</th>
                         <th className="text-left py-3 px-4 font-medium text-gray-600">Age</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-600">Base Pay</th>
+                        <th className="text-right py-3 px-4 font-medium text-gray-600">Starting Balance</th>
                         <th className="text-right py-3 px-4 font-medium text-gray-600">Your Contribution</th>
                         <th className="text-right py-3 px-4 font-medium text-gray-600">Agency Match</th>
                         <th className="text-right py-3 px-4 font-medium text-gray-600">Growth</th>
@@ -328,15 +352,15 @@ export default function TSPSimulator() {
                       </tr>
                     </thead>
                     <tbody>
-                      {projection.projections.slice(0, 10).map((p, idx) => (
+                      {(projection.projections || []).slice(0, 10).map((p: any, idx: number) => (
                         <tr key={p.year} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                           <td className="py-3 px-4 text-gray-900">{p.year}</td>
                           <td className="py-3 px-4 text-gray-600">{p.age || '—'}</td>
-                          <td className="py-3 px-4 text-right text-gray-600">{formatCurrency(p.base_pay)}</td>
-                          <td className="py-3 px-4 text-right text-blue-600">{formatCurrency(p.contribution)}</td>
-                          <td className="py-3 px-4 text-right text-green-600">{formatCurrency(p.employer_match)}</td>
-                          <td className="py-3 px-4 text-right text-purple-600">{formatCurrency(p.growth)}</td>
-                          <td className="py-3 px-4 text-right font-semibold text-gray-900">{formatCurrency(p.balance)}</td>
+                          <td className="py-3 px-4 text-right text-gray-600">{formatCurrency(p.starting_balance || 0)}</td>
+                          <td className="py-3 px-4 text-right text-blue-600">{formatCurrency(p.contribution || 0)}</td>
+                          <td className="py-3 px-4 text-right text-green-600">{formatCurrency(p.employer_match || 0)}</td>
+                          <td className="py-3 px-4 text-right text-purple-600">{formatCurrency(p.growth || 0)}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-900">{formatCurrency(p.ending_balance || 0)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -357,18 +381,18 @@ export default function TSPSimulator() {
       </div>
 
       {/* Comparison Chart */}
-      {comparison && comparison.scenarios.length >= 2 && (
+      {comparison && comparison.scenarios && comparison.scenarios.length >= 2 && (
         <div className="card p-6">
           <h3 className="font-semibold text-gray-900 mb-4">Scenario Comparison</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={comparison.comparison}>
+              <LineChart data={comparison.comparison || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
                 <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
                 <Tooltip formatter={(value: number) => formatCurrency(value)} />
                 <Legend />
-                {comparison.scenarios.map((s, idx) => (
+                {comparison.scenarios.map((s: any, idx: number) => (
                   <Line
                     key={s.scenario_id}
                     type="monotone"

@@ -6,10 +6,8 @@ export interface Profile {
   is_primary: boolean;
   service_start_date?: string;
   base_pay?: number;
-  tsp_contribution_pct: number;
-  tsp_roth_pct: number;
-  created_at: string;
-  plaid_items?: PlaidItem[];
+  tsp_contribution_pct?: number;
+  tsp_roth_pct?: number;
 }
 
 // Plaid types
@@ -161,24 +159,23 @@ export interface TSPScenario {
 
 export interface TSPProjection {
   year: number;
-  age?: number;
-  base_pay: number;
+  age: number;
+  starting_balance: number;
   contribution: number;
   employer_match: number;
   growth: number;
-  balance: number;
+  ending_balance: number;
 }
 
 export interface TSPProjectionResult {
-  scenario_id: number;
   scenario_name: string;
-  projections: TSPProjection[];
+  years_to_retirement: number;
   final_balance: number;
   total_contributions: number;
   total_employer_match: number;
   total_growth: number;
-  average_annual_return: number;
-  years_projected: number;
+  average_return_rate: number;
+  projections: TSPProjection[];
 }
 
 export interface TSPFundHistory {

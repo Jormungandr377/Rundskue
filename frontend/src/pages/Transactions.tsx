@@ -22,8 +22,8 @@ export default function Transactions() {
     end: format(new Date(), 'yyyy-MM-dd'),
   });
   const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
-  const [page, setPage] = useState(0);
-  const limit = 50;
+  const [page, setPage] = useState(1);
+  const pageSize = 50;
 
   const { data: txnData, isLoading } = useQuery({
     queryKey: ['transactions', { search, selectedAccount, selectedCategory, dateRange, page }],
@@ -33,8 +33,8 @@ export default function Transactions() {
       category_id: selectedCategory || undefined,
       start_date: dateRange.start,
       end_date: dateRange.end,
-      limit,
-      offset: page * limit,
+      page,
+      page_size: pageSize,
     }),
   });
 
@@ -237,21 +237,21 @@ export default function Transactions() {
         )}
 
         {/* Pagination */}
-        {txnData && txnData.total > limit && (
+        {txnData && txnData.total_pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
             <button
-              onClick={() => setPage(Math.max(0, page - 1))}
-              disabled={page === 0}
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page <= 1}
               className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <span className="text-sm text-gray-600">
-              Page {page + 1} of {Math.ceil(txnData.total / limit)}
+              Page {page} of {txnData.total_pages}
             </span>
             <button
               onClick={() => setPage(page + 1)}
-              disabled={(page + 1) * limit >= txnData.total}
+              disabled={page >= txnData.total_pages}
               className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next

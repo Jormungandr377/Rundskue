@@ -58,7 +58,7 @@ export default function Dashboard() {
 
   const { data: recentTxns, isLoading: txnsLoading } = useQuery({
     queryKey: ['transactions', 'recent'],
-    queryFn: () => transactions.list({ limit: 10 }),
+    queryFn: () => transactions.list({ page_size: 10 }),
   });
 
   const { data: insights } = useQuery({

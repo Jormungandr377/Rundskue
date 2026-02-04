@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePlaidLink } from 'react-plaid-link';
 import { Link2, Building2, RefreshCw, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
@@ -18,10 +18,12 @@ export default function LinkAccount() {
   });
 
   // Auto-select first/primary profile when data loads
-  if (profileList && profileList.length > 0 && !selectedProfileId) {
-    const primary = profileList.find((p: Profile) => p.is_primary);
-    setSelectedProfileId(primary?.id || profileList[0].id);
-  }
+  useEffect(() => {
+    if (profileList && profileList.length > 0 && !selectedProfileId) {
+      const primary = profileList.find((p: Profile) => p.is_primary);
+      setSelectedProfileId(primary?.id || profileList[0].id);
+    }
+  }, [profileList, selectedProfileId]);
 
   const { data: plaidItems, isLoading: itemsLoading } = useQuery({
     queryKey: ['plaid', 'items', selectedProfileId],
@@ -87,9 +89,11 @@ export default function LinkAccount() {
   };
 
   // Open Plaid Link when token is ready
-  if (linkToken && ready) {
-    open();
-  }
+  useEffect(() => {
+    if (linkToken && ready) {
+      open();
+    }
+  }, [linkToken, ready, open]);
 
   const handleSync = (itemId: number) => {
     setSyncing(itemId);
