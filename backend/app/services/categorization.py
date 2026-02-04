@@ -1,6 +1,6 @@
 """Transaction categorization service."""
 from sqlalchemy.orm import Session
-from app.models import Category
+from ..models import Category
 
 # Mapping of keywords to category names
 KEYWORD_MAPPINGS = {

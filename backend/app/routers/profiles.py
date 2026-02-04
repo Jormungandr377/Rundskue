@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import date
 
-from app.database import get_db
-from app.models import Profile
+from ..database import get_db
+from ..models import Profile
 
 router = APIRouter()
 

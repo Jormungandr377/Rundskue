@@ -7,9 +7,9 @@ from typing import List, Optional, Dict
 from datetime import date, datetime
 from decimal import Decimal
 
-from app.database import get_db
-from app.models import Profile, TSPScenario, TSPFundHistory
-from app.services.tsp_simulator import TSPSimulator
+from ..database import get_db
+from ..models import Profile, TSPScenario, TSPFundHistory
+from ..services.tsp_simulator import TSPSimulator
 
 router = APIRouter()
 

@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 from decimal import Decimal
 
-from app.database import get_db
-from app.models import Account, AccountType
+from ..database import get_db
+from ..models import Account, AccountType
 
 router = APIRouter()
 

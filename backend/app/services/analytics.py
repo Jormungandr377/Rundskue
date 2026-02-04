@@ -5,8 +5,8 @@ from collections import defaultdict
 from sqlalchemy import func, and_, or_, extract
 from sqlalchemy.orm import Session
 
-from app.models import (
-    Transaction, Account, Category, Profile, 
+from ..models import (
+    Transaction, Account, Category, Profile,
     NetWorthSnapshot, AccountType
 )
 

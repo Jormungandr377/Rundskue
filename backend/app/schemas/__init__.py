@@ -1,2 +1,2 @@
 """Schemas package."""
-from app.schemas.schemas import *
+from .schemas import *

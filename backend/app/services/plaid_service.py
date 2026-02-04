@@ -12,8 +12,8 @@ from cryptography.fernet import Fernet
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.models import PlaidItem, Account, AccountType
+from ..config import get_settings
+from ..models import PlaidItem, Account, AccountType
 
 settings = get_settings()
 
@@ -169,8 +169,8 @@ def map_account_type(plaid_type: str, plaid_subtype: str = None) -> AccountType:
 
 def sync_transactions(db: Session, plaid_item: PlaidItem, cursor: str = None) -> dict:
     """Sync transactions for a PlaidItem using Plaid's sync API."""
-    from app.models import Transaction
-    from app.services.categorization import categorize_transaction
+    from ..models import Transaction
+    from .categorization import categorize_transaction
     
     access_token = decrypt_token(plaid_item.access_token_encrypted)
     

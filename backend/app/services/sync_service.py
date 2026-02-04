@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from app.database import SessionLocal
-from app.models import PlaidItem
-from app.services import plaid_service
-from app.services.analytics import save_net_worth_snapshot
-from app.config import get_settings
+from ..database import SessionLocal
+from ..models import PlaidItem
+from . import plaid_service
+from .analytics import save_net_worth_snapshot
+from ..config import get_settings
 
 logger = logging.getLogger(__name__)
 settings = get_settings()

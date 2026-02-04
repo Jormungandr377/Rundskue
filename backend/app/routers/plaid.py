@@ -5,9 +5,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
-from app.database import get_db
-from app.models import PlaidItem, Account, Profile
-from app.services.plaid_service import (
+from ..database import get_db
+from ..models import PlaidItem, Account, Profile
+from ..services.plaid_service import (
     create_link_token,
     exchange_public_token,
     sync_transactions

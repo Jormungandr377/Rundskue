@@ -6,7 +6,7 @@ from sqlalchemy import (
     ForeignKey, Text, JSON, Enum as SQLEnum, Index
 )
 from sqlalchemy.orm import relationship
-from app.database import Base
+from .database import Base
 import enum
 
 

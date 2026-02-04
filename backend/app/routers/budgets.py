@@ -7,8 +7,8 @@ from typing import List, Optional
 from datetime import date, datetime
 from calendar import monthrange
 
-from app.database import get_db
-from app.models import Budget, BudgetItem, Category, Transaction, Account
+from ..database import get_db
+from ..models import Budget, BudgetItem, Category, Transaction, Account
 
 router = APIRouter()
 

@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models import TSPScenario, TSPFundHistory
+from ..models import TSPScenario, TSPFundHistory
 
 
 # 2024 TSP contribution limits

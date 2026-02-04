@@ -2,8 +2,8 @@
 import json
 from pathlib import Path
 from datetime import date
-from app.database import engine, SessionLocal, Base
-from app.models import Category, TSPFundHistory
+from .database import engine, SessionLocal, Base
+from .models import Category, TSPFundHistory
 
 
 DEFAULT_CATEGORIES = [
