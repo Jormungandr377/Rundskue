@@ -10,6 +10,7 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from cryptography.fernet import Fernet
 from datetime import datetime
+from typing import List
 from sqlalchemy.orm import Session
 
 from ..config import get_settings
@@ -100,7 +101,7 @@ def exchange_public_token(
     return plaid_item
 
 
-def fetch_accounts(db: Session, plaid_item: PlaidItem) -> list[Account]:
+def fetch_accounts(db: Session, plaid_item: PlaidItem) -> List[Account]:
     """Fetch accounts for a PlaidItem from Plaid."""
     access_token = decrypt_token(plaid_item.access_token_encrypted)
     

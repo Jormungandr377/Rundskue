@@ -1,7 +1,7 @@
 """Pydantic schemas for API request/response validation."""
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -104,8 +104,8 @@ class TransactionUpdate(BaseModel):
 
 class TransactionSearch(BaseModel):
     profile_id: Optional[int] = None
-    account_ids: Optional[list[int]] = None
-    category_ids: Optional[list[int]] = None
+    account_ids: Optional[List[int]] = None
+    category_ids: Optional[List[int]] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     min_amount: Optional[Decimal] = None
@@ -134,7 +134,7 @@ class CategoryResponse(CategoryBase):
     id: int
     parent_id: Optional[int] = None
     is_system: bool
-    children: list["CategoryResponse"] = []
+    children: List["CategoryResponse"] = []
     
     class Config:
         from_attributes = True
@@ -164,14 +164,14 @@ class BudgetBase(BaseModel):
 
 class BudgetCreate(BudgetBase):
     profile_id: int
-    items: list[BudgetItemBase] = []
+    items: List[BudgetItemBase] = []
 
 
 class BudgetResponse(BudgetBase):
     id: int
     profile_id: int
     is_template: bool
-    items: list[BudgetItemResponse] = []
+    items: List[BudgetItemResponse] = []
     total_budgeted: Decimal = Field(default=Decimal("0"))
     total_spent: Decimal = Field(default=Decimal("0"))
     
@@ -206,9 +206,9 @@ class NetWorthSummary(BaseModel):
 
 
 class AnalyticsResponse(BaseModel):
-    spending_by_category: list[SpendingByCategory]
-    cash_flow: list[CashFlowSummary]
-    top_merchants: list[dict]
+    spending_by_category: List[SpendingByCategory]
+    cash_flow: List[CashFlowSummary]
+    top_merchants: List[dict]
     period_comparison: Optional[dict] = None
 
 
@@ -238,7 +238,7 @@ class PlaidItemResponse(BaseModel):
     last_sync: Optional[datetime] = None
     error_code: Optional[str] = None
     error_message: Optional[str] = None
-    accounts: list[AccountResponse] = []
+    accounts: List[AccountResponse] = []
     
     class Config:
         from_attributes = True
@@ -310,7 +310,7 @@ class TSPProjectionYear(BaseModel):
 class TSPProjectionResponse(BaseModel):
     scenario_id: int
     scenario_name: str
-    projections: list[TSPProjectionYear]
+    projections: List[TSPProjectionYear]
     final_balance: Decimal
     total_contributions: Decimal
     total_employer_match: Decimal
@@ -320,7 +320,7 @@ class TSPProjectionResponse(BaseModel):
 
 class TSPFundHistoryResponse(BaseModel):
     fund: str
-    history: list[dict]  # [{date: str, price: Decimal}, ...]
+    history: List[dict]  # [{date: str, price: Decimal}, ...]
     average_annual_return: Decimal
     total_return: Decimal
 

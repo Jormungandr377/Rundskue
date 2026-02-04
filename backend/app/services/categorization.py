@@ -1,4 +1,5 @@
 """Transaction categorization service."""
+from typing import Optional, List, Dict
 from sqlalchemy.orm import Session
 from ..models import Category
 
@@ -169,7 +170,7 @@ PLAID_CATEGORY_MAPPINGS = {
 }
 
 
-def categorize_transaction(db: Session, merchant_name: str, plaid_categories: list = None) -> int | None:
+def categorize_transaction(db: Session, merchant_name: str, plaid_categories: list = None) -> Optional[int]:
     """
     Auto-categorize a transaction based on merchant name and Plaid categories.
     Returns the category_id or None if no match found.
@@ -208,7 +209,7 @@ def categorize_transaction(db: Session, merchant_name: str, plaid_categories: li
     return uncategorized.id if uncategorized else None
 
 
-def get_category_hierarchy(db: Session) -> list[dict]:
+def get_category_hierarchy(db: Session) -> List[Dict]:
     """Get all categories in a hierarchical structure."""
     # Get all top-level categories
     top_level = db.query(Category).filter(Category.parent_id.is_(None)).all()

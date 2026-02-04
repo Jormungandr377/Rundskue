@@ -2,6 +2,7 @@
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from collections import defaultdict
+from typing import List, Dict
 from sqlalchemy import func, and_, or_, extract
 from sqlalchemy.orm import Session
 
@@ -18,7 +19,7 @@ def get_spending_by_category(
     end_date: date = None,
     exclude_transfers: bool = True,
     exclude_income: bool = True
-) -> list[dict]:
+) -> List[Dict]:
     """Get spending totals grouped by category."""
     # Build base query
     query = db.query(
@@ -80,7 +81,7 @@ def get_cash_flow(
     start_date: date = None,
     end_date: date = None,
     group_by: str = "month"  # "month", "week", "day"
-) -> list[dict]:
+) -> List[Dict]:
     """Get income vs expenses over time."""
     # Determine date grouping
     if group_by == "month":
@@ -150,7 +151,7 @@ def get_top_merchants(
     start_date: date = None,
     end_date: date = None,
     limit: int = 10
-) -> list[dict]:
+) -> List[Dict]:
     """Get top merchants by spending."""
     query = db.query(
         func.coalesce(Transaction.merchant_name, Transaction.name).label("merchant"),
@@ -295,7 +296,7 @@ def get_net_worth_history(
     profile_id: int = None,
     start_date: date = None,
     end_date: date = None
-) -> list[dict]:
+) -> List[Dict]:
     """Get historical net worth snapshots."""
     query = db.query(NetWorthSnapshot)
     

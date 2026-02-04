@@ -1,7 +1,7 @@
 """TSP retirement projection simulator for military BRS."""
 from datetime import date, datetime
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -244,7 +244,7 @@ def project_tsp_balance(
     }
 
 
-def compare_scenarios(db: Session, scenario_ids: list[int]) -> dict:
+def compare_scenarios(db: Session, scenario_ids: List[int]) -> dict:
     """Compare multiple TSP scenarios side by side."""
     scenarios = db.query(TSPScenario).filter(TSPScenario.id.in_(scenario_ids)).all()
     
