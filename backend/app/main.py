@@ -76,7 +76,10 @@ app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"]
 
 @app.get("/")
 async def root():
-    """Health check endpoint."""
+    """Serve the React frontend at root."""
+    index_path = static_dir / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
     return {
         "status": "healthy",
         "app": "Finance Tracker",
