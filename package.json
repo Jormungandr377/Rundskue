@@ -2,21 +2,35 @@
   "name": "finance-tracker",
   "version": "1.0.0",
   "description": "Personal Finance Tracker with Plaid Integration",
+  "main": "index.js",
   "scripts": {
+    "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm install && npm run build",
+    "preview": "cd frontend && npm run preview",
     "postinstall": "npm run build",
     "install-backend": "cd backend && pip install -r requirements.txt",
-    "start": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    "start": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT",
+    "frontend:install": "cd frontend && npm install",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:dev": "cd frontend && npm run dev"
   },
   "engines": {
     "node": ">=18.0.0",
+    "npm": ">=8.0.0",
     "python": ">=3.9.0"
   },
+  "keywords": ["finance", "plaid", "react", "fastapi", "tracker"],
+  "author": "Finance Tracker Team",
+  "license": "MIT",
   "devDependencies": {
-    "vite": "^5.1.0"
+    "vite": "^5.1.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0"
   }
 }
