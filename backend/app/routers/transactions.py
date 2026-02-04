@@ -155,6 +155,53 @@ def get_transactions(
     )
 
 
+@router.get("/categories")
+def get_categories(db: Session = Depends(get_db)):
+    """Get all categories as a flat list."""
+    cats = db.query(Category).order_by(Category.name).all()
+    return [
+        {
+            "id": c.id,
+            "name": c.name,
+            "parent_id": c.parent_id,
+            "icon": c.icon,
+            "color": c.color,
+            "is_income": c.is_income,
+            "is_system": c.is_system,
+        }
+        for c in cats
+    ]
+
+
+@router.get("/categories/hierarchy")
+def get_categories_hierarchy(db: Session = Depends(get_db)):
+    """Get categories in a hierarchical structure."""
+    cats = db.query(Category).filter(Category.parent_id == None).order_by(Category.name).all()
+    result = []
+    for c in cats:
+        cat_data = {
+            "id": c.id,
+            "name": c.name,
+            "icon": c.icon,
+            "color": c.color,
+            "is_income": c.is_income,
+            "is_system": c.is_system,
+            "children": [
+                {
+                    "id": child.id,
+                    "name": child.name,
+                    "icon": child.icon,
+                    "color": child.color,
+                    "is_income": child.is_income,
+                    "is_system": child.is_system,
+                }
+                for child in c.children
+            ] if c.children else [],
+        }
+        result.append(cat_data)
+    return result
+
+
 @router.get("/{transaction_id}", response_model=TransactionResponse)
 def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
     """Get a specific transaction."""

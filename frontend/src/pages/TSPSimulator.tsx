@@ -46,9 +46,25 @@ export default function TSPSimulator() {
     queryFn: () => tsp.listScenarios(profileId),
   });
 
-  const { data: fundHistory } = useQuery({
-    queryKey: ['tsp', 'fundHistory'],
-    queryFn: () => tsp.fundHistory(10),
+  const { data: fundPerformance } = useQuery({
+    queryKey: ['tsp', 'fundPerformance'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/tsp/fund-performance');
+        if (!response.ok) return null;
+        const data = await response.json();
+        // Convert array to dict keyed by fund name
+        const result: Record<string, { ten_year?: number }> = {};
+        if (Array.isArray(data)) {
+          for (const item of data) {
+            result[item.fund] = item;
+          }
+        }
+        return result;
+      } catch {
+        return null;
+      }
+    },
   });
 
   const { data: projection, isLoading: projectionLoading } = useQuery({
@@ -110,12 +126,12 @@ export default function TSPSimulator() {
       </div>
 
       {/* Fund Performance Overview */}
-      {fundHistory && (
+      {fundPerformance && (
         <div className="card p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Historical Fund Returns (10-Year Average)</h3>
           <div className="grid grid-cols-5 gap-4">
             {(['G', 'F', 'C', 'S', 'I'] as const).map((fund) => {
-              const data = fundHistory[fund];
+              const data = fundPerformance[fund];
               return (
                 <div key={fund} className="text-center">
                   <div
@@ -125,7 +141,7 @@ export default function TSPSimulator() {
                     {fund}
                   </div>
                   <p className="text-2xl font-bold text-gray-900">
-                    {data?.average_annual_return?.toFixed(1) || '—'}%
+                    {data?.ten_year?.toFixed(1) || '—'}%
                   </p>
                   <p className="text-xs text-gray-500">
                     {fund === 'G' && 'Government Securities'}

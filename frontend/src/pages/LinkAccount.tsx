@@ -15,12 +15,13 @@ export default function LinkAccount() {
   const { data: profileList } = useQuery({
     queryKey: ['profiles'],
     queryFn: profiles.list,
-    onSuccess: (data) => {
-      if (data.length > 0 && !selectedProfileId) {
-        setSelectedProfileId(data.find(p => p.is_primary)?.id || data[0].id);
-      }
-    },
   });
+
+  // Auto-select first/primary profile when data loads
+  if (profileList && profileList.length > 0 && !selectedProfileId) {
+    const primary = profileList.find((p: Profile) => p.is_primary);
+    setSelectedProfileId(primary?.id || profileList[0].id);
+  }
 
   const { data: plaidItems, isLoading: itemsLoading } = useQuery({
     queryKey: ['plaid', 'items', selectedProfileId],
@@ -136,10 +137,10 @@ export default function LinkAccount() {
         </p>
         <button
           onClick={handleStartLink}
-          disabled={!selectedProfileId || linkTokenMutation.isLoading}
+          disabled={!selectedProfileId || linkTokenMutation.isPending}
           className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {linkTokenMutation.isLoading ? (
+          {linkTokenMutation.isPending ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               Preparing...
@@ -229,7 +230,7 @@ export default function LinkAccount() {
       {plaidItems && plaidItems.length > 0 && (
         <div className="flex justify-end">
           <button
-            onClick={() => selectedProfileId && plaid.syncAll(selectedProfileId).then(() => {
+            onClick={() => selectedProfileId && plaid.syncAll().then(() => {
               queryClient.invalidateQueries({ queryKey: ['accounts'] });
               queryClient.invalidateQueries({ queryKey: ['transactions'] });
             })}

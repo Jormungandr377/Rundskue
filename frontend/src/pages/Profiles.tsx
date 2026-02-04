@@ -175,7 +175,7 @@ export default function Profiles() {
                         )}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        Created {new Date(profile.created_at).toLocaleDateString()}
+                        {profile.email || 'No email set'}
                       </p>
                     </div>
                   </div>
@@ -203,18 +203,15 @@ export default function Profiles() {
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500">Linked Banks</span>
+                      <span className="text-gray-500">TSP Contribution</span>
                       <p className="font-medium text-gray-900">
-                        {profile.plaid_items?.length || 0}
+                        {profile.tsp_contribution_pct || 0}%
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500">Accounts</span>
+                      <span className="text-gray-500">Base Pay</span>
                       <p className="font-medium text-gray-900">
-                        {profile.plaid_items?.reduce(
-                          (acc, item) => acc + (item.accounts?.length || 0),
-                          0
-                        ) || 0}
+                        {profile.base_pay ? `$${Number(profile.base_pay).toLocaleString()}` : 'Not set'}
                       </p>
                     </div>
                   </div>

@@ -68,7 +68,7 @@ export const accounts = {
       total_assets: number;
       total_liabilities: number;
       net_worth: number;
-      by_type: Record<string, number>;
+      accounts_by_type: Record<string, { balance: number; count: number }>;
     }>('/accounts/summary', { params }).then(r => r.data);
   },
 };
