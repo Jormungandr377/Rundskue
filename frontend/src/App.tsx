@@ -1,9 +1,10 @@
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  CreditCard, 
-  PiggyBank, 
-  TrendingUp, 
+import {
+  LayoutDashboard,
+  CreditCard,
+  PiggyBank,
+  TrendingUp,
   Receipt,
   Settings,
   Link2,
@@ -19,6 +20,47 @@ import Reports from './pages/Reports'
 import TSPSimulator from './pages/TSPSimulator'
 import LinkAccount from './pages/LinkAccount'
 import Profiles from './pages/Profiles'
+
+// Error Boundary
+interface ErrorBoundaryState {
+  hasError: boolean
+  error: Error | null
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('React Error Boundary caught:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center h-full p-8">
+          <div className="text-center max-w-md">
+            <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+            <p className="text-gray-600 mb-4">{this.state.error?.message || 'An unexpected error occurred.'}</p>
+            <button
+              onClick={() => this.setState({ hasError: false, error: null })}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -90,16 +132,18 @@ function App() {
 
         {/* Main Content */}
         <main className="ml-64 flex-1 p-8">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/budgets" element={<Budgets />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/tsp" element={<TSPSimulator />} />
-            <Route path="/link-account" element={<LinkAccount />} />
-            <Route path="/profiles" element={<Profiles />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/accounts" element={<Accounts />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/budgets" element={<Budgets />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/tsp" element={<TSPSimulator />} />
+              <Route path="/link-account" element={<LinkAccount />} />
+              <Route path="/profiles" element={<Profiles />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
     </BrowserRouter>

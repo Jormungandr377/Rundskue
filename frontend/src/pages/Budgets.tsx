@@ -29,12 +29,6 @@ export default function Budgets() {
     queryFn: () => budgets.list(profileId, monthStr),
   });
 
-  const { data: budgetProgress } = useQuery({
-    queryKey: ['budgets', 'progress', budgetList?.[0]?.id],
-    queryFn: () => budgetList?.[0]?.id ? budgets.getProgress(budgetList[0].id) : null,
-    enabled: !!budgetList?.[0]?.id,
-  });
-
   const { data: categoryList } = useQuery({
     queryKey: ['categories'],
     queryFn: categories.list,
@@ -57,7 +51,6 @@ export default function Budgets() {
   });
 
   const budget = budgetList?.[0];
-  const progress = budgetProgress;
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
@@ -104,30 +97,30 @@ export default function Budgets() {
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      ) : budget && progress ? (
+      ) : budget ? (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-6">
               <p className="text-sm text-gray-500">Total Budgeted</p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(progress.total_budgeted)}
+                {formatCurrency(budget.total_budgeted || 0)}
               </p>
             </div>
             <div className="card p-6">
               <p className="text-sm text-gray-500">Total Spent</p>
               <p className={`text-2xl font-bold ${
-                progress.total_spent > progress.total_budgeted ? 'text-red-600' : 'text-gray-900'
+                (budget.total_spent || 0) > (budget.total_budgeted || 0) ? 'text-red-600' : 'text-gray-900'
               }`}>
-                {formatCurrency(progress.total_spent)}
+                {formatCurrency(budget.total_spent || 0)}
               </p>
             </div>
             <div className="card p-6">
               <p className="text-sm text-gray-500">Remaining</p>
               <p className={`text-2xl font-bold ${
-                progress.total_budgeted - progress.total_spent < 0 ? 'text-red-600' : 'text-green-600'
+                (budget.total_budgeted || 0) - (budget.total_spent || 0) < 0 ? 'text-red-600' : 'text-green-600'
               }`}>
-                {formatCurrency(progress.total_budgeted - progress.total_spent)}
+                {formatCurrency((budget.total_budgeted || 0) - (budget.total_spent || 0))}
               </p>
             </div>
           </div>
@@ -156,22 +149,24 @@ export default function Budgets() {
               </div>
             </div>
             <div className="divide-y divide-gray-100">
-              {progress.items.map((item) => {
-                const percentage = Math.min((item.spent / item.amount) * 100, 100);
-                const isOverBudget = item.spent > item.amount;
-                
+              {(budget.items || []).map((item) => {
+                const budgeted = item.budgeted ?? item.amount ?? 0;
+                const spent = item.spent ?? 0;
+                const percentage = item.percent_used ?? (budgeted > 0 ? Math.min((spent / budgeted) * 100, 100) : 0);
+                const isOverBudget = spent > budgeted;
+
                 return (
                   <div key={item.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-gray-900">
-                        {item.category?.name || 'Unknown Category'}
+                        {item.category_name || item.category?.name || 'Unknown Category'}
                       </span>
                       <div className="text-right">
                         <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-gray-600'}>
-                          {formatCurrency(item.spent)}
+                          {formatCurrency(spent)}
                         </span>
                         <span className="text-gray-400"> / </span>
-                        <span className="text-gray-900">{formatCurrency(item.amount)}</span>
+                        <span className="text-gray-900">{formatCurrency(budgeted)}</span>
                       </div>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -184,7 +179,7 @@ export default function Budgets() {
                     </div>
                     {isOverBudget && (
                       <p className="text-sm text-red-600 mt-1">
-                        Over budget by {formatCurrency(item.spent - item.amount)}
+                        Over budget by {formatCurrency(spent - budgeted)}
                       </p>
                     )}
                   </div>

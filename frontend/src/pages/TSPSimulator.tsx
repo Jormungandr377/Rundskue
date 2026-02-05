@@ -448,8 +448,23 @@ function CreateScenarioModal({ profileId, onClose, onCreate }: CreateScenarioMod
     e.preventDefault();
     onCreate({
       profile_id: profileId,
-      ...formData,
-    });
+      name: formData.name,
+      current_balance: formData.current_balance,
+      contribution_pct: formData.contribution_pct,
+      base_pay: formData.base_pay,
+      annual_pay_increase_pct: formData.annual_pay_increase_pct,
+      allocation: {
+        g: formData.allocation_g,
+        f: formData.allocation_f,
+        c: formData.allocation_c,
+        s: formData.allocation_s,
+        i: formData.allocation_i,
+        l: formData.allocation_l,
+      },
+      use_historical_returns: formData.use_historical_returns,
+      retirement_age: formData.retirement_age,
+      birth_year: formData.birth_year,
+    } as any);
   };
 
   const totalAllocation = formData.allocation_g + formData.allocation_f + formData.allocation_c + formData.allocation_s + formData.allocation_i + formData.allocation_l;

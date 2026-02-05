@@ -77,15 +77,23 @@ export interface Budget {
   name: string;
   month: string;
   is_template: boolean;
+  total_budgeted?: number;
+  total_spent?: number;
   items: BudgetItem[];
 }
 
 export interface BudgetItem {
   id: number;
-  budget_id: number;
+  budget_id?: number;
   category_id: number;
-  amount: number;
+  amount?: number;
+  budgeted?: number;
   spent?: number;
+  remaining?: number;
+  percent_used?: number;
+  category_name?: string;
+  category_icon?: string;
+  category_color?: string;
   category?: Category;
 }
 

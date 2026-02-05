@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
-# from .routers import tsp  # Temporarily disabled - needs TSPSimulator class
+from .routers import tsp
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
@@ -75,7 +75,7 @@ app.include_router(accounts.router, prefix="/api/accounts", tags=["Accounts"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["Transactions"])
 app.include_router(budgets.router, prefix="/api/budgets", tags=["Budgets"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
-# app.include_router(tsp.router, prefix="/api/tsp", tags=["TSP"])  # Temporarily disabled
+app.include_router(tsp.router, prefix="/api/tsp", tags=["TSP"])
 
 
 @app.get("/")

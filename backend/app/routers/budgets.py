@@ -246,6 +246,62 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
     return get_budgets(budget.profile_id, budget.month.year, budget.month.month, db)[0]
 
 
+@router.get("/{budget_id}/progress")
+def get_budget_progress(budget_id: int, db: Session = Depends(get_db)):
+    """Get progress details for a specific budget."""
+    budget = db.query(Budget).options(
+        joinedload(Budget.items).joinedload(BudgetItem.category)
+    ).filter(Budget.id == budget_id).first()
+
+    if not budget:
+        raise HTTPException(status_code=404, detail="Budget not found")
+
+    # Get the month's date range
+    _, last_day = monthrange(budget.month.year, budget.month.month)
+    end_date = date(budget.month.year, budget.month.month, last_day)
+
+    # Get spending by category
+    spending = get_spending_by_category(db, budget.profile_id, budget.month, end_date)
+
+    items = []
+    total_budgeted = 0
+    total_spent = 0
+
+    for item in budget.items:
+        spent = spending.get(item.category_id, 0)
+        budgeted = float(item.amount)
+        remaining = budgeted - spent
+        percentage = (spent / budgeted * 100) if budgeted > 0 else 0
+
+        items.append({
+            "id": item.id,
+            "budget_id": budget_id,
+            "category_id": item.category_id,
+            "amount": budgeted,
+            "spent": spent,
+            "remaining": remaining,
+            "percentage": min(percentage, 100),
+            "category": {
+                "id": item.category.id,
+                "name": item.category.name,
+                "icon": item.category.icon,
+                "color": item.category.color,
+                "is_income": item.category.is_income,
+            } if item.category else None,
+        })
+
+        total_budgeted += budgeted
+        total_spent += spent
+
+    return {
+        "budget_id": budget_id,
+        "month": budget.month.isoformat(),
+        "items": sorted(items, key=lambda x: x["spent"], reverse=True),
+        "total_budgeted": total_budgeted,
+        "total_spent": total_spent,
+    }
+
+
 @router.put("/{budget_id}", response_model=BudgetResponse)
 def update_budget(
     budget_id: int,

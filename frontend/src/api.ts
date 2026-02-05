@@ -107,7 +107,12 @@ export const categories = {
 export const budgets = {
   list: (profileId: number, month?: string) => {
     const params: Record<string, string | number> = { profile_id: profileId };
-    if (month) params.month = month;
+    if (month) {
+      // Backend expects separate year and month integers
+      const d = new Date(month);
+      params.year = d.getFullYear();
+      params.month = d.getMonth() + 1; // getMonth() is 0-indexed
+    }
     return client.get<Budget[]>('/budgets', { params }).then(r => r.data);
   },
   get: (id: number) => client.get<Budget>(`/budgets/${id}`).then(r => r.data),
@@ -122,8 +127,12 @@ export const budgets = {
     total_budgeted: number;
     total_spent: number;
   }>(`/budgets/${id}/progress`).then(r => r.data),
-  copyFromTemplate: (profileId: number, month: string) =>
-    client.post<Budget>('/budgets/copy-template', { profile_id: profileId, month }).then(r => r.data),
+  copyFromTemplate: (profileId: number, month: string) => {
+    const d = new Date(month);
+    return client.post<Budget>('/budgets/copy-from-template', null, {
+      params: { profile_id: profileId, target_year: d.getFullYear(), target_month: d.getMonth() + 1 }
+    }).then(r => r.data);
+  },
 };
 
 // Analytics
@@ -154,7 +163,7 @@ export const tsp = {
   project: (id: number) =>
     client.get<TSPProjectionResult>(`/tsp/scenarios/${id}/project`).then(r => r.data),
   compare: (scenarioIds: number[]) =>
-    client.get<{ comparisons: any[] }>('/tsp/compare', { params: { scenario_ids: scenarioIds.join(',') } }).then(r => r.data),
+    client.get<{ scenarios: any[]; comparison: any[] }>('/tsp/compare', { params: { scenario_ids: scenarioIds.join(',') } }).then(r => r.data),
   fundHistory: (years?: number) =>
     client.get<Record<string, TSPFundHistory>>('/tsp/fund-history', { params: { years } }).then(r => r.data),
 };

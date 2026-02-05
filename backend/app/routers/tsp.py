@@ -9,7 +9,12 @@ from decimal import Decimal
 
 from ..database import get_db
 from ..models import Profile, TSPScenario, TSPFundHistory
-from ..services.tsp_simulator import TSPSimulator
+from ..services.tsp_simulator import (
+    project_tsp_balance,
+    compare_scenarios as compare_tsp_scenarios,
+    get_fund_historical_returns,
+    get_all_fund_history,
+)
 
 router = APIRouter()
 
@@ -171,16 +176,42 @@ def delete_scenario(scenario_id: int, db: Session = Depends(get_db)):
     return {"status": "deleted"}
 
 
+def _transform_projection(raw: dict) -> ProjectionResponse:
+    """Transform raw projection data from service into response model."""
+    projections = []
+    for p in raw["projections"]:
+        ending_balance = p["balance"]
+        starting_balance = ending_balance - p["contribution"] - p["employer_match"] - p["growth"]
+        projections.append(ProjectionYear(
+            year=p["year"],
+            age=p["age"] or 0,
+            starting_balance=starting_balance,
+            contribution=p["contribution"],
+            employer_match=p["employer_match"],
+            growth=p["growth"],
+            ending_balance=ending_balance,
+        ))
+    return ProjectionResponse(
+        scenario_name=raw["scenario_name"],
+        years_to_retirement=raw.get("years_projected", 0),
+        final_balance=raw["final_balance"],
+        total_contributions=raw["total_contributions"],
+        total_employer_match=raw["total_employer_match"],
+        total_growth=raw["total_growth"],
+        average_return_rate=raw["average_annual_return"],
+        projections=projections,
+    )
+
+
 @router.get("/scenarios/{scenario_id}/project", response_model=ProjectionResponse)
 def project_scenario(scenario_id: int, db: Session = Depends(get_db)):
     """Run projection for a specific scenario."""
     scenario = db.query(TSPScenario).filter(TSPScenario.id == scenario_id).first()
     if not scenario:
         raise HTTPException(status_code=404, detail="Scenario not found")
-    
-    simulator = TSPSimulator(db)
-    
-    return simulator.project(scenario)
+
+    raw = project_tsp_balance(db, scenario)
+    return _transform_projection(raw)
 
 
 @router.post("/project", response_model=ProjectionResponse)
@@ -194,8 +225,6 @@ def project_custom(params: TSPScenarioCreate, db: Session = Depends(get_db)):
             status_code=400,
             detail=f"Fund allocation must sum to 100%, got {total_alloc}%"
         )
-    
-    simulator = TSPSimulator(db)
     
     # Create a temporary scenario object
     temp_scenario = TSPScenario(
@@ -216,42 +245,42 @@ def project_custom(params: TSPScenarioCreate, db: Session = Depends(get_db)):
         retirement_age=params.retirement_age,
         birth_year=params.birth_year
     )
-    
-    return simulator.project(temp_scenario)
+
+    raw = project_tsp_balance(db, temp_scenario)
+    return _transform_projection(raw)
 
 
 @router.get("/compare")
-def compare_scenarios(
+def compare_scenarios_endpoint(
     scenario_ids: str,  # Comma-separated IDs
     db: Session = Depends(get_db)
 ):
     """Compare multiple scenarios side by side."""
     ids = [int(id.strip()) for id in scenario_ids.split(",")]
-    
-    simulator = TSPSimulator(db)
-    results = []
-    
-    for scenario_id in ids:
-        scenario = db.query(TSPScenario).filter(TSPScenario.id == scenario_id).first()
-        if scenario:
-            projection = simulator.project(scenario)
-            results.append({
-                "scenario_id": scenario_id,
-                "scenario_name": scenario.name,
-                "final_balance": projection.final_balance,
-                "total_contributions": projection.total_contributions,
-                "total_growth": projection.total_growth,
-                "projections": projection.projections
-            })
-    
-    return {"comparisons": results}
+    return compare_tsp_scenarios(db, ids)
 
 
 @router.get("/fund-performance", response_model=List[FundPerformance])
 def get_fund_performance(db: Session = Depends(get_db)):
     """Get historical performance stats for each TSP fund."""
-    simulator = TSPSimulator(db)
-    return simulator.get_fund_performance()
+    funds = ["G", "F", "C", "S", "I"]
+    result = []
+    for fund in funds:
+        one_yr = get_fund_historical_returns(db, fund, years=1)
+        three_yr = get_fund_historical_returns(db, fund, years=3)
+        five_yr = get_fund_historical_returns(db, fund, years=5)
+        ten_yr = get_fund_historical_returns(db, fund, years=10)
+        all_time = get_fund_historical_returns(db, fund, years=50)
+
+        result.append(FundPerformance(
+            fund=fund,
+            one_year=one_yr["average_annual_return"] if one_yr["data_points"] > 0 else None,
+            three_year=three_yr["average_annual_return"] if three_yr["data_points"] > 0 else None,
+            five_year=five_yr["average_annual_return"] if five_yr["data_points"] > 0 else None,
+            ten_year=ten_yr["average_annual_return"] if ten_yr["data_points"] > 0 else None,
+            all_time=all_time["average_annual_return"] if all_time["data_points"] > 0 else None,
+        ))
+    return result
 
 
 @router.get("/fund-history")
