@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+*.egg-info/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build outputs (rebuilt in Docker)
+frontend/dist/
+
+# Environment files (secrets set via Coolify)
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+
+# Windows artifacts
+NUL
+nul
+
+# Railway config (not needed in Docker)
+railway.toml
+railpack.toml
+.railway/
+.railwayignore
+
+# Misc
+*.md
+*.bat
+.nvmrc
