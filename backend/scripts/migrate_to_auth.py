@@ -44,7 +44,7 @@ def migrate_existing_data():
             return
 
         # Get default credentials from environment or use defaults
-        default_email = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@financetracker.local")
+        default_email = os.getenv("DEFAULT_ADMIN_EMAIL", "admin@financetracker.app")
         default_password = os.getenv("DEFAULT_ADMIN_PASSWORD", "ChangeMe123!")
 
         print("Step 1: Creating default admin user...")

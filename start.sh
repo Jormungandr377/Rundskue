@@ -39,6 +39,21 @@ else:
         echo "First-time setup: Creating default admin user..."
         python3 scripts/migrate_to_auth.py 2>&1 || echo "Warning: Admin user creation had issues"
     fi
+
+    # One-time fix: update .local email to .app (email-validator rejects .local TLD)
+    python3 -c "
+from app.database import SessionLocal
+from app.models import User
+db = SessionLocal()
+user = db.query(User).filter(User.email == 'admin@financetracker.local').first()
+if user:
+    user.email = 'admin@financetracker.app'
+    db.commit()
+    print('Fixed admin email: .local -> .app')
+else:
+    print('Admin email fix not needed')
+db.close()
+" 2>&1 || true
 else
     echo "Warning: Could not connect to database. Skipping migrations."
 fi
