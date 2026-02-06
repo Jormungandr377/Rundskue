@@ -7,7 +7,8 @@ from typing import List, Optional
 from datetime import date, datetime, timedelta
 
 from ..database import get_db
-from ..models import Transaction, Account, Category
+from ..models import Transaction, Account, Category, User
+from ..dependencies import get_current_active_user
 
 router = APIRouter()
 
@@ -65,21 +66,26 @@ def get_transactions(
     pending_only: bool = False,
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=500),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """
     Get transactions with filtering and pagination.
     Amounts: positive = expense, negative = income.
     """
+    profile_ids = [p.id for p in current_user.profiles]
+
     query = db.query(Transaction).options(
         joinedload(Transaction.account),
         joinedload(Transaction.category)
-    )
-    
+    ).join(Account).filter(Account.profile_id.in_(profile_ids))
+
     # Apply filters
     if profile_id:
-        query = query.join(Account).filter(Account.profile_id == profile_id)
-    
+        if profile_id not in profile_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this profile")
+        query = query.filter(Account.profile_id == profile_id)
+
     if account_id:
         query = query.filter(Transaction.account_id == account_id)
     
@@ -156,7 +162,10 @@ def get_transactions(
 
 
 @router.get("/categories")
-def get_categories(db: Session = Depends(get_db)):
+def get_categories(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get all categories as a flat list."""
     cats = db.query(Category).order_by(Category.name).all()
     return [
@@ -174,7 +183,10 @@ def get_categories(db: Session = Depends(get_db)):
 
 
 @router.get("/categories/hierarchy")
-def get_categories_hierarchy(db: Session = Depends(get_db)):
+def get_categories_hierarchy(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get categories in a hierarchical structure."""
     cats = db.query(Category).filter(Category.parent_id == None).order_by(Category.name).all()
     result = []
@@ -203,13 +215,22 @@ def get_categories_hierarchy(db: Session = Depends(get_db)):
 
 
 @router.get("/{transaction_id}", response_model=TransactionResponse)
-def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
+def get_transaction(
+    transaction_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get a specific transaction."""
+    profile_ids = [p.id for p in current_user.profiles]
+
     t = db.query(Transaction).options(
         joinedload(Transaction.account),
         joinedload(Transaction.category)
-    ).filter(Transaction.id == transaction_id).first()
-    
+    ).join(Account).filter(
+        Transaction.id == transaction_id,
+        Account.profile_id.in_(profile_ids)
+    ).first()
+
     if not t:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
@@ -235,10 +256,16 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
 def update_transaction(
     transaction_id: int,
     update: TransactionUpdate,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Update transaction (category, name, notes, excluded/transfer flags)."""
-    t = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    t = db.query(Transaction).join(Account).filter(
+        Transaction.id == transaction_id,
+        Account.profile_id.in_(profile_ids)
+    ).first()
     if not t:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
@@ -264,24 +291,35 @@ def update_transaction(
     
     db.commit()
     
-    return get_transaction(transaction_id, db)
+    return get_transaction(transaction_id, current_user, db)
 
 
 @router.post("/bulk-categorize")
 def bulk_categorize(
     transaction_ids: List[int],
     category_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Bulk update category for multiple transactions."""
+    profile_ids = [p.id for p in current_user.profiles]
+
     # Verify category exists
     if category_id > 0:
         cat = db.query(Category).filter(Category.id == category_id).first()
         if not cat:
             raise HTTPException(status_code=400, detail="Category not found")
-    
+
+    # Only update transactions belonging to the user
+    user_transaction_ids = [
+        t.id for t in db.query(Transaction.id).join(Account).filter(
+            Transaction.id.in_(transaction_ids),
+            Account.profile_id.in_(profile_ids)
+        ).all()
+    ]
+
     updated = db.query(Transaction).filter(
-        Transaction.id.in_(transaction_ids)
+        Transaction.id.in_(user_transaction_ids)
     ).update(
         {Transaction.category_id: category_id if category_id > 0 else None},
         synchronize_session=False
@@ -296,12 +334,16 @@ def bulk_categorize(
 def search_merchants(
     q: str = Query(..., min_length=1),
     limit: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Search for unique merchant names for autocomplete."""
-    merchants = db.query(Transaction.merchant_name).filter(
+    profile_ids = [p.id for p in current_user.profiles]
+
+    merchants = db.query(Transaction.merchant_name).join(Account).filter(
         Transaction.merchant_name.ilike(f"%{q}%"),
-        Transaction.merchant_name.isnot(None)
+        Transaction.merchant_name.isnot(None),
+        Account.profile_id.in_(profile_ids)
     ).distinct().limit(limit).all()
     
     return [m[0] for m in merchants if m[0]]

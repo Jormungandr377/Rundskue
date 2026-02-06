@@ -1,7 +1,7 @@
 """Analytics API router - spending reports, trends, and insights."""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, extract, case
+from sqlalchemy import func, and_, or_, extract, case
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 from datetime import date, datetime, timedelta
@@ -9,7 +9,8 @@ from calendar import monthrange
 from decimal import Decimal
 
 from ..database import get_db
-from ..models import Transaction, Account, Category, NetWorthSnapshot
+from ..models import Transaction, Account, Category, NetWorthSnapshot, User
+from ..dependencies import get_current_active_user
 
 router = APIRouter()
 
@@ -58,9 +59,12 @@ def get_spending_by_category(
     profile_id: Optional[int] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get spending breakdown by category for a date range."""
+    user_profile_ids = [p.id for p in current_user.profiles]
+
     # Default to current month
     if not start_date:
         today = date.today()
@@ -69,7 +73,7 @@ def get_spending_by_category(
         today = date.today()
         _, last_day = monthrange(today.year, today.month)
         end_date = date(today.year, today.month, last_day)
-    
+
     query = db.query(
         Transaction.category_id,
         Category.name,
@@ -78,14 +82,17 @@ def get_spending_by_category(
         func.sum(Transaction.amount).label('total'),
         func.count(Transaction.id).label('count')
     ).outerjoin(Category).join(Account).filter(
+        Account.profile_id.in_(user_profile_ids),
         Transaction.date >= start_date,
         Transaction.date <= end_date,
         Transaction.is_excluded == False,
         Transaction.is_transfer == False,
         Transaction.amount > 0  # Expenses only
     )
-    
+
     if profile_id:
+        if profile_id not in user_profile_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this profile")
         query = query.filter(Account.profile_id == profile_id)
     
     query = query.group_by(
@@ -121,9 +128,15 @@ def get_cash_flow(
     profile_id: Optional[int] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get cash flow summary with income and expense breakdown."""
+    user_profile_ids = [p.id for p in current_user.profiles]
+
+    if profile_id and profile_id not in user_profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     # Default to current month
     if not start_date:
         today = date.today()
@@ -132,17 +145,9 @@ def get_cash_flow(
         today = date.today()
         _, last_day = monthrange(today.year, today.month)
         end_date = date(today.year, today.month, last_day)
-    
-    base_query = db.query(Transaction).join(Account).filter(
-        Transaction.date >= start_date,
-        Transaction.date <= end_date,
-        Transaction.is_excluded == False,
-        Transaction.is_transfer == False
-    )
-    
-    if profile_id:
-        base_query = base_query.filter(Account.profile_id == profile_id)
-    
+
+    filter_profile_ids = [profile_id] if profile_id else user_profile_ids
+
     # Get income (negative amounts)
     income_result = db.query(
         Transaction.category_id,
@@ -152,18 +157,16 @@ def get_cash_flow(
         func.sum(Transaction.amount).label('total'),
         func.count(Transaction.id).label('count')
     ).outerjoin(Category).join(Account).filter(
+        Account.profile_id.in_(filter_profile_ids),
         Transaction.date >= start_date,
         Transaction.date <= end_date,
         Transaction.is_excluded == False,
         Transaction.is_transfer == False,
         Transaction.amount < 0
-    )
-    if profile_id:
-        income_result = income_result.filter(Account.profile_id == profile_id)
-    income_result = income_result.group_by(
+    ).group_by(
         Transaction.category_id, Category.name, Category.icon, Category.color
     ).all()
-    
+
     # Get expenses (positive amounts)
     expense_result = db.query(
         Transaction.category_id,
@@ -173,15 +176,13 @@ def get_cash_flow(
         func.sum(Transaction.amount).label('total'),
         func.count(Transaction.id).label('count')
     ).outerjoin(Category).join(Account).filter(
+        Account.profile_id.in_(filter_profile_ids),
         Transaction.date >= start_date,
         Transaction.date <= end_date,
         Transaction.is_excluded == False,
         Transaction.is_transfer == False,
         Transaction.amount > 0
-    )
-    if profile_id:
-        expense_result = expense_result.filter(Account.profile_id == profile_id)
-    expense_result = expense_result.group_by(
+    ).group_by(
         Transaction.category_id, Category.name, Category.icon, Category.color
     ).all()
     
@@ -229,12 +230,20 @@ def get_cash_flow(
 def get_monthly_trends(
     profile_id: Optional[int] = None,
     months: int = 12,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get income vs expenses trend over the past N months."""
+    user_profile_ids = [p.id for p in current_user.profiles]
+
+    if profile_id and profile_id not in user_profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     today = date.today()
     start_date = date(today.year, today.month, 1) - timedelta(days=30 * months)
-    
+
+    filter_profile_ids = [profile_id] if profile_id else user_profile_ids
+
     query = db.query(
         extract('year', Transaction.date).label('year'),
         extract('month', Transaction.date).label('month'),
@@ -251,13 +260,11 @@ def get_monthly_trends(
             )
         ).label('expenses')
     ).join(Account).filter(
+        Account.profile_id.in_(filter_profile_ids),
         Transaction.date >= start_date,
         Transaction.is_excluded == False,
         Transaction.is_transfer == False
     )
-    
-    if profile_id:
-        query = query.filter(Account.profile_id == profile_id)
     
     query = query.group_by(
         extract('year', Transaction.date),
@@ -287,19 +294,31 @@ def get_monthly_trends(
 def get_net_worth_history(
     profile_id: Optional[int] = None,
     months: int = 12,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get net worth history over time."""
+    user_profile_ids = [p.id for p in current_user.profiles]
+
+    if profile_id and profile_id not in user_profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     start_date = date.today() - timedelta(days=30 * months)
-    
+
     query = db.query(NetWorthSnapshot).filter(
         NetWorthSnapshot.date >= start_date
     )
-    
+
     if profile_id:
         query = query.filter(NetWorthSnapshot.profile_id == profile_id)
     else:
-        query = query.filter(NetWorthSnapshot.profile_id.is_(None))  # Household total
+        # Show snapshots for user's profiles or household total (profile_id=None)
+        query = query.filter(
+            or_(
+                NetWorthSnapshot.profile_id.in_(user_profile_ids),
+                NetWorthSnapshot.profile_id.is_(None)
+            )
+        )
     
     snapshots = query.order_by(NetWorthSnapshot.date).all()
     
@@ -327,14 +346,22 @@ def get_net_worth_history(
 @router.post("/snapshot-net-worth")
 def create_net_worth_snapshot(
     profile_id: Optional[int] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Create a net worth snapshot based on current account balances."""
-    query = db.query(Account).filter(Account.is_hidden == False)
-    
-    if profile_id:
-        query = query.filter(Account.profile_id == profile_id)
-    
+    user_profile_ids = [p.id for p in current_user.profiles]
+
+    if profile_id and profile_id not in user_profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
+    filter_profile_ids = [profile_id] if profile_id else user_profile_ids
+
+    query = db.query(Account).filter(
+        Account.is_hidden == False,
+        Account.profile_id.in_(filter_profile_ids)
+    )
+
     accounts = query.all()
     
     total_cash = 0
@@ -399,12 +426,20 @@ def create_net_worth_snapshot(
 @router.get("/insights", response_model=List[SpendingInsight])
 def get_spending_insights(
     profile_id: Optional[int] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Get AI-generated spending insights comparing current month to previous."""
+    """Get spending insights comparing current month to previous."""
+    user_profile_ids = [p.id for p in current_user.profiles]
+
+    if profile_id and profile_id not in user_profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
+    filter_profile_ids = [profile_id] if profile_id else user_profile_ids
+
     today = date.today()
     current_month_start = date(today.year, today.month, 1)
-    
+
     # Previous month
     if today.month == 1:
         prev_month_start = date(today.year - 1, 12, 1)
@@ -413,21 +448,20 @@ def get_spending_insights(
         prev_month_start = date(today.year, today.month - 1, 1)
         _, last_day = monthrange(today.year, today.month - 1)
         prev_month_end = date(today.year, today.month - 1, last_day)
-    
+
     # Get spending by category for both months
     def get_spending(start, end):
         query = db.query(
             Category.name,
             func.sum(Transaction.amount).label('total')
         ).select_from(Transaction).outerjoin(Category).join(Account).filter(
+            Account.profile_id.in_(filter_profile_ids),
             Transaction.date >= start,
             Transaction.date <= end,
             Transaction.is_excluded == False,
             Transaction.is_transfer == False,
             Transaction.amount > 0
         )
-        if profile_id:
-            query = query.filter(Account.profile_id == profile_id)
         return {r.name or "Uncategorized": float(r.total) for r in query.group_by(Category.name).all()}
     
     current_spending = get_spending(current_month_start, today)

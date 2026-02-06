@@ -6,7 +6,8 @@ from typing import List, Optional
 from datetime import datetime
 
 from ..database import get_db
-from ..models import PlaidItem, Account, Profile
+from ..models import PlaidItem, Account, Profile, User
+from ..dependencies import get_current_active_user
 from ..services.plaid_service import (
     create_link_token,
     exchange_public_token,
@@ -51,12 +52,20 @@ class SyncResponse(BaseModel):
 
 
 @router.post("/link-token", response_model=LinkTokenResponse)
-def get_link_token(request: LinkTokenRequest, db: Session = Depends(get_db)):
+def get_link_token(
+    request: LinkTokenRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """
     Create a Plaid Link token for connecting a new bank account.
     The frontend uses this token to initialize Plaid Link.
     """
-    # Verify profile exists
+    # Verify profile belongs to user
+    profile_ids = [p.id for p in current_user.profiles]
+    if request.profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     profile = db.query(Profile).filter(Profile.id == request.profile_id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
@@ -72,12 +81,20 @@ def get_link_token(request: LinkTokenRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/exchange-token")
-def exchange_token(request: PublicTokenExchange, db: Session = Depends(get_db)):
+def exchange_token(
+    request: PublicTokenExchange,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """
     Exchange public token for access token after user completes Plaid Link.
     This creates the PlaidItem and associated accounts.
     """
-    # Verify profile exists
+    # Verify profile belongs to user
+    profile_ids = [p.id for p in current_user.profiles]
+    if request.profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     profile = db.query(Profile).filter(Profile.id == request.profile_id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
@@ -104,12 +121,20 @@ def exchange_token(request: PublicTokenExchange, db: Session = Depends(get_db)):
 
 
 @router.get("/items", response_model=List[PlaidItemResponse])
-def list_items(profile_id: Optional[int] = None, db: Session = Depends(get_db)):
-    """List all Plaid items (bank connections)."""
-    query = db.query(PlaidItem)
+def list_items(
+    profile_id: Optional[int] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """List all Plaid items (bank connections) for current user."""
+    profile_ids = [p.id for p in current_user.profiles]
+
+    query = db.query(PlaidItem).filter(PlaidItem.profile_id.in_(profile_ids))
     if profile_id:
+        if profile_id not in profile_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this profile")
         query = query.filter(PlaidItem.profile_id == profile_id)
-    
+
     items = query.all()
     
     result = []
@@ -131,20 +156,29 @@ def list_items(profile_id: Optional[int] = None, db: Session = Depends(get_db)):
 async def trigger_sync(
     background_tasks: BackgroundTasks,
     item_id: Optional[int] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """
-    Trigger a transaction sync for one or all Plaid items.
+    Trigger a transaction sync for one or all of user's Plaid items.
     If item_id is provided, sync only that item.
-    Otherwise, sync all active items.
+    Otherwise, sync all active items for the user.
     """
+    profile_ids = [p.id for p in current_user.profiles]
+
     if item_id:
-        item = db.query(PlaidItem).filter(PlaidItem.id == item_id).first()
+        item = db.query(PlaidItem).filter(
+            PlaidItem.id == item_id,
+            PlaidItem.profile_id.in_(profile_ids)
+        ).first()
         if not item:
             raise HTTPException(status_code=404, detail="Plaid item not found")
         items = [item]
     else:
-        items = db.query(PlaidItem).filter(PlaidItem.is_active == True).all()
+        items = db.query(PlaidItem).filter(
+            PlaidItem.is_active == True,
+            PlaidItem.profile_id.in_(profile_ids)
+        ).all()
     
     total_added = 0
     total_modified = 0
@@ -170,9 +204,18 @@ async def trigger_sync(
 
 
 @router.delete("/items/{item_id}")
-def delete_item(item_id: int, db: Session = Depends(get_db)):
+def delete_item(
+    item_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Remove a Plaid item (bank connection)."""
-    item = db.query(PlaidItem).filter(PlaidItem.id == item_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    item = db.query(PlaidItem).filter(
+        PlaidItem.id == item_id,
+        PlaidItem.profile_id.in_(profile_ids)
+    ).first()
     if not item:
         raise HTTPException(status_code=404, detail="Plaid item not found")
     
@@ -184,12 +227,21 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/items/{item_id}/update-link")
-def update_link(item_id: int, db: Session = Depends(get_db)):
+def update_link(
+    item_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """
     Get a link token for updating/fixing a bank connection.
     Used when credentials need to be refreshed.
     """
-    item = db.query(PlaidItem).filter(PlaidItem.id == item_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    item = db.query(PlaidItem).filter(
+        PlaidItem.id == item_id,
+        PlaidItem.profile_id.in_(profile_ids)
+    ).first()
     if not item:
         raise HTTPException(status_code=404, detail="Plaid item not found")
     

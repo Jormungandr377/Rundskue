@@ -8,7 +8,8 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from ..database import get_db
-from ..models import Profile, TSPScenario, TSPFundHistory
+from ..models import Profile, TSPScenario, TSPFundHistory, User
+from ..dependencies import get_current_active_user
 from ..services.tsp_simulator import (
     project_tsp_balance,
     compare_scenarios as compare_tsp_scenarios,
@@ -88,8 +89,16 @@ class FundPerformance(BaseModel):
 
 
 @router.get("/scenarios", response_model=List[TSPScenarioResponse])
-def get_scenarios(profile_id: int, db: Session = Depends(get_db)):
+def get_scenarios(
+    profile_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get all TSP scenarios for a profile."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     scenarios = db.query(TSPScenario).filter(
         TSPScenario.profile_id == profile_id
     ).all()
@@ -124,8 +133,16 @@ def get_scenarios(profile_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/scenarios", response_model=TSPScenarioResponse)
-def create_scenario(scenario: TSPScenarioCreate, db: Session = Depends(get_db)):
+def create_scenario(
+    scenario: TSPScenarioCreate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Create a new TSP projection scenario."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if scenario.profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     # Validate allocation sums to 100
     alloc = scenario.allocation
     total_alloc = alloc.g + alloc.f + alloc.c + alloc.s + alloc.i + alloc.l
@@ -160,13 +177,22 @@ def create_scenario(scenario: TSPScenarioCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_scenario)
     
-    return get_scenarios(scenario.profile_id, db)[-1]
+    return get_scenarios(scenario.profile_id, current_user, db)[-1]
 
 
 @router.delete("/scenarios/{scenario_id}")
-def delete_scenario(scenario_id: int, db: Session = Depends(get_db)):
+def delete_scenario(
+    scenario_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Delete a TSP scenario."""
-    scenario = db.query(TSPScenario).filter(TSPScenario.id == scenario_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    scenario = db.query(TSPScenario).filter(
+        TSPScenario.id == scenario_id,
+        TSPScenario.profile_id.in_(profile_ids)
+    ).first()
     if not scenario:
         raise HTTPException(status_code=404, detail="Scenario not found")
     
@@ -204,9 +230,18 @@ def _transform_projection(raw: dict) -> ProjectionResponse:
 
 
 @router.get("/scenarios/{scenario_id}/project", response_model=ProjectionResponse)
-def project_scenario(scenario_id: int, db: Session = Depends(get_db)):
+def project_scenario(
+    scenario_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Run projection for a specific scenario."""
-    scenario = db.query(TSPScenario).filter(TSPScenario.id == scenario_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    scenario = db.query(TSPScenario).filter(
+        TSPScenario.id == scenario_id,
+        TSPScenario.profile_id.in_(profile_ids)
+    ).first()
     if not scenario:
         raise HTTPException(status_code=404, detail="Scenario not found")
 
@@ -215,7 +250,11 @@ def project_scenario(scenario_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/project", response_model=ProjectionResponse)
-def project_custom(params: TSPScenarioCreate, db: Session = Depends(get_db)):
+def project_custom(
+    params: TSPScenarioCreate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Run a one-off projection without saving the scenario."""
     # Validate allocation
     alloc = params.allocation
@@ -253,15 +292,31 @@ def project_custom(params: TSPScenarioCreate, db: Session = Depends(get_db)):
 @router.get("/compare")
 def compare_scenarios_endpoint(
     scenario_ids: str,  # Comma-separated IDs
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Compare multiple scenarios side by side."""
+    profile_ids = [p.id for p in current_user.profiles]
     ids = [int(id.strip()) for id in scenario_ids.split(",")]
+
+    # Verify all scenarios belong to user
+    user_scenarios = db.query(TSPScenario.id).filter(
+        TSPScenario.id.in_(ids),
+        TSPScenario.profile_id.in_(profile_ids)
+    ).all()
+    user_scenario_ids = [s.id for s in user_scenarios]
+
+    if len(user_scenario_ids) != len(ids):
+        raise HTTPException(status_code=404, detail="One or more scenarios not found")
+
     return compare_tsp_scenarios(db, ids)
 
 
 @router.get("/fund-performance", response_model=List[FundPerformance])
-def get_fund_performance(db: Session = Depends(get_db)):
+def get_fund_performance(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get historical performance stats for each TSP fund."""
     funds = ["G", "F", "C", "S", "I"]
     result = []
@@ -288,6 +343,7 @@ def get_fund_history(
     fund: str,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get historical price data for a specific fund."""
@@ -307,7 +363,9 @@ def get_fund_history(
 
 
 @router.get("/contribution-limits")
-def get_contribution_limits():
+def get_contribution_limits(
+    current_user: User = Depends(get_current_active_user),
+):
     """Get current TSP contribution limits."""
     # 2024 limits (update annually)
     current_year = date.today().year
@@ -328,7 +386,8 @@ def get_contribution_limits():
 @router.get("/brs-match")
 def calculate_brs_match(
     base_pay: float,
-    contribution_pct: float
+    contribution_pct: float,
+    current_user: User = Depends(get_current_active_user),
 ):
     """Calculate BRS (Blended Retirement System) matching contribution."""
     # BRS matching structure:

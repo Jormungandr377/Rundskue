@@ -8,7 +8,8 @@ from datetime import date, datetime
 from calendar import monthrange
 
 from ..database import get_db
-from ..models import Budget, BudgetItem, Category, Transaction, Account
+from ..models import Budget, BudgetItem, Category, Transaction, Account, User
+from ..dependencies import get_current_active_user
 
 router = APIRouter()
 
@@ -95,9 +96,14 @@ def get_budgets(
     profile_id: int,
     year: Optional[int] = None,
     month: Optional[int] = None,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get all budgets for a profile, optionally filtered by month."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     query = db.query(Budget).filter(Budget.profile_id == profile_id)
     
     if year and month:
@@ -159,9 +165,13 @@ def get_budget_summary(
     profile_id: int,
     year: int,
     month: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get budget summary for a specific month."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
     target_month = date(year, month, 1)
     _, last_day = monthrange(year, month)
     end_date = date(year, month, last_day)
@@ -209,8 +219,16 @@ def get_budget_summary(
 
 
 @router.post("/", response_model=BudgetResponse)
-def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
+def create_budget(
+    budget: BudgetCreate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Create a new monthly budget."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if budget.profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
     # Check if budget already exists for this month
     existing = db.query(Budget).filter(
         Budget.profile_id == budget.profile_id,
@@ -243,15 +261,24 @@ def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
     
     db.commit()
     
-    return get_budgets(budget.profile_id, budget.month.year, budget.month.month, db)[0]
+    return get_budgets(budget.profile_id, budget.month.year, budget.month.month, current_user, db)[0]
 
 
 @router.get("/{budget_id}/progress")
-def get_budget_progress(budget_id: int, db: Session = Depends(get_db)):
+def get_budget_progress(
+    budget_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get progress details for a specific budget."""
+    profile_ids = [p.id for p in current_user.profiles]
+
     budget = db.query(Budget).options(
         joinedload(Budget.items).joinedload(BudgetItem.category)
-    ).filter(Budget.id == budget_id).first()
+    ).filter(
+        Budget.id == budget_id,
+        Budget.profile_id.in_(profile_ids)
+    ).first()
 
     if not budget:
         raise HTTPException(status_code=404, detail="Budget not found")
@@ -306,10 +333,16 @@ def get_budget_progress(budget_id: int, db: Session = Depends(get_db)):
 def update_budget(
     budget_id: int,
     items: List[BudgetItemCreate],
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Update budget items."""
-    budget = db.query(Budget).filter(Budget.id == budget_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    budget = db.query(Budget).filter(
+        Budget.id == budget_id,
+        Budget.profile_id.in_(profile_ids)
+    ).first()
     if not budget:
         raise HTTPException(status_code=404, detail="Budget not found")
     
@@ -327,7 +360,7 @@ def update_budget(
     
     db.commit()
     
-    return get_budgets(budget.profile_id, budget.month.year, budget.month.month, db)[0]
+    return get_budgets(budget.profile_id, budget.month.year, budget.month.month, current_user, db)[0]
 
 
 @router.post("/copy-from-template")
@@ -335,9 +368,13 @@ def copy_from_template(
     profile_id: int,
     target_year: int,
     target_month: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Copy the template budget to a new month."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
     template = db.query(Budget).filter(
         Budget.profile_id == profile_id,
         Budget.is_template == True
@@ -382,9 +419,18 @@ def copy_from_template(
 
 
 @router.delete("/{budget_id}")
-def delete_budget(budget_id: int, db: Session = Depends(get_db)):
+def delete_budget(
+    budget_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Delete a budget."""
-    budget = db.query(Budget).filter(Budget.id == budget_id).first()
+    profile_ids = [p.id for p in current_user.profiles]
+
+    budget = db.query(Budget).filter(
+        Budget.id == budget_id,
+        Budget.profile_id.in_(profile_ids)
+    ).first()
     if not budget:
         raise HTTPException(status_code=404, detail="Budget not found")
     
