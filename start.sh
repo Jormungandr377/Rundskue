@@ -1,8 +1,7 @@
 #!/bin/bash
 # Startup script for Finance Tracker
 # Runs database migrations automatically, then starts the app
-
-set -e
+# NOTE: No 'set -e' — migration failures must NOT prevent app startup
 
 echo "=== Finance Tracker Startup ==="
 
@@ -11,20 +10,18 @@ echo "Running database migrations..."
 cd /app/backend
 
 # Check if we can connect to the database
-python3 -c "
+if python3 -c "
 from app.database import engine
 from sqlalchemy import text
 with engine.connect() as conn:
     conn.execute(text('SELECT 1'))
     print('Database connection OK')
-" 2>/dev/null
-
-if [ $? -eq 0 ]; then
+" 2>&1; then
     echo "Running Alembic migrations..."
     python3 -m alembic upgrade head 2>&1 || echo "Warning: Alembic migration had issues (may already be applied)"
 
     # Run data migration if users table is empty (first-time setup only)
-    python3 -c "
+    USER_CHECK=$(python3 -c "
 from app.database import SessionLocal
 from app.models import User
 db = SessionLocal()
@@ -34,10 +31,14 @@ if count == 0:
     print('NO_USERS')
 else:
     print(f'USERS_EXIST ({count})')
-" 2>/dev/null | grep -q "NO_USERS" && {
-    echo "First-time setup: Creating default admin user..."
-    python3 scripts/migrate_to_auth.py
-}
+" 2>&1) || true
+
+    echo "User check result: $USER_CHECK"
+
+    if echo "$USER_CHECK" | grep -q "NO_USERS"; then
+        echo "First-time setup: Creating default admin user..."
+        python3 scripts/migrate_to_auth.py 2>&1 || echo "Warning: Admin user creation had issues"
+    fi
 else
     echo "Warning: Could not connect to database. Skipping migrations."
 fi
