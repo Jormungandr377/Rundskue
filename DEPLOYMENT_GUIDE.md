@@ -1,138 +1,129 @@
-# 🚀 Finance Tracker Deployment Guide
+# Finance Tracker Deployment Guide (Coolify)
 
-This guide will help you deploy your Finance Tracker to Railway for web access.
+This guide covers deploying the Finance Tracker to Coolify via Docker.
 
 ## Prerequisites
 
-1. **Railway Account**: Sign up at [railway.app](https://railway.app) (free tier available)
-2. **Plaid Account**: Get your API keys from [dashboard.plaid.com](https://dashboard.plaid.com/)
-3. **Git Repository**: Your code should be in a GitHub repository
+1. **Coolify Instance**: Self-hosted Coolify with Docker support
+2. **PostgreSQL**: Database service running on Coolify
+3. **Plaid Account**: API keys from [dashboard.plaid.com](https://dashboard.plaid.com/)
+4. **GitHub**: Code pushed to GitHub (Coolify pulls from there)
 
-## Step 1: Prepare Your Repository
+## Architecture
 
-Ensure your repository is pushed to GitHub with all the new deployment files:
-- `railway.toml` - Railway configuration
-- `nixpacks.toml` - Build configuration
-- `package.json` - Root package file for builds
-- Updated `backend/app/main.py` - Now serves frontend static files
+Single Docker container serving both the React frontend and FastAPI backend:
 
-## Step 2: Create Railway Project
-
-1. Go to [railway.app](https://railway.app) and sign in
-2. Click "Start a New Project"
-3. Choose "Deploy from GitHub repo"
-4. Select your finance tracker repository
-
-## Step 3: Configure Environment Variables
-
-In Railway's project dashboard, add these environment variables:
-
-### Required Variables:
-```bash
-# Database (Railway will provide this automatically with PostgreSQL addon)
-DATABASE_URL=postgresql://postgres:password@hostname:5432/database
-
-# Application Security
-SECRET_KEY=your-super-secret-key-change-this-now
-ENCRYPTION_KEY=your-32-character-encryption-key
-
-# Plaid API Credentials
-PLAID_CLIENT_ID=your_plaid_client_id
-PLAID_SECRET=your_plaid_secret_key
-PLAID_ENV=sandbox  # Use "development" or "production" for real banks
-
-# Production Configuration
-DEBUG=false
-FRONTEND_URL=https://your-app-name.up.railway.app
-
-# Optional
-SYNC_HOUR=3  # Daily sync time (3 AM)
+```
+Coolify -> GitHub (main branch) -> Docker build -> Container
+                                                   |
+                                                   +-- React (static files)
+                                                   +-- FastAPI (API + serves frontend)
+                                                   +-- Auto-migrations on startup
 ```
 
-### Getting Plaid Credentials:
-1. Sign up at [dashboard.plaid.com](https://dashboard.plaid.com/)
-2. Get your `client_id` and secret from the dashboard
-3. For testing: use `PLAID_ENV=sandbox`
-4. For production: use `PLAID_ENV=production` (requires verification)
+## Environment Variables
 
-## Step 4: Add PostgreSQL Database
+Set these in the Coolify dashboard for your application:
 
-1. In Railway dashboard, click "Add Service"
-2. Choose "Database" → "PostgreSQL"
-3. Railway will automatically create a `DATABASE_URL` environment variable
+### Required
 
-## Step 5: Deploy
+```bash
+# Database (your Coolify PostgreSQL service)
+DATABASE_URL=postgresql://postgres:password@db-host:5432/finance_tracker
 
-1. Railway will automatically deploy when you push to your main branch
-2. The build process will:
-   - Install Python dependencies
-   - Install Node.js dependencies
-   - Build the React frontend
-   - Start the FastAPI backend
+# Security keys (generate unique values!)
+SECRET_KEY=<run: python -c "import secrets; print(secrets.token_hex(32))">
+ENCRYPTION_KEY=<run: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())">
 
-## Step 6: Access Your App
+# Plaid API
+PLAID_CLIENT_ID=your_plaid_client_id
+PLAID_SECRET=your_plaid_secret
+PLAID_ENV=sandbox
 
-1. Railway will provide a URL like `https://your-app-name.up.railway.app`
-2. Update the `FRONTEND_URL` environment variable with this URL
-3. Your app will be live and accessible!
+# Production settings
+DEBUG=false
+FRONTEND_URL=https://finance.rundskue.com
+```
 
-## Security Notes for Production
+### Optional
 
-### For Plaid Production Environment:
-- Set `PLAID_ENV=production`
-- Your app MUST use HTTPS (Railway provides this automatically)
-- You may need to verify your application with Plaid
+```bash
+# Email (for password reset)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=noreply@financetracker.com
 
-### Environment Variables:
-- Generate strong random values for `SECRET_KEY` and `ENCRYPTION_KEY`
-- Never commit these to your repository
-- Use Railway's environment variable interface
+# Daily Plaid sync time
+SYNC_HOUR=3
+SYNC_MINUTE=0
+
+# Custom admin credentials (first deploy only)
+DEFAULT_ADMIN_EMAIL=admin@financetracker.local
+DEFAULT_ADMIN_PASSWORD=ChangeMe123!
+```
+
+## Deployment Steps
+
+### 1. Push to GitHub
+
+```bash
+git push origin main
+```
+
+### 2. Coolify Configuration
+
+- **Build type**: Dockerfile
+- **Port**: 3000
+- **Health check**: `/api/health`
+- **Domain**: finance.rundskue.com
+
+### 3. First Deploy
+
+On first deploy, the startup script automatically:
+1. Runs Alembic migrations (creates auth tables)
+2. Creates default admin user if no users exist
+3. Links orphaned profiles to the admin user
+4. Starts the FastAPI server
+
+### 4. Post-Deploy
+
+1. Navigate to https://finance.rundskue.com
+2. Login with default credentials:
+   - Email: `admin@financetracker.local`
+   - Password: `ChangeMe123!`
+3. **Change the password immediately**
+4. Optionally enable 2FA
+
+## Authentication System
+
+The app uses JWT-based authentication:
+- **Access tokens**: 15-minute expiry
+- **Refresh tokens**: 7-30 days (with "remember me")
+- **2FA**: Optional TOTP (Google Authenticator)
+- **Password reset**: Email-based (requires SMTP config)
+
+All API endpoints require authentication. Data is scoped per user.
 
 ## Troubleshooting
 
-### Build Issues:
-- Check Railway's build logs in the dashboard
-- Ensure all dependencies are listed in `requirements.txt` and `package.json`
+### Container won't start
+- Check Coolify logs for migration errors
+- Verify DATABASE_URL is correct and database is reachable
 
-### Database Issues:
-- Verify `DATABASE_URL` is set correctly
-- Check PostgreSQL service is running in Railway
+### 401 on all endpoints
+- Auth system is working - you need to login first
+- Test: `curl https://finance.rundskue.com/api/health` (this endpoint is public)
 
-### Plaid Issues:
-- Verify credentials are correct
-- Check Plaid environment setting
-- Ensure webhook URLs (if used) point to your Railway domain
+### Migration errors
+- Check if database is accessible from the container
+- Migrations are idempotent - safe to retry
 
-### Frontend Issues:
-- Ensure React build completed successfully
-- Check that static files are being served correctly
+### Can't login
+- Verify the data migration created the admin user (check Coolify logs for "Migration completed")
+- Check SECRET_KEY hasn't changed between deploys (invalidates tokens)
 
-## Local Development vs Production
+## Redeployment
 
-- **Local**: Frontend runs on port 3000, backend on 8000
-- **Production**: Everything served from one Railway domain
-- **API**: In production, frontend makes requests to `/api/*` (same domain)
-
-## Cost Information
-
-- Railway offers a free tier with limited usage
-- PostgreSQL database is included in free tier
-- Monitor usage in Railway dashboard
-- Consider paid tier for production use
-
-## Updates and Maintenance
-
-- Push changes to GitHub to automatically redeploy
-- Monitor application health via Railway dashboard
-- Set up database backups for production data
-- Monitor Plaid API usage and limits
-
-## Next Steps After Deployment
-
-1. **Set up monitoring**: Use Railway's metrics dashboard
-2. **Configure backups**: Set up database backup schedule
-3. **Custom domain**: Add your own domain in Railway settings
-4. **SSL/TLS**: Already handled by Railway
-5. **Environment promotion**: Create separate dev/staging environments
-
-Your Finance Tracker is now live on the web! 🎉
+Push to main branch and redeploy in Coolify. Migrations run automatically and skip already-applied changes.

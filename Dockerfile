@@ -43,11 +43,15 @@ COPY backend/ ./backend/
 # Lands at /app/frontend/dist — exactly where main.py expects it
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
+# Copy startup script (runs migrations then starts app)
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh
+
 ENV PORT=3000
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:3000/api/health || exit 1
 
-CMD ["python3", "-m", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["./start.sh"]
