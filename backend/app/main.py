@@ -3,11 +3,12 @@ Finance Tracker API
 Main FastAPI application entry point
 Updated: Fixed import paths for deployment - Force rebuild 2026-02-03
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import os
@@ -115,15 +116,17 @@ if static_dir.exists():
             return FileResponse(favicon_path)
         return {"error": "Favicon not found"}
 
-    # Serve the React app for all non-API routes (SPA routing)
-    @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str):
-        # Don't serve SPA for API routes
-        if full_path.startswith("api/"):
-            return {"error": "API route not found"}
-
-        # Serve index.html for all SPA routes
-        index_path = static_dir / "index.html"
-        if index_path.exists():
-            return FileResponse(index_path)
-        return {"error": "Frontend not built. Run 'npm run build' in the frontend directory."}
+    # Exception handler for 404s - serve SPA for non-API routes
+    @app.exception_handler(404)
+    async def not_found_handler(request: Request, exc):
+        # Serve SPA for non-API routes
+        if not request.url.path.startswith("/api/"):
+            index_path = static_dir / "index.html"
+            if index_path.exists():
+                return FileResponse(index_path)
+        # For API routes, return proper 404
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Not found"}
+        )
