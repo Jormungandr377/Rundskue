@@ -16,7 +16,7 @@ from pathlib import Path
 
 from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
-from .routers import tsp
+from .routers import tsp, auth
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
@@ -70,6 +70,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/api")  # Auth routes (no additional prefix)
 app.include_router(profiles.router, prefix="/api/profiles", tags=["Profiles"])
 app.include_router(plaid.router, prefix="/api/plaid", tags=["Plaid"])
 app.include_router(accounts.router, prefix="/api/accounts", tags=["Accounts"])

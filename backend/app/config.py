@@ -30,7 +30,27 @@ class Settings(BaseSettings):
 
     # Security
     encryption_key: str = _default_fernet_key
-    
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+    refresh_token_remember_me_days: int = 30
+
+    # Password Policy
+    password_min_length: int = 8
+    password_require_uppercase: bool = True
+    password_require_number: bool = True
+    password_require_special: bool = True
+
+    # 2FA
+    totp_issuer: str = "Finance Tracker"
+
+    # Email (SMTP)
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "noreply@financetracker.com"
+
     # Frontend URL (for CORS)
     frontend_url: str = "http://localhost:3000"
     
