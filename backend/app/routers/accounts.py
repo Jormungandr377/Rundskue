@@ -6,7 +6,8 @@ from typing import List, Optional
 from decimal import Decimal
 
 from ..database import get_db
-from ..models import Account, AccountType
+from ..models import Account, AccountType, User, Profile
+from ..dependencies import get_current_active_user
 
 router = APIRouter()
 
@@ -45,17 +46,24 @@ class AccountsSummary(BaseModel):
 def get_accounts(
     profile_id: Optional[int] = None,
     include_hidden: bool = False,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Get all accounts, optionally filtered by profile."""
-    query = db.query(Account)
-    
+    """Get all accounts for current user, optionally filtered by profile."""
+    # Get user's profile IDs
+    profile_ids = [p.id for p in current_user.profiles]
+
+    query = db.query(Account).filter(Account.profile_id.in_(profile_ids))
+
     if profile_id:
+        # Verify profile belongs to user
+        if profile_id not in profile_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this profile")
         query = query.filter(Account.profile_id == profile_id)
-    
+
     if not include_hidden:
         query = query.filter(Account.is_hidden == False)
-    
+
     accounts = query.all()
     
     result = []
@@ -82,13 +90,26 @@ def get_accounts(
 
 
 @router.get("/summary", response_model=AccountsSummary)
-def get_accounts_summary(profile_id: Optional[int] = None, db: Session = Depends(get_db)):
-    """Get aggregated account summary."""
-    query = db.query(Account).filter(Account.is_hidden == False)
-    
+def get_accounts_summary(
+    profile_id: Optional[int] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Get aggregated account summary for current user."""
+    # Get user's profile IDs
+    profile_ids = [p.id for p in current_user.profiles]
+
+    query = db.query(Account).filter(
+        Account.is_hidden == False,
+        Account.profile_id.in_(profile_ids)
+    )
+
     if profile_id:
+        # Verify profile belongs to user
+        if profile_id not in profile_ids:
+            raise HTTPException(status_code=403, detail="Access denied to this profile")
         query = query.filter(Account.profile_id == profile_id)
-    
+
     accounts = query.all()
     
     total_assets = 0
@@ -120,9 +141,19 @@ def get_accounts_summary(profile_id: Optional[int] = None, db: Session = Depends
 
 
 @router.get("/{account_id}", response_model=AccountResponse)
-def get_account(account_id: int, db: Session = Depends(get_db)):
+def get_account(
+    account_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get a specific account."""
-    account = db.query(Account).filter(Account.id == account_id).first()
+    # Get user's profile IDs
+    profile_ids = [p.id for p in current_user.profiles]
+
+    account = db.query(Account).filter(
+        Account.id == account_id,
+        Account.profile_id.in_(profile_ids)
+    ).first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     
@@ -145,18 +176,29 @@ def get_account(account_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{account_id}", response_model=AccountResponse)
-def update_account(account_id: int, update: AccountUpdate, db: Session = Depends(get_db)):
+def update_account(
+    account_id: int,
+    update: AccountUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Update account settings (hide/show, custom name)."""
-    account = db.query(Account).filter(Account.id == account_id).first()
+    # Get user's profile IDs
+    profile_ids = [p.id for p in current_user.profiles]
+
+    account = db.query(Account).filter(
+        Account.id == account_id,
+        Account.profile_id.in_(profile_ids)
+    ).first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
+
     if update.is_hidden is not None:
         account.is_hidden = update.is_hidden
     if update.display_name is not None:
         account.display_name = update.display_name
-    
+
     db.commit()
     db.refresh(account)
-    
-    return get_account(account_id, db)
+
+    return get_account(account_id, current_user, db)
