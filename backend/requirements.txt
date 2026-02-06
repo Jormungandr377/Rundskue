@@ -21,7 +21,7 @@ requests==2.31.0
 
 # Environment and config
 python-dotenv==1.0.0
-pydantic==2.10.6
+pydantic[email]==2.10.6
 pydantic-settings==2.7.1
 
 # Date/time
