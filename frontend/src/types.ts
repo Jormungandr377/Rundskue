@@ -212,3 +212,51 @@ export interface RecurringTransaction {
   is_active: boolean;
   notes?: string;
 }
+
+// Savings Goals
+export interface SavingsGoal {
+  id: number;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  deadline?: string;
+  color: string;
+  icon: string;
+  is_completed: boolean;
+  completed_at?: string;
+  progress_pct: number;
+  monthly_needed?: number;
+}
+
+// Category Rules (auto-categorization)
+export interface CategoryRule {
+  id: number;
+  category_id: number;
+  category_name?: string;
+  match_field: 'name' | 'merchant_name';
+  match_type: 'contains' | 'exact' | 'starts_with';
+  match_value: string;
+  is_active: boolean;
+  priority: number;
+}
+
+// Notifications
+export interface AppNotification {
+  id: number;
+  type: 'budget_alert' | 'bill_reminder' | 'goal_reached';
+  title: string;
+  message: string;
+  data?: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
+}
+
+// Sessions
+export interface UserSession {
+  id: number;
+  user_agent?: string;
+  ip_address?: string;
+  created_at: string;
+  expires_at: string;
+  is_current: boolean;
+}

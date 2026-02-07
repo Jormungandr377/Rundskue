@@ -10,6 +10,7 @@ const api = axios.create({
   baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest', // CSRF protection
   },
   withCredentials: true, // Send cookies (refresh token) with requests
 })

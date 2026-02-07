@@ -12,6 +12,8 @@ import {
 import {
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,10 +21,11 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  Legend,
 } from 'recharts';
 import { format, parseISO, differenceInDays } from 'date-fns';
-import { accounts, analytics, transactions, recurring } from '../api';
+import { accounts, analytics, transactions, recurring, goals } from '../api';
 import type { SpendingByCategory, MonthlyTrend, Transaction } from '../types';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
@@ -70,6 +73,16 @@ export default function Dashboard() {
   const { data: upcomingBills } = useQuery({
     queryKey: ['recurring', 'upcoming'],
     queryFn: () => recurring.upcoming(14),
+  });
+
+  const { data: netWorthHistory } = useQuery({
+    queryKey: ['analytics', 'netWorthHistory'],
+    queryFn: () => analytics.netWorthHistory({ months: 6 }),
+  });
+
+  const { data: savingsGoals } = useQuery({
+    queryKey: ['goals', 'active'],
+    queryFn: () => goals.list(false),
   });
 
   const isLoading = summaryLoading || cashFlowLoading || spendingLoading || trendsLoading;
@@ -155,43 +168,29 @@ export default function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Income vs Expenses Trend */}
+        {/* Income vs Expenses - Bar Chart */}
         <div className="card p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Income vs Expenses</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trends || []}>
+              <BarChart data={trends || []} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
                 <XAxis
                   dataKey="month"
                   tickFormatter={(value) => format(parseISO(value + '-01'), 'MMM')}
                   stroke="#9CA3AF"
+                  fontSize={12}
                 />
-                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#9CA3AF" />
+                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#9CA3AF" fontSize={12} />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                   labelFormatter={(label) => format(parseISO(label + '-01'), 'MMMM yyyy')}
                   contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="income"
-                  stackId="1"
-                  stroke="#22c55e"
-                  fill="#22c55e"
-                  fillOpacity={0.3}
-                  name="Income"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="expenses"
-                  stackId="2"
-                  stroke="#ef4444"
-                  fill="#ef4444"
-                  fillOpacity={0.3}
-                  name="Expenses"
-                />
-              </AreaChart>
+                <Legend />
+                <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -235,6 +234,62 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Net Worth Trend + Savings Goals Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Net Worth Trend */}
+        {netWorthHistory && netWorthHistory.length > 1 && (
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Net Worth Trend</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={netWorthHistory}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(value) => format(parseISO(value), 'MMM')}
+                    stroke="#9CA3AF"
+                    fontSize={12}
+                  />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#9CA3AF" fontSize={12} />
+                  <Tooltip
+                    formatter={(value: number) => formatCurrency(value)}
+                    labelFormatter={(label) => format(parseISO(label), 'MMM d, yyyy')}
+                    contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  />
+                  <Area type="monotone" dataKey="net_worth" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} name="Net Worth" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Savings Goals Progress */}
+        {savingsGoals && savingsGoals.length > 0 && (
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Savings Goals</h3>
+            <div className="space-y-4">
+              {savingsGoals.filter(g => !g.is_completed).slice(0, 4).map((goal) => (
+                <div key={goal.id}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium text-gray-900 dark:text-white">{goal.name}</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div
+                      className="h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(goal.progress_pct, 100)}%`, backgroundColor: goal.color || '#3b82f6' }}
+                    />
+                  </div>
+                  <p className="text-right text-xs text-gray-400 dark:text-gray-500 mt-0.5">{goal.progress_pct}%</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom Row: Recent Transactions, Upcoming Bills, Insights */}

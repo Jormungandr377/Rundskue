@@ -79,6 +79,7 @@ export default function Budgets() {
         <button
           onClick={handlePrevMonth}
           className="p-2 hover:bg-gray-100 rounded-lg"
+          aria-label="Previous month"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -88,6 +89,7 @@ export default function Budgets() {
         <button
           onClick={handleNextMonth}
           className="p-2 hover:bg-gray-100 rounded-lg"
+          aria-label="Next month"
         >
           <ChevronRight className="w-5 h-5" />
         </button>

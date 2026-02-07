@@ -18,6 +18,10 @@ import type {
   TSPProjectionResult,
   TSPFundHistory,
   RecurringTransaction,
+  SavingsGoal,
+  CategoryRule,
+  AppNotification,
+  UserSession,
 } from './types';
 
 const client = authenticatedApi;
@@ -197,6 +201,58 @@ export const dataExport = {
     client.get('/export/transactions/excel', { params, responseType: 'blob' }).then(r => r.data),
 };
 
+// Savings Goals
+export const goals = {
+  list: (includeCompleted = false) =>
+    client.get<SavingsGoal[]>('/goals', { params: { include_completed: includeCompleted } }).then(r => r.data),
+  get: (id: number) => client.get<SavingsGoal>(`/goals/${id}`).then(r => r.data),
+  create: (data: { name: string; target_amount: number; current_amount?: number; deadline?: string; color?: string; icon?: string }) =>
+    client.post<SavingsGoal>('/goals', data).then(r => r.data),
+  update: (id: number, data: Partial<SavingsGoal>) =>
+    client.put<SavingsGoal>(`/goals/${id}`, data).then(r => r.data),
+  contribute: (id: number, amount: number) =>
+    client.post<SavingsGoal>(`/goals/${id}/contribute`, { amount }).then(r => r.data),
+  delete: (id: number) => client.delete(`/goals/${id}`),
+};
+
+// Notifications
+export const notifications = {
+  list: (unreadOnly = false) =>
+    client.get<AppNotification[]>('/notifications', { params: { unread_only: unreadOnly } }).then(r => r.data),
+  unreadCount: () =>
+    client.get<{ count: number }>('/notifications/unread-count').then(r => r.data),
+  markRead: (id: number) =>
+    client.put(`/notifications/${id}/read`).then(r => r.data),
+  markAllRead: () =>
+    client.put('/notifications/read-all').then(r => r.data),
+  delete: (id: number) => client.delete(`/notifications/${id}`),
+  checkBudgets: () =>
+    client.post('/notifications/check-budgets').then(r => r.data),
+  checkBills: () =>
+    client.post('/notifications/check-bills').then(r => r.data),
+};
+
+// Auto-Categorization
+export const categorization = {
+  listRules: () =>
+    client.get<CategoryRule[]>('/categorization/rules').then(r => r.data),
+  createRule: (data: { category_id: number; match_field?: string; match_type?: string; match_value: string; priority?: number }) =>
+    client.post<CategoryRule>('/categorization/rules', data).then(r => r.data),
+  updateRule: (id: number, data: Partial<CategoryRule>) =>
+    client.put<CategoryRule>(`/categorization/rules/${id}`, data).then(r => r.data),
+  deleteRule: (id: number) => client.delete(`/categorization/rules/${id}`),
+  applyRules: (uncategorizedOnly = true) =>
+    client.post<{ categorized: number; skipped: number }>('/categorization/apply', null, { params: { uncategorized_only: uncategorizedOnly } }).then(r => r.data),
+};
+
+// Sessions
+export const sessions = {
+  list: () =>
+    client.get<UserSession[]>('/sessions').then(r => r.data),
+  revoke: (id: number) => client.delete(`/sessions/${id}`),
+  revokeAllOthers: () => client.delete('/sessions'),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -209,6 +265,10 @@ export const api = {
   tsp,
   recurring,
   dataExport,
+  goals,
+  notifications,
+  categorization,
+  sessions,
 };
 
 export default api;

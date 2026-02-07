@@ -57,7 +57,10 @@ class Settings(BaseSettings):
     # Sync settings
     sync_hour: int = 3  # Hour to run daily sync (3 AM)
     sync_minute: int = 0  # Minute to run daily sync (on the hour)
-    
+
+    # Error monitoring
+    sentry_dsn: str = ""  # Set in env to enable Sentry
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

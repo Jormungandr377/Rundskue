@@ -18,14 +18,24 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
 from pathlib import Path
+import sentry_sdk
 
 from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
-from .routers import tsp, auth, recurring, export
+from .routers import tsp, auth, recurring, export, goals, notifications, categorization, sessions
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
 settings = get_settings()
+
+# Sentry error monitoring (only if DSN configured)
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
+        environment="production",
+    )
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -112,6 +122,30 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(CacheControlMiddleware)
 
+
+# CSRF protection - require X-Requested-With header on state-changing API requests
+# This leverages the browser's same-origin policy: cross-origin forms can't set custom headers
+class CSRFMiddleware(BaseHTTPMiddleware):
+    SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
+    EXEMPT_PATHS = ("/api/auth/login", "/api/auth/register", "/api/auth/refresh",
+                    "/api/auth/forgot-password", "/api/auth/reset-password", "/api/health")
+
+    async def dispatch(self, request: Request, call_next):
+        if (
+            request.method not in self.SAFE_METHODS
+            and request.url.path.startswith("/api/")
+            and request.url.path not in self.EXEMPT_PATHS
+        ):
+            if not request.headers.get("X-Requested-With"):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Missing X-Requested-With header"}
+                )
+        return await call_next(request)
+
+
+app.add_middleware(CSRFMiddleware)
+
 # Include routers
 app.include_router(auth.router, prefix="/api")  # Auth routes (no additional prefix)
 app.include_router(profiles.router, prefix="/api/profiles", tags=["Profiles"])
@@ -123,6 +157,10 @@ app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"]
 app.include_router(tsp.router, prefix="/api/tsp", tags=["TSP"])
 app.include_router(recurring.router, prefix="/api/recurring", tags=["Recurring"])
 app.include_router(export.router, prefix="/api/export", tags=["Export"])
+app.include_router(goals.router, prefix="/api/goals", tags=["Savings Goals"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(categorization.router, prefix="/api/categorization", tags=["Auto-Categorization"])
+app.include_router(sessions.router, prefix="/api/sessions", tags=["Sessions"])
 
 
 @app.get("/")

@@ -265,7 +265,7 @@ export default function Transactions() {
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => handleToggleExclude(txn)}
-                          title={txn.is_excluded ? 'Include in reports' : 'Exclude from reports'}
+                          aria-label={txn.is_excluded ? 'Include in reports' : 'Exclude from reports'}
                           className={`p-1 rounded ${
                             txn.is_excluded
                               ? 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
@@ -276,7 +276,7 @@ export default function Transactions() {
                         </button>
                         <button
                           onClick={() => handleToggleTransfer(txn)}
-                          title={txn.is_transfer ? 'Mark as regular' : 'Mark as transfer'}
+                          aria-label={txn.is_transfer ? 'Mark as regular' : 'Mark as transfer'}
                           className={`p-1 rounded ${
                             txn.is_transfer
                               ? 'bg-purple-200 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400'

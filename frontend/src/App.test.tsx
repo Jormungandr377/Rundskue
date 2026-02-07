@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { server } from './test/mocks/server';
 import App from './App';
@@ -21,24 +21,39 @@ function renderApp() {
 }
 
 describe('App', () => {
-  it('renders sidebar navigation', () => {
+  it('renders sidebar navigation after auth', async () => {
     renderApp();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Accounts')).toBeInTheDocument();
-    expect(screen.getByText('Transactions')).toBeInTheDocument();
-    expect(screen.getByText('Budgets')).toBeInTheDocument();
-    expect(screen.getByText('Reports')).toBeInTheDocument();
-    expect(screen.getByText('TSP Simulator')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Accounts')).toBeInTheDocument();
+      expect(screen.getByText('Transactions')).toBeInTheDocument();
+      expect(screen.getByText('Budgets')).toBeInTheDocument();
+      expect(screen.getByText('Reports')).toBeInTheDocument();
+      expect(screen.getByText('TSP Simulator')).toBeInTheDocument();
+    });
   });
 
-  it('renders footer nav items', () => {
+  it('renders new nav items (Goals, Auto-Categorize)', async () => {
     renderApp();
-    expect(screen.getByText('Link Account')).toBeInTheDocument();
-    expect(screen.getByText('Profiles')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Savings Goals')).toBeInTheDocument();
+      expect(screen.getByText('Auto-Categorize')).toBeInTheDocument();
+      expect(screen.getByText('Bills & Subs')).toBeInTheDocument();
+    });
   });
 
-  it('renders app title', () => {
+  it('renders footer nav items', async () => {
     renderApp();
-    expect(screen.getByText(/Finance Tracker/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Link Account')).toBeInTheDocument();
+      expect(screen.getByText('Profiles')).toBeInTheDocument();
+    });
+  });
+
+  it('renders app title', async () => {
+    renderApp();
+    await waitFor(() => {
+      expect(screen.getByText(/Finance Tracker/)).toBeInTheDocument();
+    });
   });
 });

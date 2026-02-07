@@ -19,6 +19,10 @@ import {
   Moon,
   Sun,
   RefreshCw,
+  Target,
+  Wand2,
+  Bell,
+  Monitor,
 } from 'lucide-react'
 
 // Auth (loaded eagerly - needed immediately)
@@ -26,6 +30,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { ThemeProvider, useTheme } from './contexts/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import { useQuery } from '@tanstack/react-query'
+import { notifications } from './api'
 
 // Lazy-loaded pages - each becomes its own chunk, loaded on demand
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -43,6 +49,11 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const TwoFactorSetup = lazy(() => import('./pages/TwoFactorSetup'))
 const ChangePassword = lazy(() => import('./pages/ChangePassword'))
+const Goals = lazy(() => import('./pages/Goals'))
+const Sessions = lazy(() => import('./pages/Sessions'))
+const CategoryRules = lazy(() => import('./pages/CategoryRules'))
+const NotificationsPage = lazy(() => import('./pages/Notifications'))
+const Onboarding = lazy(() => import('./pages/Onboarding'))
 
 // Page loading spinner for lazy-loaded routes
 function PageLoader() {
@@ -100,8 +111,10 @@ const navItems = [
   { path: '/transactions', icon: Receipt, label: 'Transactions' },
   { path: '/budgets', icon: PiggyBank, label: 'Budgets' },
   { path: '/recurring', icon: RefreshCw, label: 'Bills & Subs' },
+  { path: '/goals', icon: Target, label: 'Savings Goals' },
   { path: '/reports', icon: TrendingUp, label: 'Reports' },
   { path: '/tsp', icon: TrendingUp, label: 'TSP Simulator' },
+  { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
 ]
 
 // Theme toggle button
@@ -115,6 +128,32 @@ function ThemeToggle() {
       title={`Switch to ${effectiveTheme === 'light' ? 'dark' : 'light'} mode`}
     >
       {effectiveTheme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+    </button>
+  )
+}
+
+// Notification bell with unread count badge
+function NotificationBell() {
+  const navigate = useNavigate()
+  const { data } = useQuery({
+    queryKey: ['notifications', 'unread-count'],
+    queryFn: notifications.unreadCount,
+    refetchInterval: 60000, // Poll every minute
+  })
+  const count = data?.count || 0
+
+  return (
+    <button
+      onClick={() => navigate('/notifications')}
+      className="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      aria-label="Notifications"
+    >
+      <Bell className="w-5 h-5" />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          {count > 9 ? '9+' : count}
+        </span>
+      )}
     </button>
   )
 }
@@ -185,6 +224,17 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             <Shield className="w-4 h-4" />
             {user.totp_enabled ? 'Manage 2FA' : 'Enable 2FA'}
           </button>
+          <button
+            onClick={() => {
+              setOpen(false)
+              onNavigate?.()
+              navigate('/sessions')
+            }}
+            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Monitor className="w-4 h-4" />
+            Active Sessions
+          </button>
           <div className="border-t border-gray-100 dark:border-gray-700" />
           <button
             onClick={handleLogout}
@@ -205,7 +255,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <>
       <div className="p-6 flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Finance Tracker</h1>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <ThemeToggle />
+        </div>
       </div>
 
       <nav className="mt-2 flex-1">
@@ -279,8 +332,16 @@ function AuthenticatedLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors">
+      {/* Skip to main content link - visible only on keyboard focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       {/* Desktop Sidebar - hidden on mobile */}
-      <aside className="hidden lg:flex w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed h-full flex-col transition-colors">
+      <aside className="hidden lg:flex w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed h-full flex-col transition-colors" role="navigation" aria-label="Main navigation">
         <SidebarContent />
       </aside>
 
@@ -322,7 +383,7 @@ function AuthenticatedLayout() {
       )}
 
       {/* Main Content */}
-      <main className="lg:ml-64 flex-1 p-4 pt-16 lg:p-8 lg:pt-8">
+      <main id="main-content" className="lg:ml-64 flex-1 p-4 pt-16 lg:p-8 lg:pt-8">
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
@@ -337,6 +398,10 @@ function AuthenticatedLayout() {
               <Route path="/profiles" element={<Profiles />} />
               <Route path="/2fa-setup" element={<TwoFactorSetup />} />
               <Route path="/change-password" element={<ChangePassword />} />
+              <Route path="/goals" element={<Goals />} />
+              <Route path="/sessions" element={<Sessions />} />
+              <Route path="/rules" element={<CategoryRules />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
             </Routes>
           </Suspense>
         </ErrorBoundary>
@@ -358,6 +423,7 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
                 {/* Protected routes */}
                 <Route

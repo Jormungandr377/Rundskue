@@ -68,8 +68,10 @@ sys.modules["app.database"] = fake_db_module
 from app.models import (
     Profile, PlaidItem, Account, AccountType, Category,
     Transaction, Budget, BudgetItem, NetWorthSnapshot,
-    TSPScenario, TSPFundHistory,
+    TSPScenario, TSPFundHistory, User, Notification,
+    SavingsGoal, CategoryRule,
 )
+from app.core.security import hash_password, create_access_token
 
 from fastapi.testclient import TestClient
 
@@ -291,3 +293,46 @@ def sample_fund_history(db):
             entries.append(entry)
     db.commit()
     return entries
+
+
+@pytest.fixture
+def test_user(db) -> User:
+    """Create a test user with a linked primary profile."""
+    user = User(
+        email="testauth@example.com",
+        hashed_password=hash_password("TestPass123!"),
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    profile = Profile(
+        user_id=user.id,
+        name="Auth Test Profile",
+        is_primary=True,
+        base_pay=Decimal("60000"),
+        tsp_contribution_pct=Decimal("5.0"),
+    )
+    db.add(profile)
+    db.commit()
+    return user
+
+
+@pytest.fixture
+def auth_headers(test_user) -> dict:
+    """Provide authenticated headers with JWT and CSRF for API requests."""
+    token = create_access_token({"sub": str(test_user.id)})
+    return {
+        "Authorization": f"Bearer {token}",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+
+
+@pytest.fixture
+def api_headers() -> dict:
+    """Provide headers for public endpoints (no auth, with CSRF)."""
+    return {
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/json",
+    }

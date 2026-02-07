@@ -399,3 +399,80 @@ class RecurringTransaction(Base):
         Index("ix_recurring_profile_active", "profile_id", "is_active"),
         Index("ix_recurring_next_due", "next_due_date"),
     )
+
+
+class SavingsGoal(Base):
+    """Savings goal tracking."""
+    __tablename__ = "savings_goals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+
+    name = Column(String(255), nullable=False)
+    target_amount = Column(Numeric(14, 2), nullable=False)
+    current_amount = Column(Numeric(14, 2), default=0)
+    deadline = Column(Date, nullable=True)
+    color = Column(String(7), default="#3b82f6")  # Hex color for UI
+    icon = Column(String(50), default="piggy-bank")
+
+    is_completed = Column(Boolean, default=False)
+    completed_at = Column(DateTime, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    profile = relationship("Profile")
+
+    __table_args__ = (
+        Index("ix_savings_goals_profile", "profile_id", "is_completed"),
+    )
+
+
+class CategoryRule(Base):
+    """Auto-categorization rules for transactions."""
+    __tablename__ = "category_rules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+
+    match_field = Column(String(20), nullable=False, default="name")  # name, merchant_name
+    match_type = Column(String(20), nullable=False, default="contains")  # contains, exact, starts_with
+    match_value = Column(String(255), nullable=False)
+
+    is_active = Column(Boolean, default=True)
+    priority = Column(Integer, default=0)  # Higher = checked first
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    profile = relationship("Profile")
+    category = relationship("Category")
+
+    __table_args__ = (
+        Index("ix_category_rules_profile_active", "profile_id", "is_active"),
+    )
+
+
+class Notification(Base):
+    """User notifications for budget alerts, bill reminders, etc."""
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+
+    type = Column(String(50), nullable=False)  # budget_alert, bill_reminder, goal_reached
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    data = Column(JSON, nullable=True)  # Extra context (budget_id, goal_id, etc.)
+
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("ix_notifications_user_read", "user_id", "is_read"),
+    )
