@@ -1,12 +1,14 @@
 """
 Finance Tracker API
 Main FastAPI application entry point
-Updated: Added rate limiting and change-password endpoint - 2026-02-07
+Updated: Performance optimization - GZip compression + cache headers - 2026-02-07
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from contextlib import asynccontextmanager
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -70,6 +72,9 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# GZip compression - compress responses > 500 bytes (huge win for JS/CSS bundles)
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -78,6 +83,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Cache headers middleware - long cache for hashed assets, no-cache for HTML/API
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+
+        # Hashed static assets (e.g. /assets/index-CWa-Wc9X.js) - cache 1 year
+        if path.startswith("/assets/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        # Favicon - cache 1 day
+        elif path == "/favicon.ico":
+            response.headers["Cache-Control"] = "public, max-age=86400"
+        # API responses - no cache
+        elif path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store"
+        # HTML (SPA routes) - revalidate every time so deploys take effect
+        else:
+            response.headers["Cache-Control"] = "no-cache"
+
+        return response
+
+
+app.add_middleware(CacheControlMiddleware)
 
 # Include routers
 app.include_router(auth.router, prefix="/api")  # Auth routes (no additional prefix)

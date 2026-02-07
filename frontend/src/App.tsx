@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode, useState, useRef, useEffect } from 'react'
+import { Component, type ErrorInfo, type ReactNode, useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -14,29 +14,39 @@ import {
   ChevronDown,
   User,
   Menu,
-  X
+  X,
+  Loader2
 } from 'lucide-react'
 
-// Auth
+// Auth (loaded eagerly - needed immediately)
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
-// Pages
-import Dashboard from './pages/Dashboard'
-import Accounts from './pages/Accounts'
-import Transactions from './pages/Transactions'
-import Budgets from './pages/Budgets'
-import Reports from './pages/Reports'
-import TSPSimulator from './pages/TSPSimulator'
-import LinkAccount from './pages/LinkAccount'
-import Profiles from './pages/Profiles'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import TwoFactorSetup from './pages/TwoFactorSetup'
-import ChangePassword from './pages/ChangePassword'
+// Lazy-loaded pages - each becomes its own chunk, loaded on demand
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Accounts = lazy(() => import('./pages/Accounts'))
+const Transactions = lazy(() => import('./pages/Transactions'))
+const Budgets = lazy(() => import('./pages/Budgets'))
+const Reports = lazy(() => import('./pages/Reports'))
+const TSPSimulator = lazy(() => import('./pages/TSPSimulator'))
+const LinkAccount = lazy(() => import('./pages/LinkAccount'))
+const Profiles = lazy(() => import('./pages/Profiles'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const TwoFactorSetup = lazy(() => import('./pages/TwoFactorSetup'))
+const ChangePassword = lazy(() => import('./pages/ChangePassword'))
+
+// Page loading spinner for lazy-loaded routes
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+    </div>
+  )
+}
 
 // Error Boundary
 interface ErrorBoundaryState {
@@ -291,18 +301,20 @@ function AuthenticatedLayout() {
       {/* Main Content */}
       <main className="lg:ml-64 flex-1 p-4 pt-16 lg:p-8 lg:pt-8">
         <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/accounts" element={<Accounts />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/budgets" element={<Budgets />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/tsp" element={<TSPSimulator />} />
-            <Route path="/link-account" element={<LinkAccount />} />
-            <Route path="/profiles" element={<Profiles />} />
-            <Route path="/2fa-setup" element={<TwoFactorSetup />} />
-            <Route path="/change-password" element={<ChangePassword />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/accounts" element={<Accounts />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/budgets" element={<Budgets />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/tsp" element={<TSPSimulator />} />
+              <Route path="/link-account" element={<LinkAccount />} />
+              <Route path="/profiles" element={<Profiles />} />
+              <Route path="/2fa-setup" element={<TwoFactorSetup />} />
+              <Route path="/change-password" element={<ChangePassword />} />
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
       </main>
     </div>
@@ -314,23 +326,25 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
-            {/* Protected routes */}
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <AuthenticatedLayout />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+              {/* Protected routes */}
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <AuthenticatedLayout />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Suspense>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
