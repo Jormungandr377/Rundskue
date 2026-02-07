@@ -173,7 +173,7 @@ export default function TwoFactorSetup() {
             {/* QR Code */}
             <div className="flex justify-center">
               <div className="bg-white p-4 border-2 border-gray-200 rounded-lg">
-                <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                <img src={`data:image/png;base64,${qrCode}`} alt="2FA QR Code" className="w-48 h-48" />
               </div>
             </div>
 

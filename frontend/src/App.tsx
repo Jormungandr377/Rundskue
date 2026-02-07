@@ -23,6 +23,7 @@ import {
   Wand2,
   Bell,
   Monitor,
+  Calculator,
 } from 'lucide-react'
 
 // Auth (loaded eagerly - needed immediately)
@@ -39,7 +40,7 @@ const Accounts = lazy(() => import('./pages/Accounts'))
 const Transactions = lazy(() => import('./pages/Transactions'))
 const Budgets = lazy(() => import('./pages/Budgets'))
 const Reports = lazy(() => import('./pages/Reports'))
-const TSPSimulator = lazy(() => import('./pages/TSPSimulator'))
+const FinancialPlanning = lazy(() => import('./pages/FinancialPlanning'))
 const LinkAccount = lazy(() => import('./pages/LinkAccount'))
 const Profiles = lazy(() => import('./pages/Profiles'))
 const RecurringBills = lazy(() => import('./pages/RecurringBills'))
@@ -113,7 +114,7 @@ const navItems = [
   { path: '/recurring', icon: RefreshCw, label: 'Bills & Subs' },
   { path: '/goals', icon: Target, label: 'Savings Goals' },
   { path: '/reports', icon: TrendingUp, label: 'Reports' },
-  { path: '/tsp', icon: TrendingUp, label: 'TSP Simulator' },
+  { path: '/planning', icon: Calculator, label: 'Financial Planning' },
   { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
 ]
 
@@ -393,7 +394,7 @@ function AuthenticatedLayout() {
               <Route path="/budgets" element={<Budgets />} />
               <Route path="/recurring" element={<RecurringBills />} />
               <Route path="/reports" element={<Reports />} />
-              <Route path="/tsp" element={<TSPSimulator />} />
+              <Route path="/planning" element={<FinancialPlanning />} />
               <Route path="/link-account" element={<LinkAccount />} />
               <Route path="/profiles" element={<Profiles />} />
               <Route path="/2fa-setup" element={<TwoFactorSetup />} />
