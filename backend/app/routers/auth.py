@@ -37,6 +37,7 @@ limiter = Limiter(key_func=get_remote_address)
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
 async def register(
+    request: Request,
     user_data: UserRegister,
     response: Response,
     db: Session = Depends(get_db)
@@ -432,6 +433,7 @@ async def disable_2fa(
 @router.post("/forgot-password", response_model=PasswordResetResponse)
 @limiter.limit("3/minute")
 async def forgot_password(
+    request: Request,
     forgot_data: ForgotPassword,
     db: Session = Depends(get_db)
 ):
