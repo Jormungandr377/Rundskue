@@ -272,7 +272,7 @@ For security concerns, vulnerability reports, or questions about this policy:
 |---|---|
 | **Security Email** | [security@rundskue.com](mailto:security@rundskue.com) *(planned -- not yet active)* |
 | **Current Contact** | [admin@rundskue.com](mailto:admin@rundskue.com) |
-| **Maintainer** | Luke Robinson -- [lukerobinson1234377@outlook.com](mailto:lukerobinson1234377@outlook.com) |
+| **Maintainer** | Luke Robinson -- [rundskue@outlook.com](mailto:rundskue@outlook.com) |
 
 Until the `security@rundskue.com` group mailbox is set up, please direct all security-related communications to `admin@rundskue.com` or contact the maintainer directly.
 

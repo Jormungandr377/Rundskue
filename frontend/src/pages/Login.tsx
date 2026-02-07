@@ -186,6 +186,14 @@ export default function Login() {
             Create one
           </Link>
         </p>
+
+        <div className="flex justify-center gap-3 mt-8 text-xs text-stone-400">
+          <Link to="/privacy" className="hover:text-stone-600 transition-colors">Privacy</Link>
+          <span>&middot;</span>
+          <Link to="/security" className="hover:text-stone-600 transition-colors">Security</Link>
+          <span>&middot;</span>
+          <Link to="/data-retention" className="hover:text-stone-600 transition-colors">Data Retention</Link>
+        </div>
       </div>
     </div>
   )

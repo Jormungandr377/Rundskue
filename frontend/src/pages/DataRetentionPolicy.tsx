@@ -262,10 +262,10 @@ export default function DataRetentionPolicy() {
             <div className="p-4 bg-stone-50 dark:bg-stone-700/50 rounded-lg">
               <p className="text-stone-800 dark:text-stone-200 font-medium">Luke Robinson</p>
               <a
-                href="mailto:lukerobinson1234377@outlook.com"
+                href="mailto:rundskue@outlook.com"
                 className="text-teal-600 dark:text-teal-400 hover:underline text-sm"
               >
-                lukerobinson1234377@outlook.com
+                rundskue@outlook.com
               </a>
             </div>
             <p className="text-stone-500 dark:text-stone-400 text-sm mt-3">

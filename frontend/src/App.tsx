@@ -325,6 +325,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
       <div className="border-t border-stone-200 dark:border-stone-700/60 mx-3" />
       <UserMenu onNavigate={onNavigate} />
+
+      {/* Policy links footer */}
+      <div className="mt-auto px-5 py-3 border-t border-stone-200 dark:border-stone-700/60">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone-400 dark:text-stone-500">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">Privacy</a>
+          <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">Security</a>
+          <a href="/data-retention" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">Data Retention</a>
+        </div>
+        <p className="text-[10px] text-stone-300 dark:text-stone-600 mt-1">&copy; {new Date().getFullYear()} Rundskue</p>
+      </div>
     </>
   )
 }
