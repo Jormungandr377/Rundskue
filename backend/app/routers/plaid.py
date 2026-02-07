@@ -8,6 +8,7 @@ from datetime import datetime
 from ..database import get_db
 from ..models import PlaidItem, Account, Profile, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 from ..services.plaid_service import (
     create_link_token,
     exchange_public_token,
@@ -107,6 +108,13 @@ def exchange_token(
             public_token=request.public_token,
             institution_id=request.institution_id,
             institution_name=request.institution_name
+        )
+
+        # Audit log
+        audit.log_audit_event(
+            db, audit.PLAID_LINK, user_id=current_user.id,
+            resource_type="plaid_item", resource_id=str(plaid_item.id),
+            details={"institution": request.institution_name, "accounts": len(plaid_item.accounts)},
         )
 
         return {
@@ -219,10 +227,19 @@ def delete_item(
     if not item:
         raise HTTPException(status_code=404, detail="Plaid item not found")
     
+    institution_name = item.institution_name
+
     # This will cascade delete accounts and transactions
     db.delete(item)
     db.commit()
-    
+
+    # Audit log
+    audit.log_audit_event(
+        db, audit.PLAID_UNLINK, user_id=current_user.id,
+        resource_type="plaid_item", resource_id=str(item_id),
+        details={"institution": institution_name},
+    )
+
     return {"status": "deleted", "item_id": item_id}
 
 

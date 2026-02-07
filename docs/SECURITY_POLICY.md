@@ -190,9 +190,49 @@ To be transparent: financial transaction data, account metadata, and user profil
 - Runtime errors and exceptions are reported to Sentry for monitoring and debugging.
 - Sentry is configured to avoid capturing sensitive request bodies or credentials. However, incidental metadata (such as request URLs or user IDs) may appear in error reports.
 
-### 7.5 Known Limitations
+### 7.5 Security Headers
 
-- The server is self-hosted and managed by a single maintainer. There is no dedicated security operations team, no intrusion detection system, and no automated vulnerability scanning pipeline at this time.
+All HTTP responses include defense-in-depth headers:
+
+- `X-Content-Type-Options: nosniff` -- prevents MIME type sniffing
+- `X-Frame-Options: DENY` -- prevents clickjacking via iframes
+- `Referrer-Policy: strict-origin-when-cross-origin` -- controls referrer leakage
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()` -- disables unused browser APIs
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains` -- enforces HTTPS
+- `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` -- applied to API endpoints
+
+### 7.6 Vulnerability Scanning
+
+Automated vulnerability scanning runs via GitHub Actions on every push/PR to main and weekly:
+
+- **pip-audit** -- Python dependency CVE scanning
+- **npm audit** -- Node.js dependency CVE scanning
+- **Bandit** -- Python static analysis (SQL injection, hardcoded secrets, etc.)
+- **Trivy** -- Docker image scanning for OS and library vulnerabilities
+
+Patch SLAs: Critical vulnerabilities within 72 hours, High within 7 days, Medium within 30 days, Low at next release. See `VULNERABILITY_MANAGEMENT.md` for full details.
+
+### 7.7 Audit Logging
+
+All security-relevant actions are recorded in an immutable audit log, including: login attempts (success/failure), user registration, password changes, 2FA changes, session management, role changes, user deactivation, bank account linking, and data exports. Audit logs are queryable by admin users and are retained indefinitely.
+
+### 7.8 Access Reviews
+
+Quarterly access reviews are conducted to verify that user privileges remain appropriate. The system automatically reminds admin users on the 1st of January, April, July, and October. See `ACCESS_REVIEW_PROCEDURE.md` for the full procedure.
+
+### 7.9 De-provisioning
+
+When a user account is deactivated by an admin:
+
+1. The account is immediately set to inactive (login disabled).
+2. All active refresh tokens are revoked immediately.
+3. The action is recorded in the audit log.
+
+There is no delay between deactivation and access revocation. See `ACCESS_CONTROL_POLICY.md` for full details.
+
+### 7.10 Known Limitations
+
+- The server is self-hosted and managed by a single maintainer. There is no dedicated security operations team or intrusion detection system.
 - Server operating system updates and Docker image updates are applied manually on a best-effort basis.
 - There is no Web Application Firewall (WAF) in front of the application beyond what Coolify and the reverse proxy provide.
 

@@ -110,6 +110,7 @@ class UserResponse(BaseModel):
     id: int = Field(..., description="User ID")
     email: str = Field(..., description="User email address")
     is_active: bool = Field(..., description="Whether user account is active")
+    role: str = Field(default="user", description="User role (admin or user)")
     totp_enabled: bool = Field(..., description="Whether 2FA is enabled")
     theme: str = Field(default="light", description="UI theme preference (light, dark, system)")
     created_at: datetime = Field(..., description="Account creation timestamp")

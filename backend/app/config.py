@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     password_require_number: bool = True
     password_require_special: bool = True
 
+    # Registration
+    registration_enabled: bool = True  # Set to False to prevent new signups
+
     # 2FA
     totp_issuer: str = "Finance Tracker"
 

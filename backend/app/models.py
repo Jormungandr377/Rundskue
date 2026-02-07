@@ -35,6 +35,9 @@ class User(Base):
     # Preferences
     theme = Column(String(10), default="light")  # light, dark, system
 
+    # Role
+    role = Column(String(20), default="user", nullable=False)  # "admin" or "user"
+
     # 2FA fields
     totp_secret = Column(String(255), nullable=True)
     totp_enabled = Column(Boolean, default=False)
@@ -475,4 +478,26 @@ class Notification(Base):
 
     __table_args__ = (
         Index("ix_notifications_user_read", "user_id", "is_read"),
+    )
+
+
+class AuditLog(Base):
+    """Immutable audit trail for security-relevant actions."""
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    action = Column(String(100), nullable=False)
+    resource_type = Column(String(50), nullable=True)
+    resource_id = Column(String(50), nullable=True)
+    details = Column(JSON, nullable=True)
+    ip_address = Column(String(50), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+    status = Column(String(20), default="success", nullable=False)
+
+    __table_args__ = (
+        Index("ix_audit_logs_timestamp", "timestamp"),
+        Index("ix_audit_logs_user_action", "user_id", "action"),
+        Index("ix_audit_logs_action", "action"),
     )

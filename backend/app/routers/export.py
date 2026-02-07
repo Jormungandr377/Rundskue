@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 from ..database import get_db
 from ..models import Transaction, Account, Category, Profile
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Export"])
 
@@ -79,6 +80,12 @@ async def export_transactions_csv(
     text_output.flush()
     text_output.detach()
     output.seek(0)
+
+    # Audit log
+    audit.log_audit_event(
+        db, audit.DATA_EXPORT, user_id=current_user.id,
+        details={"format": "csv", "rows": len(transactions)},
+    )
 
     filename = f"transactions_{date.today().isoformat()}.csv"
     return StreamingResponse(
@@ -160,6 +167,12 @@ async def export_transactions_excel(
             for r in range(1, min(len(transactions) + 2, 100))
         ) if transactions else 10
         ws.column_dimensions[chr(64 + col)].width = min(max_length + 4, 40)
+
+    # Audit log
+    audit.log_audit_event(
+        db, audit.DATA_EXPORT, user_id=current_user.id,
+        details={"format": "excel", "rows": len(transactions)},
+    )
 
     output = BytesIO()
     wb.save(output)

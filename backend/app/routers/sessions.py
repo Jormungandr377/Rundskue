@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from ..database import get_db
 from ..models import RefreshToken, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Sessions"])
 
@@ -64,6 +65,7 @@ async def list_sessions(
 @router.delete("/{session_id}")
 async def revoke_session(
     session_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -79,6 +81,12 @@ async def revoke_session(
 
     session.is_revoked = True
     db.commit()
+
+    audit.log_from_request(
+        db, request, audit.SESSION_REVOKED,
+        user_id=current_user.id,
+        resource_type="session", resource_id=str(session_id),
+    )
     return {"message": "Session revoked"}
 
 
@@ -102,4 +110,10 @@ async def revoke_all_other_sessions(
 
     count = query.update({"is_revoked": True})
     db.commit()
+
+    audit.log_from_request(
+        db, request, audit.SESSION_REVOKED_ALL,
+        user_id=current_user.id,
+        details={"sessions_revoked": count},
+    )
     return {"message": f"Revoked {count} sessions"}

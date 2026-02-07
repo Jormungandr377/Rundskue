@@ -23,6 +23,7 @@ from ..core.security import (
 )
 from ..dependencies import get_current_active_user
 from ..services.email import send_password_reset_email, send_welcome_email
+from ..services import audit
 from ..config import get_settings
 
 settings = get_settings()
@@ -48,6 +49,10 @@ async def register(
     Creates a new user with email/password and a default profile.
     Returns JWT access token and sets refresh token cookie.
     """
+    # Check if registration is enabled
+    if not settings.registration_enabled:
+        raise HTTPException(status_code=403, detail="Registration is currently disabled")
+
     # Validate password
     is_valid, error_msg = validate_password(user_data.password)
     if not is_valid:
@@ -107,6 +112,9 @@ async def register(
         max_age=expires_days * 24 * 60 * 60
     )
 
+    # Audit log
+    audit.log_from_request(db, request, audit.REGISTER, user_id=user.id)
+
     # Send welcome email (don't wait for it)
     try:
         await send_welcome_email(user.email)
@@ -132,15 +140,31 @@ async def login(
     # Verify user credentials
     user = db.query(User).filter(User.email == user_data.email).first()
     if not user or not verify_password(user_data.password, user.hashed_password):
+        audit.log_from_request(
+            db, request, audit.LOGIN_FAILED,
+            details={"email": user_data.email}, status="failure",
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
         )
 
     if not user.is_active:
+        audit.log_from_request(
+            db, request, audit.LOGIN_FAILED,
+            user_id=user.id, details={"reason": "inactive"}, status="failure",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is inactive"
+        )
+
+    # Enforce 2FA for admin users
+    if user.role == "admin" and not user.totp_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin accounts must enable 2FA. Use /auth/2fa/setup first.",
+            headers={"X-Require-2FA-Setup": "true"},
         )
 
     # Check 2FA if enabled
@@ -208,6 +232,9 @@ async def login(
         max_age=expires_days * 24 * 60 * 60
     )
 
+    # Audit log
+    audit.log_from_request(db, request, audit.LOGIN, user_id=user.id)
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -267,14 +294,20 @@ async def logout(
     Clears refresh token cookie.
     """
     refresh_token = request.cookies.get("refresh_token")
+    user_id = None
     if refresh_token:
         # Revoke refresh token
         token_obj = db.query(RefreshToken).filter(
             RefreshToken.token == refresh_token
         ).first()
         if token_obj:
+            user_id = token_obj.user_id
             token_obj.is_revoked = True
             db.commit()
+
+    # Audit log
+    if user_id:
+        audit.log_from_request(db, request, audit.LOGOUT, user_id=user_id)
 
     # Clear cookie
     response.delete_cookie(key="refresh_token")
@@ -325,6 +358,9 @@ async def change_password(
         RefreshToken.is_revoked == False
     ).update({"is_revoked": True})
     db.commit()
+
+    # Audit log
+    audit.log_audit_event(db, audit.PASSWORD_CHANGE, user_id=current_user.id)
 
     return {"message": "Password changed successfully"}
 
@@ -392,6 +428,9 @@ async def verify_2fa(
     current_user.totp_enabled = True
     db.commit()
 
+    # Audit log
+    audit.log_audit_event(db, audit.TWO_FA_ENABLED, user_id=current_user.id)
+
     return {"message": "2FA enabled successfully"}
 
 
@@ -422,6 +461,9 @@ async def disable_2fa(
     current_user.totp_secret = None
     current_user.backup_codes = None
     db.commit()
+
+    # Audit log
+    audit.log_audit_event(db, audit.TWO_FA_DISABLED, user_id=current_user.id)
 
     return {"message": "2FA disabled successfully"}
 
@@ -511,6 +553,9 @@ async def reset_password(
         RefreshToken.is_revoked == False
     ).update({"is_revoked": True})
     db.commit()
+
+    # Audit log
+    audit.log_audit_event(db, audit.PASSWORD_RESET, user_id=user.id)
 
     return {"message": "Password reset successfully"}
 

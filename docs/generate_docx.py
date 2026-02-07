@@ -173,10 +173,15 @@ def create_security_policy():
     add_bullet(doc, "Only ports 80/443 exposed to the public internet.")
     add_bullet(doc, "All secrets stored as environment variables, never in source code.")
     add_bullet(doc, "Runtime errors monitored via Sentry (configured to minimize sensitive data exposure).")
+    add_bullet(doc, "Defense-in-depth HTTP headers: X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, CSP.", "Security headers:")
+    add_bullet(doc, "Automated scanning via GitHub Actions: pip-audit, npm audit, Bandit (SAST), Trivy (Docker).", "Vulnerability scanning:")
+    add_bullet(doc, "All security events recorded in immutable audit log (logins, role changes, deactivations, etc.).", "Audit logging:")
+    add_bullet(doc, "Quarterly reviews with automated reminders. Admin generates report and records completion.", "Access reviews:")
+    add_bullet(doc, "Admin deactivation immediately sets is_active=False and revokes all tokens.", "De-provisioning:")
     p = doc.add_paragraph()
     run = p.add_run(
         "Known limitations: Single maintainer, no dedicated security operations team, no IDS, "
-        "no automated vulnerability scanning, and no WAF beyond the reverse proxy. "
+        "and no WAF beyond the reverse proxy. "
         "OS and Docker updates applied on a best-effort basis."
     )
     run.italic = True
@@ -431,8 +436,109 @@ def create_data_retention_policy():
     print(f"Created: {path}")
 
 
+# ============================================================
+# ACCESS CONTROL POLICY
+# ============================================================
+def create_access_control_policy():
+    doc = Document()
+    set_style(doc)
+    add_meta(doc, "Access Control Policy")
+
+    # 1
+    doc.add_heading("1. Purpose", level=2)
+    doc.add_paragraph(
+        "This document defines the access control framework for Finance Tracker. It describes "
+        "how users are identified, authenticated, authorized, and de-provisioned, and establishes "
+        "the roles, permissions, and review processes that govern access to the application."
+    )
+
+    # 2
+    doc.add_heading("2. Roles & Permissions", level=2)
+    add_table(doc, ["Role", "Description", "Capabilities"], [
+        ["User", "Standard end-user", "View/manage own data, link banks, configure budgets, export, enable 2FA"],
+        ["Admin", "Application administrator", "All User capabilities + user management, role changes, audit logs, access reviews"],
+    ])
+    add_bullet(doc, "All accounts default to User role at registration.", "Least privilege:")
+    add_bullet(doc, "Admin privileges granted only by an existing admin. No self-service escalation.")
+    add_bullet(doc, "All role changes are recorded in the audit log.")
+    add_bullet(doc, "Users can only access their own financial data via ownership checks.", "Data isolation:")
+
+    # 3
+    doc.add_heading("3. Authentication Requirements", level=2)
+    doc.add_heading("Password Policy", level=3)
+    add_table(doc, ["Requirement", "Setting"], [
+        ["Minimum length", "8 characters"],
+        ["Uppercase letter", "Required"],
+        ["Number", "Required"],
+        ["Special character", "Required"],
+    ])
+    doc.add_heading("Two-Factor Authentication", level=3)
+    add_bullet(doc, "TOTP-based 2FA available to all users (Google Authenticator, Authy, etc.).")
+    add_bullet(doc, "Admin accounts are required to have 2FA enabled. Blocked from login without it.", "Admin 2FA enforcement:")
+    doc.add_heading("Session Management", level=3)
+    add_bullet(doc, "15-minute access tokens, 7-day refresh tokens (30 days with remember me).")
+    add_bullet(doc, "Users can view and revoke all active sessions.")
+    add_bullet(doc, "On deactivation, all refresh tokens are immediately revoked.")
+
+    # 4
+    doc.add_heading("4. Zero Trust Architecture", level=2)
+    add_bullet(doc, "Every API request authenticated via JWT. No implicit trust.", "Per-request auth:")
+    add_bullet(doc, "Every data query includes ownership filters.", "Per-resource authorization:")
+    add_bullet(doc, "Unauthenticated requests return 401. Non-admin requests to admin endpoints return 403.", "Deny by default:")
+    add_bullet(doc, "X-Requested-With header required on mutating requests.", "CSRF protection:")
+    add_bullet(doc, "Per-client IP rate limiting.", "Rate limiting:")
+
+    # 5
+    doc.add_heading("5. Security Headers", level=2)
+    add_bullet(doc, "X-Content-Type-Options: nosniff")
+    add_bullet(doc, "X-Frame-Options: DENY")
+    add_bullet(doc, "Referrer-Policy: strict-origin-when-cross-origin")
+    add_bullet(doc, "Permissions-Policy: camera=(), microphone=(), geolocation=()")
+    add_bullet(doc, "Strict-Transport-Security: max-age=31536000; includeSubDomains")
+    add_bullet(doc, "Content-Security-Policy: default-src 'none' (API endpoints)")
+
+    # 6
+    doc.add_heading("6. Provisioning & De-provisioning", level=2)
+    doc.add_heading("Provisioning", level=3)
+    add_bullet(doc, "Users register via /api/auth/register (can be disabled via environment variable).")
+    add_bullet(doc, "New accounts default to User role. All registrations are audit-logged.")
+    doc.add_heading("De-provisioning", level=3)
+    doc.add_paragraph("When an admin deactivates a user:")
+    add_bullet(doc, "is_active flag set to false immediately.")
+    add_bullet(doc, "All active refresh tokens revoked immediately.")
+    add_bullet(doc, "User can no longer log in or access any data.")
+    add_bullet(doc, "Action recorded in audit log with acting admin and target user.")
+
+    # 7
+    doc.add_heading("7. Access Review", level=2)
+    add_bullet(doc, "Quarterly reviews (Jan, Apr, Jul, Oct) with automated admin reminders.", "Schedule:")
+    add_bullet(doc, "Admin generates access review report showing all users with metadata.", "Procedure:")
+    add_bullet(doc, "Review each user's role, active status, 2FA, last login, and linked items.")
+    add_bullet(doc, "Record completion via API with notes. Audit-logged for compliance.", "Recording:")
+
+    # 8
+    doc.add_heading("8. Audit Logging", level=2)
+    doc.add_paragraph("All security-relevant actions are recorded in an immutable audit log:")
+    add_bullet(doc, "Login (success/failure), registration, logout")
+    add_bullet(doc, "Password change/reset, 2FA enable/disable")
+    add_bullet(doc, "Session revocation, role changes, user deactivation/reactivation")
+    add_bullet(doc, "Bank account link/unlink, data exports, access review completions")
+
+    # 9
+    doc.add_heading("9. Contact", level=2)
+    add_table(doc, ["", ""], [
+        ["Name", "Luke Robinson"],
+        ["Email", "rundskue@outlook.com"],
+    ])
+
+    path = os.path.join(OUTPUT_DIR, "Access_Control_Policy_Rundskue.docx")
+    doc.save(path)
+    print(f"Created: {path}")
+
+
 if __name__ == "__main__":
     create_security_policy()
     create_privacy_policy()
     create_data_retention_policy()
+    create_access_control_policy()
     print("\nAll documents generated successfully!")

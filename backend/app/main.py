@@ -23,10 +23,36 @@ import sentry_sdk
 from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
 from .routers import tsp, auth, recurring, export, goals, notifications, categorization, sessions
+from .routers import admin
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
 settings = get_settings()
+
+
+async def create_access_review_reminder():
+    """Quarterly job: create a notification for each admin user to perform an access review."""
+    from .database import SessionLocal
+    from .models import User as UserModel, Notification
+
+    db = SessionLocal()
+    try:
+        admins = db.query(UserModel).filter(
+            UserModel.role == "admin", UserModel.is_active == True
+        ).all()
+        for admin in admins:
+            notif = Notification(
+                user_id=admin.id,
+                type="access_review_due",
+                title="Quarterly Access Review Due",
+                message="A quarterly access review is due. Please review all user accounts, "
+                        "roles, and permissions via the Admin panel and record completion.",
+            )
+            db.add(notif)
+        db.commit()
+    finally:
+        db.close()
+
 
 # Sentry error monitoring (only if DSN configured)
 if settings.sentry_dsn:
@@ -61,8 +87,32 @@ async def lifespan(app: FastAPI):
         name="Daily Plaid Transaction Sync",
         replace_existing=True
     )
+
+    # Schedule quarterly access review reminder (1st of Jan/Apr/Jul/Oct at 9 AM)
+    scheduler.add_job(
+        create_access_review_reminder,
+        CronTrigger(month="1,4,7,10", day=1, hour=9),
+        id="quarterly_access_review",
+        name="Quarterly Access Review Reminder",
+        replace_existing=True,
+    )
+
     scheduler.start()
     print(f"Scheduled daily sync at {settings.sync_hour:02d}:{settings.sync_minute:02d}")
+    print("Scheduled quarterly access review reminders")
+
+    # Startup check: warn if admin users don't have 2FA
+    from .database import SessionLocal
+    from .models import User as UserModel
+    check_db = SessionLocal()
+    try:
+        admins_no_2fa = check_db.query(UserModel).filter(
+            UserModel.role == "admin", UserModel.totp_enabled == False
+        ).count()
+        if admins_no_2fa:
+            print(f"WARNING: {admins_no_2fa} admin user(s) do not have 2FA enabled!")
+    finally:
+        check_db.close()
     
     yield
     
@@ -123,6 +173,24 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
 app.add_middleware(CacheControlMiddleware)
 
 
+# Security headers middleware - defense-in-depth HTTP headers
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "0"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        if request.url.path.startswith("/api/"):
+            response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+
 # CSRF protection - require X-Requested-With header on state-changing API requests
 # This leverages the browser's same-origin policy: cross-origin forms can't set custom headers
 class CSRFMiddleware(BaseHTTPMiddleware):
@@ -161,6 +229,7 @@ app.include_router(goals.router, prefix="/api/goals", tags=["Savings Goals"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(categorization.router, prefix="/api/categorization", tags=["Auto-Categorization"])
 app.include_router(sessions.router, prefix="/api/sessions", tags=["Sessions"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
 
 @app.get("/")
