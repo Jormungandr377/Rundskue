@@ -5,13 +5,16 @@ import json
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from ..database import get_db
 from ..models import User, RefreshToken, PasswordResetToken, Profile
 from ..schemas.auth import (
     UserRegister, UserLogin, Token, UserResponse, TwoFactorSetup,
     TwoFactorSetupResponse, TwoFactorVerify, TwoFactorDisable,
-    ForgotPassword, ResetPassword, PasswordResetResponse, MessageResponse
+    ForgotPassword, ResetPassword, PasswordResetResponse, MessageResponse,
+    ChangePassword
 )
 from ..core.security import (
     hash_password, verify_password, create_access_token, create_refresh_token,
@@ -24,6 +27,7 @@ from ..config import get_settings
 
 settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 # ============================================================================
@@ -31,6 +35,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 # ============================================================================
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
 async def register(
     user_data: UserRegister,
     response: Response,
@@ -111,6 +116,7 @@ async def register(
 
 
 @router.post("/login", response_model=Token)
+@limiter.limit("10/minute")
 async def login(
     user_data: UserLogin,
     response: Response,
@@ -283,6 +289,45 @@ async def get_current_user_info(
     return current_user
 
 
+@router.post("/change-password", response_model=MessageResponse)
+async def change_password(
+    password_data: ChangePassword,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change password for authenticated user.
+
+    Requires current password verification and validates new password.
+    Revokes all refresh tokens to force re-login on other devices.
+    """
+    # Verify current password
+    if not verify_password(password_data.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    # Validate new password
+    is_valid, error_msg = validate_password(password_data.new_password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
+    # Don't allow same password
+    if verify_password(password_data.new_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="New password must be different from current password")
+
+    # Update password
+    current_user.hashed_password = hash_password(password_data.new_password)
+    db.commit()
+
+    # Revoke all refresh tokens (force re-login on all devices)
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == current_user.id,
+        RefreshToken.is_revoked == False
+    ).update({"is_revoked": True})
+    db.commit()
+
+    return {"message": "Password changed successfully"}
+
+
 # ============================================================================
 # Two-Factor Authentication (2FA)
 # ============================================================================
@@ -385,6 +430,7 @@ async def disable_2fa(
 # ============================================================================
 
 @router.post("/forgot-password", response_model=PasswordResetResponse)
+@limiter.limit("3/minute")
 async def forgot_password(
     forgot_data: ForgotPassword,
     db: Session = Depends(get_db)

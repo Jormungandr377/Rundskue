@@ -133,6 +133,8 @@ export const authApi = {
     api.post('/auth/forgot-password', { email }).then(r => r.data),
   resetPassword: (data: { token: string; new_password: string }) =>
     api.post('/auth/reset-password', data).then(r => r.data),
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    api.post('/auth/change-password', data).then(r => r.data),
 }
 
 // Types

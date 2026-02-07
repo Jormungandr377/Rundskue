@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode, useState, useRef, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   CreditCard,
@@ -10,12 +10,16 @@ import {
   Users,
   LogOut,
   Shield,
+  Lock,
   ChevronDown,
-  User
+  User,
+  Menu,
+  X
 } from 'lucide-react'
 
 // Auth
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ToastProvider } from './contexts/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
@@ -32,6 +36,7 @@ import Signup from './pages/Signup'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import TwoFactorSetup from './pages/TwoFactorSetup'
+import ChangePassword from './pages/ChangePassword'
 
 // Error Boundary
 interface ErrorBoundaryState {
@@ -84,7 +89,7 @@ const navItems = [
 ]
 
 // User dropdown menu component
-function UserMenu() {
+function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -103,6 +108,7 @@ function UserMenu() {
 
   const handleLogout = async () => {
     setOpen(false)
+    onNavigate?.()
     await logout()
     navigate('/login')
   }
@@ -115,13 +121,13 @@ function UserMenu() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
-        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
           <User className="w-4 h-4" />
         </div>
         <div className="flex-1 text-left min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
         </div>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
@@ -129,6 +135,18 @@ function UserMenu() {
           <button
             onClick={() => {
               setOpen(false)
+              onNavigate?.()
+              navigate('/change-password')
+            }}
+            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Lock className="w-4 h-4" />
+            Change Password
+          </button>
+          <button
+            onClick={() => {
+              setOpen(false)
+              onNavigate?.()
               navigate('/2fa-setup')
             }}
             className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -150,70 +168,128 @@ function UserMenu() {
   )
 }
 
-// Main authenticated layout with sidebar
+// Sidebar content (shared between desktop and mobile)
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <>
+      <div className="p-6">
+        <h1 className="text-xl font-bold text-gray-900">Finance Tracker</h1>
+      </div>
+
+      <nav className="mt-2 flex-1">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === '/'}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`
+            }
+          >
+            <item.icon className="w-5 h-5 mr-3" />
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="border-t border-gray-200">
+        <NavLink
+          to="/link-account"
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            `flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+              isActive
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`
+          }
+        >
+          <Link2 className="w-5 h-5 mr-3" />
+          Link Account
+        </NavLink>
+        <NavLink
+          to="/profiles"
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            `flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+              isActive
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`
+          }
+        >
+          <Users className="w-5 h-5 mr-3" />
+          Profiles
+        </NavLink>
+        <div className="border-t border-gray-100" />
+        <UserMenu onNavigate={onNavigate} />
+      </div>
+    </>
+  )
+}
+
+// Main authenticated layout with responsive sidebar
 function AuthenticatedLayout() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [location.pathname])
+
+  const closeMobileMenu = () => setMobileMenuOpen(false)
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 fixed h-full flex flex-col">
-        <div className="p-6">
-          <h1 className="text-xl font-bold text-gray-900">Finance Tracker</h1>
-        </div>
-
-        <nav className="mt-2 flex-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                `flex items-center px-6 py-3 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`
-              }
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="border-t border-gray-200">
-          <NavLink
-            to="/link-account"
-            className={({ isActive }) =>
-              `flex items-center px-6 py-3 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`
-            }
-          >
-            <Link2 className="w-5 h-5 mr-3" />
-            Link Account
-          </NavLink>
-          <NavLink
-            to="/profiles"
-            className={({ isActive }) =>
-              `flex items-center px-6 py-3 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`
-            }
-          >
-            <Users className="w-5 h-5 mr-3" />
-            Profiles
-          </NavLink>
-          <div className="border-t border-gray-100" />
-          <UserMenu />
-        </div>
+      {/* Desktop Sidebar - hidden on mobile */}
+      <aside className="hidden lg:flex w-64 bg-white border-r border-gray-200 fixed h-full flex-col">
+        <SidebarContent />
       </aside>
 
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+        <h1 className="text-lg font-bold text-gray-900">Finance Tracker</h1>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 animate-fade-in"
+            onClick={closeMobileMenu}
+          />
+          {/* Sidebar */}
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white flex flex-col animate-slide-in-left shadow-xl">
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={closeMobileMenu}
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <SidebarContent onNavigate={closeMobileMenu} />
+          </aside>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="ml-64 flex-1 p-8">
+      <main className="lg:ml-64 flex-1 p-4 pt-16 lg:p-8 lg:pt-8">
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Dashboard />} />
@@ -225,6 +301,7 @@ function AuthenticatedLayout() {
             <Route path="/link-account" element={<LinkAccount />} />
             <Route path="/profiles" element={<Profiles />} />
             <Route path="/2fa-setup" element={<TwoFactorSetup />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Routes>
         </ErrorBoundary>
       </main>
@@ -236,23 +313,25 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+        <ToastProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Protected routes */}
-          <Route
-            path="/*"
-            element={
-              <ProtectedRoute>
-                <AuthenticatedLayout />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+            {/* Protected routes */}
+            <Route
+              path="/*"
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   )

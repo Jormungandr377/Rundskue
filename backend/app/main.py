@@ -1,16 +1,19 @@
 """
 Finance Tracker API
 Main FastAPI application entry point
-Updated: Fixed import paths for deployment - Force rebuild 2026-02-03
+Updated: Added rate limiting and change-password endpoint - 2026-02-07
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from contextlib import asynccontextmanager
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 from pathlib import Path
 
@@ -21,6 +24,9 @@ from .services.sync_service import sync_all_items
 from .init_db import init_db
 
 settings = get_settings()
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 # Scheduler for daily syncs
 scheduler = AsyncIOScheduler()
@@ -59,6 +65,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware
 app.add_middleware(

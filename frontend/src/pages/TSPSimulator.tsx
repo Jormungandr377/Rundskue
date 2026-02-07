@@ -56,17 +56,16 @@ export default function TSPSimulator() {
     queryKey: ['tsp', 'fundPerformance'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/tsp/fund-performance');
-        if (!response.ok) return null;
-        const data = await response.json();
-        // Convert array to dict keyed by fund name
-        const result: Record<string, { ten_year?: number }> = {};
+        const data = await tsp.fundHistory();
+        // If returned as array, convert to dict keyed by fund name
         if (Array.isArray(data)) {
+          const result: Record<string, { ten_year?: number }> = {};
           for (const item of data) {
             result[item.fund] = item;
           }
+          return result;
         }
-        return result;
+        return data;
       } catch {
         return null;
       }

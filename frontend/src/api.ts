@@ -1,4 +1,6 @@
-import axios from 'axios';
+// Use the authenticated axios instance from services/api.ts
+// This ensures all API calls include JWT auth headers and auto-refresh logic
+import authenticatedApi from './services/api';
 import type {
   Profile,
   PlaidItem,
@@ -17,12 +19,7 @@ import type {
   TSPFundHistory,
 } from './types';
 
-const client = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const client = authenticatedApi;
 
 // Profiles
 export const profiles = {
