@@ -1,7 +1,7 @@
 # Finance Tracker - Project Status
 
 **Last Updated:** 2026-02-07
-**Status:** Full-Stack Authentication Complete, Deployed to Coolify
+**Status:** Full-Stack Auth + Performance Optimized, Deployed to Coolify
 
 ## Overview
 
@@ -28,6 +28,13 @@ Self-hosted personal finance tracker with Plaid bank linking, TSP retirement sim
 - **Toast notifications** for user feedback
 - **Mobile responsive** sidebar with hamburger menu
 - **Protected routes** with AuthContext
+- **Code splitting:** React.lazy() on all 14 pages — each is its own chunk
+- **Vendor splitting:** react, data (query+axios), charts (recharts), utils (date-fns+lucide)
+
+### Backend Performance
+- **GZip compression:** GZipMiddleware on all responses > 500 bytes
+- **Cache headers:** Immutable 1yr cache for hashed `/assets/`, no-cache for HTML, no-store for API
+- **Result:** 821KB monolithic → 102KB initial transfer (login), 68% compression ratio
 
 ### Deployment
 - Single Dockerfile: FastAPI serves React static files
@@ -68,7 +75,7 @@ backend/app/
 ├── config.py                 # Settings
 ├── database.py               # DB session
 ├── init_db.py                # DB initialization
-└── main.py                   # App entry + rate limiter + CORS
+└── main.py                   # App entry + rate limiter + GZip + cache headers + CORS
 ```
 
 ### Frontend
@@ -97,7 +104,7 @@ frontend/src/
 │   ├── TSPSimulator.tsx      # TSP retirement simulator
 │   ├── LinkAccount.tsx       # Plaid bank linking
 │   └── Profiles.tsx          # Profile management
-├── App.tsx                   # Router + responsive sidebar + layout
+├── App.tsx                   # Router + lazy loading + responsive sidebar + layout
 ├── main.tsx                  # Entry point with QueryClient
 ├── types.ts                  # TypeScript interfaces
 └── index.css                 # Tailwind + custom animations
@@ -145,6 +152,7 @@ frontend/src/
 | Mobile Responsive | 100% (hamburger menu sidebar) |
 | Rate Limiting | 100% (login, register, forgot-password) |
 | Deployment | 100% (Coolify, auto-deploy) |
+| Performance | 100% (GZip, code splitting, cache headers) |
 | Plaid Integration | Built, needs real bank testing |
 
 ---
@@ -173,4 +181,4 @@ git status
 1. **Refresh token cookie:** `secure=False` - should be `True` when HTTPS is configured with proper certs
 2. **Plaid:** Uses sandbox credentials, needs real keys for production bank linking
 3. **Email:** SMTP not configured - password reset emails won't send without SMTP setup
-4. **Browser cache:** After deploys, users may need hard refresh (Ctrl+Shift+F5)
+4. **Browser cache:** Hashed assets cached 1yr (immutable), HTML set to no-cache so deploys auto-refresh
