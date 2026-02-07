@@ -19,8 +19,17 @@ from ..models import PlaidItem, Account, AccountType
 settings = get_settings()
 
 # Initialize Plaid client
+# Plaid SDK only defines Sandbox and Production environments.
+# Map any env string to the correct host URL.
+_plaid_env_map = {
+    'sandbox': plaid.Environment.Sandbox,
+    'development': plaid.Environment.Production,  # "development" uses production host
+    'production': plaid.Environment.Production,
+}
+_plaid_host = _plaid_env_map.get(settings.plaid_env.lower(), plaid.Environment.Sandbox)
+
 configuration = plaid.Configuration(
-    host=getattr(plaid.Environment, settings.plaid_env.capitalize()),
+    host=_plaid_host,
     api_key={
         'clientId': settings.plaid_client_id,
         'secret': settings.plaid_secret,
