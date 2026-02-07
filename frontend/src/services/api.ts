@@ -11,7 +11,129 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Send cookies (refresh token) with requests
 })
+
+// --- Auth token management ---
+let accessToken: string | null = null
+
+export const setAccessToken = (token: string | null) => {
+  accessToken = token
+}
+
+export const getAccessToken = () => accessToken
+
+// Request interceptor: attach access token to every request
+api.interceptors.request.use((config) => {
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
+  }
+  return config
+})
+
+// Response interceptor: auto-refresh on 401
+let isRefreshing = false
+let refreshSubscribers: ((token: string) => void)[] = []
+
+const onRefreshed = (token: string) => {
+  refreshSubscribers.forEach((cb) => cb(token))
+  refreshSubscribers = []
+}
+
+const addRefreshSubscriber = (cb: (token: string) => void) => {
+  refreshSubscribers.push(cb)
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+
+    // Don't intercept login, register, or refresh requests
+    const isAuthRequest = originalRequest?.url?.includes('/auth/login') ||
+      originalRequest?.url?.includes('/auth/register') ||
+      originalRequest?.url?.includes('/auth/refresh')
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
+      if (isRefreshing) {
+        // Queue this request until refresh completes
+        return new Promise((resolve) => {
+          addRefreshSubscriber((token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            resolve(api(originalRequest))
+          })
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        const response = await api.post('/auth/refresh')
+        const newToken = response.data.access_token
+        setAccessToken(newToken)
+        onRefreshed(newToken)
+        isRefreshing = false
+
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return api(originalRequest)
+      } catch (refreshError) {
+        isRefreshing = false
+        refreshSubscribers = []
+        setAccessToken(null)
+        // Redirect to login
+        window.location.href = '/login'
+        return Promise.reject(refreshError)
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+// --- Auth Types ---
+export interface AuthTokens {
+  access_token: string
+  token_type: string
+}
+
+export interface AuthUser {
+  id: number
+  email: string
+  is_active: boolean
+  totp_enabled: boolean
+  created_at?: string
+}
+
+export interface TwoFactorSetupResponse {
+  secret: string
+  qr_code: string
+  backup_codes: string[]
+}
+
+// --- Auth API ---
+export const authApi = {
+  register: (data: { email: string; password: string; remember_me?: boolean }) =>
+    api.post<AuthTokens>('/auth/register', data).then(r => r.data),
+  login: (data: { email: string; password: string; remember_me?: boolean; totp_code?: string }) =>
+    api.post<AuthTokens>('/auth/login', data).then(r => r.data),
+  refresh: () =>
+    api.post<AuthTokens>('/auth/refresh').then(r => r.data),
+  logout: () =>
+    api.post('/auth/logout').then(r => r.data),
+  me: () =>
+    api.get<AuthUser>('/auth/me').then(r => r.data),
+  setup2FA: (password: string) =>
+    api.post<TwoFactorSetupResponse>('/auth/2fa/setup', { password }).then(r => r.data),
+  verify2FA: (totp_code: string) =>
+    api.post('/auth/2fa/verify', { totp_code }).then(r => r.data),
+  disable2FA: (data: { password: string; totp_code?: string }) =>
+    api.post('/auth/2fa/disable', data).then(r => r.data),
+  forgotPassword: (email: string) =>
+    api.post('/auth/forgot-password', { email }).then(r => r.data),
+  resetPassword: (data: { token: string; new_password: string }) =>
+    api.post('/auth/reset-password', data).then(r => r.data),
+}
 
 // Types
 export interface Profile {
