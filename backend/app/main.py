@@ -21,7 +21,7 @@ from pathlib import Path
 
 from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
-from .routers import tsp, auth
+from .routers import tsp, auth, recurring, export
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
@@ -95,8 +95,11 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
         if path.startswith("/assets/"):
             response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
         # Favicon - cache 1 day
-        elif path == "/favicon.ico":
+        elif path in ("/favicon.ico", "/favicon.svg"):
             response.headers["Cache-Control"] = "public, max-age=86400"
+        # Service worker - must always be fresh
+        elif path == "/sw.js":
+            response.headers["Cache-Control"] = "no-cache"
         # API responses - no cache
         elif path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
@@ -118,6 +121,8 @@ app.include_router(transactions.router, prefix="/api/transactions", tags=["Trans
 app.include_router(budgets.router, prefix="/api/budgets", tags=["Budgets"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
 app.include_router(tsp.router, prefix="/api/tsp", tags=["TSP"])
+app.include_router(recurring.router, prefix="/api/recurring", tags=["Recurring"])
+app.include_router(export.router, prefix="/api/export", tags=["Export"])
 
 
 @app.get("/")
@@ -149,13 +154,38 @@ if static_dir.exists():
     # Serve static assets
     app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
 
-    # Serve favicon and other root files
+    # Serve favicon and other root-level files
     @app.get("/favicon.ico")
     async def favicon():
         favicon_path = static_dir / "favicon.ico"
         if favicon_path.exists():
             return FileResponse(favicon_path)
         return {"error": "Favicon not found"}
+
+    @app.get("/favicon.svg")
+    async def favicon_svg():
+        svg_path = static_dir / "favicon.svg"
+        if svg_path.exists():
+            return FileResponse(svg_path, media_type="image/svg+xml")
+        return {"error": "Favicon not found"}
+
+    @app.get("/manifest.json")
+    async def manifest():
+        manifest_path = static_dir / "manifest.json"
+        if manifest_path.exists():
+            return FileResponse(manifest_path, media_type="application/manifest+json")
+        return {"error": "Manifest not found"}
+
+    @app.get("/sw.js")
+    async def service_worker():
+        sw_path = static_dir / "sw.js"
+        if sw_path.exists():
+            return FileResponse(
+                sw_path,
+                media_type="application/javascript",
+                headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
+            )
+        return {"error": "Service worker not found"}
 
     # Exception handler for 404s - serve SPA for non-API routes
     @app.exception_handler(404)

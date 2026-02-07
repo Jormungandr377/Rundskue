@@ -1,0 +1,19 @@
+{
+  "name": "Finance Tracker",
+  "short_name": "Finance",
+  "description": "Personal finance tracker with budgeting, analytics, and bank linking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -75,6 +75,19 @@ class ChangePassword(BaseModel):
     new_password: str = Field(..., min_length=8, description="New password")
 
 
+class UpdateTheme(BaseModel):
+    """Schema for updating theme preference."""
+    theme: str = Field(..., description="Theme preference: light, dark, or system")
+
+    @field_validator("theme")
+    @classmethod
+    def validate_theme(cls, v: str) -> str:
+        """Validate theme value."""
+        if v not in ("light", "dark", "system"):
+            raise ValueError("Theme must be light, dark, or system")
+        return v
+
+
 # ============================================================================
 # Response Schemas
 # ============================================================================
@@ -98,6 +111,7 @@ class UserResponse(BaseModel):
     email: str = Field(..., description="User email address")
     is_active: bool = Field(..., description="Whether user account is active")
     totp_enabled: bool = Field(..., description="Whether 2FA is enabled")
+    theme: str = Field(default="light", description="UI theme preference (light, dark, system)")
     created_at: datetime = Field(..., description="Account creation timestamp")
 
     class Config:

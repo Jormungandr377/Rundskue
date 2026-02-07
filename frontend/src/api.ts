@@ -17,6 +17,7 @@ import type {
   TSPScenario,
   TSPProjectionResult,
   TSPFundHistory,
+  RecurringTransaction,
 } from './types';
 
 const client = authenticatedApi;
@@ -165,6 +166,37 @@ export const tsp = {
     client.get<Record<string, TSPFundHistory>>('/tsp/fund-history', { params: { years } }).then(r => r.data),
 };
 
+// Recurring transactions
+export const recurring = {
+  list: (activeOnly = true) =>
+    client.get<RecurringTransaction[]>('/recurring', { params: { active_only: activeOnly } }).then(r => r.data),
+  create: (data: {
+    name: string;
+    amount: number;
+    frequency: string;
+    day_of_month?: number;
+    day_of_week?: number;
+    start_date: string;
+    end_date?: string;
+    category_id?: number;
+    is_income?: boolean;
+    notes?: string;
+  }) => client.post<RecurringTransaction>('/recurring', data).then(r => r.data),
+  update: (id: number, data: Partial<RecurringTransaction>) =>
+    client.put<RecurringTransaction>(`/recurring/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/recurring/${id}`),
+  upcoming: (days = 30) =>
+    client.get<RecurringTransaction[]>('/recurring/upcoming', { params: { days } }).then(r => r.data),
+};
+
+// Export
+export const dataExport = {
+  transactionsCsv: (params?: { start_date?: string; end_date?: string }) =>
+    client.get('/export/transactions/csv', { params, responseType: 'blob' }).then(r => r.data),
+  transactionsExcel: (params?: { start_date?: string; end_date?: string }) =>
+    client.get('/export/transactions/excel', { params, responseType: 'blob' }).then(r => r.data),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -175,6 +207,8 @@ export const api = {
   budgets,
   analytics,
   tsp,
+  recurring,
+  dataExport,
 };
 
 export default api;

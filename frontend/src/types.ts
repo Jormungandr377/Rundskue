@@ -194,3 +194,21 @@ export interface TSPFundHistory {
   start_date?: string;
   end_date?: string;
 }
+
+// Recurring transactions
+export interface RecurringTransaction {
+  id: number;
+  name: string;
+  amount: number;
+  frequency: 'monthly' | 'weekly' | 'biweekly' | 'quarterly' | 'yearly';
+  day_of_month?: number;
+  day_of_week?: number;
+  start_date: string;
+  end_date?: string;
+  next_due_date: string;
+  category_id?: number;
+  category_name?: string;
+  is_income: boolean;
+  is_active: boolean;
+  notes?: string;
+}

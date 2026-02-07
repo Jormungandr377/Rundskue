@@ -102,6 +102,7 @@ export interface AuthUser {
   email: string
   is_active: boolean
   totp_enabled: boolean
+  theme: 'light' | 'dark' | 'system'
   created_at?: string
 }
 
@@ -135,6 +136,8 @@ export const authApi = {
     api.post('/auth/reset-password', data).then(r => r.data),
   changePassword: (data: { current_password: string; new_password: string }) =>
     api.post('/auth/change-password', data).then(r => r.data),
+  updateTheme: (theme: string) =>
+    api.put<AuthUser>('/auth/theme', { theme }).then(r => r.data),
 }
 
 // Types

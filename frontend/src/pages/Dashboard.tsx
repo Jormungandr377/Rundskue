@@ -1,27 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
   CreditCard,
   ArrowUpRight,
   ArrowDownRight,
-  AlertCircle
+  AlertCircle,
+  Calendar,
 } from 'lucide-react';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell
 } from 'recharts';
-import { format, parseISO } from 'date-fns';
-import { accounts, analytics, transactions } from '../api';
+import { format, parseISO, differenceInDays } from 'date-fns';
+import { accounts, analytics, transactions, recurring } from '../api';
 import type { SpendingByCategory, MonthlyTrend, Transaction } from '../types';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
@@ -66,6 +67,11 @@ export default function Dashboard() {
     queryFn: () => analytics.insights(),
   });
 
+  const { data: upcomingBills } = useQuery({
+    queryKey: ['recurring', 'upcoming'],
+    queryFn: () => recurring.upcoming(14),
+  });
+
   const isLoading = summaryLoading || cashFlowLoading || spendingLoading || trendsLoading;
 
   if (isLoading) {
@@ -80,8 +86,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500">Your financial overview</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-500 dark:text-gray-400">Your financial overview</p>
       </div>
 
       {/* Summary Cards */}
@@ -89,13 +95,13 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Net Worth</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Net Worth</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {formatCurrency(summary?.net_worth || 0)}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Wallet className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+              <Wallet className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
@@ -103,13 +109,13 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Assets</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Assets</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {formatCurrency(summary?.total_assets || 0)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+              <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -117,13 +123,13 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Liabilities</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Liabilities</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(summary?.total_liabilities || 0)}
               </p>
             </div>
-            <div className="p-3 bg-red-100 rounded-full">
-              <CreditCard className="w-6 h-6 text-red-600" />
+            <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
+              <CreditCard className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
           </div>
         </div>
@@ -131,16 +137,16 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">This Month's Cash Flow</p>
-              <p className={`text-2xl font-bold ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className="text-sm text-gray-500 dark:text-gray-400">This Month's Cash Flow</p>
+              <p className={`text-2xl font-bold ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                 {formatCurrency(cashFlow?.net_cash_flow || 0)}
               </p>
             </div>
-            <div className={`p-3 rounded-full ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+            <div className={`p-3 rounded-full ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
               {(cashFlow?.net_cash_flow || 0) >= 0 ? (
-                <ArrowUpRight className="w-6 h-6 text-green-600" />
+                <ArrowUpRight className="w-6 h-6 text-green-600 dark:text-green-400" />
               ) : (
-                <ArrowDownRight className="w-6 h-6 text-red-600" />
+                <ArrowDownRight className="w-6 h-6 text-red-600 dark:text-red-400" />
               )}
             </div>
           </div>
@@ -151,35 +157,37 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expenses Trend */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Income vs Expenses</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Income vs Expenses</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trends || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="month" 
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                <XAxis
+                  dataKey="month"
                   tickFormatter={(value) => format(parseISO(value + '-01'), 'MMM')}
+                  stroke="#9CA3AF"
                 />
-                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                <Tooltip 
+                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#9CA3AF" />
+                <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                   labelFormatter={(label) => format(parseISO(label + '-01'), 'MMMM yyyy')}
+                  contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="income" 
-                  stackId="1" 
-                  stroke="#22c55e" 
-                  fill="#22c55e" 
+                <Area
+                  type="monotone"
+                  dataKey="income"
+                  stackId="1"
+                  stroke="#22c55e"
+                  fill="#22c55e"
                   fillOpacity={0.3}
                   name="Income"
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="expenses" 
-                  stackId="2" 
-                  stroke="#ef4444" 
-                  fill="#ef4444" 
+                <Area
+                  type="monotone"
+                  dataKey="expenses"
+                  stackId="2"
+                  stroke="#ef4444"
+                  fill="#ef4444"
                   fillOpacity={0.3}
                   name="Expenses"
                 />
@@ -190,7 +198,7 @@ export default function Dashboard() {
 
         {/* Spending by Category */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending by Category</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Spending by Category</h3>
           <div className="h-64 flex">
             <div className="w-1/2">
               <ResponsiveContainer width="100%" height="100%">
@@ -216,12 +224,12 @@ export default function Dashboard() {
             <div className="w-1/2 flex flex-col justify-center space-y-2">
               {spending?.slice(0, 6).map((cat, index) => (
                 <div key={cat.category_id} className="flex items-center text-sm">
-                  <div 
-                    className="w-3 h-3 rounded-full mr-2" 
+                  <div
+                    className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
-                  <span className="text-gray-600 truncate flex-1">{cat.category_name}</span>
-                  <span className="font-medium">{cat.percentage}%</span>
+                  <span className="text-gray-600 dark:text-gray-400 truncate flex-1">{cat.category_name}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{cat.percentage}%</span>
                 </div>
               ))}
             </div>
@@ -229,53 +237,87 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Transactions & Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Bottom Row: Recent Transactions, Upcoming Bills, Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Transactions */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Transactions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Transactions</h3>
           <div className="space-y-3">
-            {recentTxns?.transactions?.slice(0, 8).map((txn) => (
-              <div key={txn.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            {recentTxns?.transactions?.slice(0, 6).map((txn) => (
+              <div key={txn.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                 <div>
-                  <p className="font-medium text-gray-900">{txn.custom_name || txn.merchant_name || txn.name}</p>
-                  <p className="text-sm text-gray-500">{format(parseISO(txn.date), 'MMM d')}</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">{txn.custom_name || txn.merchant_name || txn.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{format(parseISO(txn.date), 'MMM d')}</p>
                 </div>
-                <p className={`font-semibold ${txn.amount < 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                <p className={`font-semibold text-sm ${txn.amount < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
                   {txn.amount < 0 ? '+' : '-'}{formatCurrency(Math.abs(txn.amount))}
                 </p>
               </div>
             ))}
             {(!recentTxns?.transactions || recentTxns.transactions.length === 0) && (
-              <p className="text-gray-500 text-center py-4">No transactions yet</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No transactions yet</p>
+            )}
+          </div>
+        </div>
+
+        {/* Upcoming Bills */}
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-orange-500" />
+            Upcoming Bills
+          </h3>
+          <div className="space-y-3">
+            {upcomingBills?.slice(0, 6).map((bill) => {
+              const daysUntil = differenceInDays(parseISO(bill.next_due_date), new Date())
+              return (
+                <div key={bill.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-orange-500' : 'bg-green-500'
+                    }`} />
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">{bill.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil}d`}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">
+                    {formatCurrency(bill.amount)}
+                  </p>
+                </div>
+              )
+            })}
+            {(!upcomingBills || upcomingBills.length === 0) && (
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No upcoming bills</p>
             )}
           </div>
         </div>
 
         {/* Insights */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending Insights</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Spending Insights</h3>
           <div className="space-y-3">
             {insights?.slice(0, 5).map((insight, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`p-3 rounded-lg ${
-                  insight.type === 'increase' ? 'bg-orange-50' : 'bg-green-50'
+                  insight.type === 'increase' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-green-50 dark:bg-green-900/20'
                 }`}
               >
                 <div className="flex items-start">
-                  <AlertCircle className={`w-5 h-5 mr-2 mt-0.5 ${
+                  <AlertCircle className={`w-5 h-5 mr-2 mt-0.5 flex-shrink-0 ${
                     insight.type === 'increase' ? 'text-orange-500' : 'text-green-500'
                   }`} />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{insight.category}</p>
-                    <p className="text-sm text-gray-600">{insight.message}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{insight.category}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{insight.message}</p>
                   </div>
                 </div>
               </div>
             ))}
             {(!insights || insights.length === 0) && (
-              <p className="text-gray-500 text-center py-4">No insights available yet</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No insights available yet</p>
             )}
           </div>
         </div>

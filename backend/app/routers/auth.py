@@ -14,7 +14,7 @@ from ..schemas.auth import (
     UserRegister, UserLogin, Token, UserResponse, TwoFactorSetup,
     TwoFactorSetupResponse, TwoFactorVerify, TwoFactorDisable,
     ForgotPassword, ResetPassword, PasswordResetResponse, MessageResponse,
-    ChangePassword
+    ChangePassword, UpdateTheme
 )
 from ..core.security import (
     hash_password, verify_password, create_access_token, create_refresh_token,
@@ -102,7 +102,7 @@ async def register(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
+        secure=True,
         samesite="lax",
         max_age=expires_days * 24 * 60 * 60
     )
@@ -203,7 +203,7 @@ async def login(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
+        secure=True,
         samesite="lax",
         max_age=expires_days * 24 * 60 * 60
     )
@@ -513,3 +513,20 @@ async def reset_password(
     db.commit()
 
     return {"message": "Password reset successfully"}
+
+
+# ============================================================================
+# User Preferences
+# ============================================================================
+
+@router.put("/theme", response_model=UserResponse)
+async def update_theme(
+    theme_data: UpdateTheme,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update user's theme preference (light, dark, system)."""
+    current_user.theme = theme_data.theme
+    db.commit()
+    db.refresh(current_user)
+    return current_user

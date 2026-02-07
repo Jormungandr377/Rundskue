@@ -32,6 +32,9 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Preferences
+    theme = Column(String(10), default="light")  # light, dark, system
+
     # 2FA fields
     totp_secret = Column(String(255), nullable=True)
     totp_enabled = Column(Boolean, default=False)
@@ -49,7 +52,7 @@ class RefreshToken(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     token = Column(String(255), unique=True, index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     expires_at = Column(DateTime, nullable=False)
     is_revoked = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -80,7 +83,7 @@ class Profile(Base):
     __tablename__ = "profiles"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Nullable during migration
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)  # Indexed for user lookup
     name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=True)
     is_primary = Column(Boolean, default=False)
@@ -135,9 +138,9 @@ class Account(Base):
     __tablename__ = "accounts"
     
     id = Column(Integer, primary_key=True, index=True)
-    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
     plaid_item_id = Column(Integer, ForeignKey("plaid_items.id"), nullable=False)
-    
+
     # Plaid identifiers
     plaid_account_id = Column(String(255), unique=True, nullable=False)
     
@@ -350,12 +353,49 @@ class TSPScenario(Base):
 class TSPFundHistory(Base):
     """Historical TSP fund prices."""
     __tablename__ = "tsp_fund_history"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     date = Column(Date, nullable=False)
     fund = Column(String(10), nullable=False)  # G, F, C, S, I, L2025, L2030, etc.
     price = Column(Numeric(12, 6), nullable=False)
-    
+
     __table_args__ = (
         Index("ix_tsp_fund_date", "fund", "date", unique=True),
+    )
+
+
+class RecurringTransaction(Base):
+    """Recurring bills and subscriptions."""
+    __tablename__ = "recurring_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+
+    name = Column(String(255), nullable=False)
+    amount = Column(Numeric(14, 2), nullable=False)
+    frequency = Column(String(20), nullable=False)  # monthly, weekly, biweekly, quarterly, yearly
+    day_of_month = Column(Integer, nullable=True)  # 1-31 for monthly
+    day_of_week = Column(Integer, nullable=True)  # 0-6 for weekly (Mon=0)
+
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)  # Null = ongoing
+    next_due_date = Column(Date, nullable=False)
+
+    is_income = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    auto_categorize = Column(Boolean, default=True)  # Auto-assign category to matching transactions
+
+    notes = Column(Text, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    profile = relationship("Profile")
+    category = relationship("Category")
+
+    __table_args__ = (
+        Index("ix_recurring_profile_active", "profile_id", "is_active"),
+        Index("ix_recurring_next_due", "next_due_date"),
     )
