@@ -18,7 +18,7 @@ type TabId = typeof tabs[number]['id'];
 function TabLoader() {
   return (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
     </div>
   );
 }
@@ -30,12 +30,12 @@ export default function FinancialPlanning() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Financial Planning</h1>
-        <p className="text-gray-500 dark:text-gray-400">Retirement projections, loan calculators, and investment tools</p>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Financial Planning</h1>
+        <p className="text-stone-500 dark:text-stone-400">Retirement projections, loan calculators, and investment tools</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-stone-200 dark:border-stone-700">
         <nav className="flex gap-1 -mb-px overflow-x-auto" aria-label="Financial planning tabs">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -46,8 +46,8 @@ export default function FinancialPlanning() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   isActive
-                    ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                    ? 'border-teal-600 text-teal-600 dark:border-teal-400 dark:text-teal-400'
+                    : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:border-stone-300 dark:hover:border-stone-600'
                 }`}
                 aria-selected={isActive}
                 role="tab"

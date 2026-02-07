@@ -70,21 +70,21 @@ export default function CategoryRules() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Auto-Categorization Rules</h1>
-          <p className="text-gray-500 dark:text-gray-400">Automatically categorize transactions based on rules</p>
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Auto-Categorization Rules</h1>
+          <p className="text-stone-500 dark:text-stone-400">Automatically categorize transactions based on rules</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => applyMutation.mutate()}
             disabled={applyMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 border border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 disabled:opacity-50 transition-colors"
           >
             {applyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
             Apply Rules
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Rule
@@ -95,26 +95,26 @@ export default function CategoryRules() {
       {/* Create Form */}
       {showCreate && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create Rule</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Create Rule</h3>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">When</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">When</label>
                 <select
                   value={form.match_field}
                   onChange={(e) => setForm({ ...form, match_field: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white"
                 >
                   <option value="name">Transaction Name</option>
                   <option value="merchant_name">Merchant Name</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Match Type</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Match Type</label>
                 <select
                   value={form.match_type}
                   onChange={(e) => setForm({ ...form, match_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white"
                 >
                   <option value="contains">Contains</option>
                   <option value="exact">Exact Match</option>
@@ -122,23 +122,23 @@ export default function CategoryRules() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Value</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Value</label>
                 <input
                   type="text"
                   required
                   value={form.match_value}
                   onChange={(e) => setForm({ ...form, match_value: e.target.value })}
                   placeholder="e.g., Starbucks"
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assign Category</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Assign Category</label>
                 <select
                   required
                   value={form.category_id}
                   onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white"
                 >
                   <option value="">Select category...</option>
                   {categoryList?.map((cat) => (
@@ -148,10 +148,10 @@ export default function CategoryRules() {
               </div>
             </div>
             <div className="flex gap-2">
-              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button type="submit" className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
                 Create Rule
               </button>
-              <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg">
                 Cancel
               </button>
             </div>
@@ -163,36 +163,36 @@ export default function CategoryRules() {
       <div className="card overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
           </div>
         ) : rules && rules.length > 0 ? (
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+            <thead className="bg-stone-50 dark:bg-stone-700/50 border-b border-stone-200 dark:border-stone-700">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Field</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Match Type</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Value</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Category</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Priority</th>
+                <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Field</th>
+                <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Match Type</th>
+                <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Value</th>
+                <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Category</th>
+                <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Priority</th>
                 <th className="w-16"></th>
               </tr>
             </thead>
             <tbody>
               {rules.map((rule) => (
-                <tr key={rule.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400 capitalize">
+                <tr key={rule.id} className="border-b border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/30">
+                  <td className="py-3 px-4 text-stone-600 dark:text-stone-400 capitalize">
                     {rule.match_field === 'merchant_name' ? 'Merchant' : 'Name'}
                   </td>
-                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400 capitalize">
+                  <td className="py-3 px-4 text-stone-600 dark:text-stone-400 capitalize">
                     {rule.match_type.replace('_', ' ')}
                   </td>
-                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{rule.match_value}</td>
-                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{rule.category_name || '-'}</td>
-                  <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{rule.priority}</td>
+                  <td className="py-3 px-4 font-medium text-stone-900 dark:text-white">{rule.match_value}</td>
+                  <td className="py-3 px-4 text-stone-600 dark:text-stone-400">{rule.category_name || '-'}</td>
+                  <td className="py-3 px-4 text-stone-600 dark:text-stone-400">{rule.priority}</td>
                   <td className="py-3 px-4">
                     <button
                       onClick={() => deleteMutation.mutate(rule.id)}
-                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      className="p-1 text-stone-400 hover:text-red-500 transition-colors"
                       aria-label={`Delete rule for ${rule.match_value}`}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -204,12 +204,12 @@ export default function CategoryRules() {
           </table>
         ) : (
           <div className="text-center py-12">
-            <Wand2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No rules yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">Create rules to automatically categorize your transactions</p>
+            <Wand2 className="w-12 h-12 text-stone-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-stone-900 dark:text-white mb-2">No rules yet</h3>
+            <p className="text-stone-500 dark:text-stone-400 mb-4">Create rules to automatically categorize your transactions</p>
             <button
               onClick={() => setShowCreate(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
             >
               Create First Rule
             </button>

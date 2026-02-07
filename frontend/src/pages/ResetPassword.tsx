@@ -59,16 +59,16 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Invalid reset link</h2>
-            <p className="text-gray-500 text-sm mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8">
+            <h2 className="text-lg font-semibold text-stone-900 mb-2">Invalid reset link</h2>
+            <p className="text-stone-500 text-sm mb-6">
               This password reset link is invalid or has expired.
             </p>
             <Link
               to="/forgot-password"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium text-sm"
             >
               Request a new link
             </Link>
@@ -79,24 +79,24 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Finance Tracker</h1>
-          <p className="text-gray-500 mt-2">Set a new password</p>
+          <h1 className="text-3xl font-bold text-stone-900">Finance Tracker</h1>
+          <p className="text-stone-500 mt-2">Set a new password</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8">
           {success ? (
             <div className="text-center py-4">
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Password reset!</h2>
-              <p className="text-gray-500 text-sm mb-6">
+              <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+              <h2 className="text-lg font-semibold text-stone-900 mb-2">Password reset!</h2>
+              <p className="text-stone-500 text-sm mb-6">
                 Your password has been reset successfully. You can now sign in with your new password.
               </p>
               <button
                 onClick={() => navigate('/login')}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium text-sm"
               >
                 Sign in
               </button>
@@ -112,7 +112,7 @@ export default function ResetPassword() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* New Password */}
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
                     New password
                   </label>
                   <div className="relative">
@@ -122,14 +122,14 @@ export default function ResetPassword() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors pr-10"
+                      className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors pr-10"
                       placeholder="Create a new password"
                       autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                     >
                       {showPassword ? (
                         <span className="w-5 h-5 block"><X className="w-5 h-5" /></span>
@@ -146,11 +146,11 @@ export default function ResetPassword() {
                         return (
                           <div key={check.label} className="flex items-center gap-2 text-xs">
                             {passed ? (
-                              <Check className="w-3.5 h-3.5 text-green-500" />
+                              <Check className="w-3.5 h-3.5 text-emerald-500" />
                             ) : (
-                              <X className="w-3.5 h-3.5 text-gray-300" />
+                              <X className="w-3.5 h-3.5 text-stone-300" />
                             )}
-                            <span className={passed ? 'text-green-600' : 'text-gray-400'}>
+                            <span className={passed ? 'text-emerald-600' : 'text-stone-400'}>
                               {check.label}
                             </span>
                           </div>
@@ -162,7 +162,7 @@ export default function ResetPassword() {
 
                 {/* Confirm Password */}
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-stone-700 mb-1">
                     Confirm new password
                   </label>
                   <input
@@ -171,8 +171,8 @@ export default function ResetPassword() {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors ${
-                      confirmPassword.length > 0 && !passwordsMatch ? 'border-red-300' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors ${
+                      confirmPassword.length > 0 && !passwordsMatch ? 'border-red-300' : 'border-stone-300'
                     }`}
                     placeholder="Confirm your new password"
                     autoComplete="new-password"
@@ -185,7 +185,7 @@ export default function ResetPassword() {
                 <button
                   type="submit"
                   disabled={isSubmitting || !allChecksPassed || !passwordsMatch}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -199,8 +199,8 @@ export default function ResetPassword() {
           )}
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          <Link to="/login" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium">
+        <p className="text-center text-sm text-stone-500 mt-6">
+          <Link to="/login" className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 font-medium">
             <ArrowLeft className="w-4 h-4" />
             Back to sign in
           </Link>

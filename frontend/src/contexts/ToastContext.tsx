@@ -49,17 +49,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const icons = {
-    success: <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />,
+    success: <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />,
     error: <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />,
     warning: <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />,
-    info: <Info className="w-5 h-5 text-blue-500 flex-shrink-0" />,
+    info: <Info className="w-5 h-5 text-teal-500 flex-shrink-0" />,
   }
 
   const bgColors = {
-    success: 'bg-green-50 border-green-200',
+    success: 'bg-emerald-50 border-green-200',
     error: 'bg-red-50 border-red-200',
     warning: 'bg-amber-50 border-amber-200',
-    info: 'bg-blue-50 border-blue-200',
+    info: 'bg-teal-50 border-teal-200',
   }
 
   return (
@@ -68,10 +68,10 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       role="alert"
     >
       {icons[toast.type]}
-      <p className="text-sm text-gray-800 flex-1">{toast.message}</p>
+      <p className="text-sm text-stone-800 flex-1">{toast.message}</p>
       <button
         onClick={onClose}
-        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+        className="text-stone-400 hover:text-stone-600 flex-shrink-0"
       >
         <X className="w-4 h-4" />
       </button>

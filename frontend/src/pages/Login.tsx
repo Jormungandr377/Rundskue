@@ -47,14 +47,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Finance Tracker</h1>
-          <p className="text-gray-500 mt-2">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-stone-900">Finance Tracker</h1>
+          <p className="text-stone-500 mt-2">Sign in to your account</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
@@ -66,7 +66,7 @@ export default function Login() {
               <>
                 {/* Email */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">
                     Email address
                   </label>
                   <input
@@ -75,7 +75,7 @@ export default function Login() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
                     placeholder="you@example.com"
                     autoComplete="email"
                   />
@@ -83,7 +83,7 @@ export default function Login() {
 
                 {/* Password */}
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
                     Password
                   </label>
                   <div className="relative">
@@ -93,14 +93,14 @@ export default function Login() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors pr-10"
+                      className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors pr-10"
                       placeholder="Enter your password"
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -114,11 +114,11 @@ export default function Login() {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-teal-600 border-stone-300 rounded focus:ring-teal-500"
                     />
-                    <span className="text-sm text-gray-600">Remember me</span>
+                    <span className="text-sm text-stone-600">Remember me</span>
                   </label>
-                  <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+                  <Link to="/forgot-password" className="text-sm text-teal-600 hover:text-teal-700">
                     Forgot password?
                   </Link>
                 </div>
@@ -126,11 +126,11 @@ export default function Login() {
             ) : (
               /* 2FA Code Input */
               <div>
-                <div className="flex items-center gap-2 mb-4 text-blue-600">
+                <div className="flex items-center gap-2 mb-4 text-teal-600">
                   <Shield className="w-5 h-5" />
                   <span className="text-sm font-medium">Two-factor authentication required</span>
                 </div>
-                <label htmlFor="totp" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="totp" className="block text-sm font-medium text-stone-700 mb-1">
                   Authentication code
                 </label>
                 <input
@@ -142,12 +142,12 @@ export default function Login() {
                   required
                   value={totpCode}
                   onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-center text-2xl tracking-widest"
+                  className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors text-center text-2xl tracking-widest"
                   placeholder="000000"
                   autoFocus
                   autoComplete="one-time-code"
                 />
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-stone-500">
                   Enter the 6-digit code from your authenticator app, or a backup code.
                 </p>
                 <button
@@ -157,7 +157,7 @@ export default function Login() {
                     setTotpCode('')
                     setError('')
                   }}
-                  className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+                  className="mt-3 text-sm text-teal-600 hover:text-teal-700"
                 >
                   Back to login
                 </button>
@@ -168,7 +168,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -180,9 +180,9 @@ export default function Login() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-stone-500 mt-6">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/signup" className="text-teal-600 hover:text-teal-700 font-medium">
             Create one
           </Link>
         </p>

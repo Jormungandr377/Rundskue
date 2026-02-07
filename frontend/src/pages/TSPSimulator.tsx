@@ -26,9 +26,9 @@ function formatCurrency(amount: number) {
 }
 
 const FUND_COLORS = {
-  G: '#6b7280',
-  F: '#3b82f6',
-  C: '#22c55e',
+  G: '#78716c',
+  F: '#14b8a6',
+  C: '#10b981',
   S: '#f59e0b',
   I: '#8b5cf6',
 };
@@ -132,12 +132,12 @@ export default function TSPSimulator() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">TSP Retirement Simulator</h1>
-          <p className="text-gray-500">Project your Thrift Savings Plan growth to retirement</p>
+          <h1 className="text-2xl font-bold text-stone-900">TSP Retirement Simulator</h1>
+          <p className="text-stone-500">Project your Thrift Savings Plan growth to retirement</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
         >
           <Plus className="w-5 h-5" />
           New Scenario
@@ -147,7 +147,7 @@ export default function TSPSimulator() {
       {/* Fund Performance Overview */}
       {fundPerformance && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Historical Fund Returns (10-Year Average)</h3>
+          <h3 className="text-lg font-semibold text-stone-900 mb-4">Historical Fund Returns (10-Year Average)</h3>
           <div className="grid grid-cols-5 gap-4">
             {(['G', 'F', 'C', 'S', 'I'] as const).map((fund) => {
               const data = fundPerformance[fund];
@@ -159,10 +159,10 @@ export default function TSPSimulator() {
                   >
                     {fund}
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-stone-900">
                     {data?.ten_year?.toFixed(1) || '—'}%
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-stone-500">
                     {fund === 'G' && 'Government Securities'}
                     {fund === 'F' && 'Fixed Income'}
                     {fund === 'C' && 'Common Stock (S&P)'}
@@ -179,21 +179,21 @@ export default function TSPSimulator() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Scenarios List */}
         <div className="card">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-900">Scenarios</h3>
+          <div className="p-4 border-b border-stone-200">
+            <h3 className="font-semibold text-stone-900">Scenarios</h3>
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-stone-100">
             {scenariosLoading ? (
               <div className="p-4 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600 mx-auto"></div>
               </div>
             ) : scenarios?.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <Calculator className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <div className="p-8 text-center text-stone-500">
+                <Calculator className="w-12 h-12 mx-auto mb-4 text-stone-300" />
                 <p>No scenarios yet</p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="mt-4 text-blue-600 hover:text-blue-700"
+                  className="mt-4 text-teal-600 hover:text-teal-700"
                 >
                   Create your first scenario
                 </button>
@@ -203,14 +203,14 @@ export default function TSPSimulator() {
                 <div
                   key={scenario.id}
                   className={`p-4 cursor-pointer transition-colors ${
-                    selectedScenarioId === scenario.id ? 'bg-blue-50' : 'hover:bg-gray-50'
+                    selectedScenarioId === scenario.id ? 'bg-teal-50' : 'hover:bg-stone-50'
                   }`}
                   onClick={() => setSelectedScenarioId(scenario.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">{scenario.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-stone-900">{scenario.name}</p>
+                      <p className="text-sm text-stone-500">
                         {scenario.contribution_pct}% contribution • Retire at {scenario.retirement_age}
                       </p>
                     </div>
@@ -222,7 +222,7 @@ export default function TSPSimulator() {
                           e.stopPropagation();
                           handleToggleCompare(scenario.id);
                         }}
-                        className="w-4 h-4 text-blue-600 rounded"
+                        className="w-4 h-4 text-teal-600 rounded"
                         title="Compare"
                       />
                       <button
@@ -232,7 +232,7 @@ export default function TSPSimulator() {
                             deleteMutation.mutate(scenario.id);
                           }
                         }}
-                        className="p-1 text-gray-400 hover:text-red-600"
+                        className="p-1 text-stone-400 hover:text-red-600"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -251,25 +251,25 @@ export default function TSPSimulator() {
               {/* Summary Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="card p-4">
-                  <p className="text-sm text-gray-500">Current Balance</p>
-                  <p className="text-xl font-bold text-gray-900">
+                  <p className="text-sm text-stone-500">Current Balance</p>
+                  <p className="text-xl font-bold text-stone-900">
                     {formatCurrency(selectedScenario.current_balance)}
                   </p>
                 </div>
                 <div className="card p-4">
-                  <p className="text-sm text-gray-500">Final Balance</p>
-                  <p className="text-xl font-bold text-green-600">
+                  <p className="text-sm text-stone-500">Final Balance</p>
+                  <p className="text-xl font-bold text-emerald-600">
                     {formatCurrency(projection.final_balance)}
                   </p>
                 </div>
                 <div className="card p-4">
-                  <p className="text-sm text-gray-500">Total Contributions</p>
-                  <p className="text-xl font-bold text-blue-600">
+                  <p className="text-sm text-stone-500">Total Contributions</p>
+                  <p className="text-xl font-bold text-teal-600">
                     {formatCurrency(projection.total_contributions + projection.total_employer_match)}
                   </p>
                 </div>
                 <div className="card p-4">
-                  <p className="text-sm text-gray-500">Investment Growth</p>
+                  <p className="text-sm text-stone-500">Investment Growth</p>
                   <p className="text-xl font-bold text-purple-600">
                     {formatCurrency(projection.total_growth)}
                   </p>
@@ -278,7 +278,7 @@ export default function TSPSimulator() {
 
               {/* Allocation */}
               <div className="card p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Fund Allocation</h3>
+                <h3 className="font-semibold text-stone-900 mb-4">Fund Allocation</h3>
                 <div className="flex items-center gap-4">
                   {(['G', 'F', 'C', 'S', 'I'] as const).map((fund) => {
                     const allocObj = (selectedScenario as any).allocation;
@@ -297,14 +297,14 @@ export default function TSPSimulator() {
                     );
                   })}
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-stone-500 mt-2">
                   Expected return: {(projection.average_return_rate ?? 0).toFixed(1)}% annually
                 </p>
               </div>
 
               {/* Projection Chart */}
               <div className="card p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Balance Projection</h3>
+                <h3 className="font-semibold text-stone-900 mb-4">Balance Projection</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={projection.projections || []}>
@@ -323,8 +323,8 @@ export default function TSPSimulator() {
                         type="monotone"
                         dataKey="ending_balance"
                         name="Balance"
-                        stroke="#3b82f6"
-                        fill="#3b82f6"
+                        stroke="#14b8a6"
+                        fill="#14b8a6"
                         fillOpacity={0.3}
                       />
                     </AreaChart>
@@ -334,32 +334,32 @@ export default function TSPSimulator() {
 
               {/* Year-by-Year Details */}
               <div className="card overflow-hidden">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-900">Year-by-Year Breakdown</h3>
+                <div className="p-4 border-b border-stone-200">
+                  <h3 className="font-semibold text-stone-900">Year-by-Year Breakdown</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-stone-50">
                       <tr>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Year</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-600">Age</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-600">Starting Balance</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-600">Your Contribution</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-600">Agency Match</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-600">Growth</th>
-                        <th className="text-right py-3 px-4 font-medium text-gray-600">Balance</th>
+                        <th className="text-left py-3 px-4 font-medium text-stone-600">Year</th>
+                        <th className="text-left py-3 px-4 font-medium text-stone-600">Age</th>
+                        <th className="text-right py-3 px-4 font-medium text-stone-600">Starting Balance</th>
+                        <th className="text-right py-3 px-4 font-medium text-stone-600">Your Contribution</th>
+                        <th className="text-right py-3 px-4 font-medium text-stone-600">Agency Match</th>
+                        <th className="text-right py-3 px-4 font-medium text-stone-600">Growth</th>
+                        <th className="text-right py-3 px-4 font-medium text-stone-600">Balance</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(projection.projections || []).slice(0, 10).map((p: any, idx: number) => (
-                        <tr key={p.year} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="py-3 px-4 text-gray-900">{p.year}</td>
-                          <td className="py-3 px-4 text-gray-600">{p.age || '—'}</td>
-                          <td className="py-3 px-4 text-right text-gray-600">{formatCurrency(p.starting_balance || 0)}</td>
-                          <td className="py-3 px-4 text-right text-blue-600">{formatCurrency(p.contribution || 0)}</td>
-                          <td className="py-3 px-4 text-right text-green-600">{formatCurrency(p.employer_match || 0)}</td>
+                        <tr key={p.year} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50'}>
+                          <td className="py-3 px-4 text-stone-900">{p.year}</td>
+                          <td className="py-3 px-4 text-stone-600">{p.age || '—'}</td>
+                          <td className="py-3 px-4 text-right text-stone-600">{formatCurrency(p.starting_balance || 0)}</td>
+                          <td className="py-3 px-4 text-right text-teal-600">{formatCurrency(p.contribution || 0)}</td>
+                          <td className="py-3 px-4 text-right text-emerald-600">{formatCurrency(p.employer_match || 0)}</td>
                           <td className="py-3 px-4 text-right text-purple-600">{formatCurrency(p.growth || 0)}</td>
-                          <td className="py-3 px-4 text-right font-semibold text-gray-900">{formatCurrency(p.ending_balance || 0)}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-stone-900">{formatCurrency(p.ending_balance || 0)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -369,9 +369,9 @@ export default function TSPSimulator() {
             </>
           ) : (
             <div className="card p-12 text-center">
-              <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Select a scenario</h3>
-              <p className="text-gray-500">
+              <TrendingUp className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-stone-900 mb-2">Select a scenario</h3>
+              <p className="text-stone-500">
                 Choose a scenario from the list to view projections, or create a new one.
               </p>
             </div>
@@ -382,7 +382,7 @@ export default function TSPSimulator() {
       {/* Comparison Chart */}
       {comparison && comparison.scenarios && comparison.scenarios.length >= 2 && (
         <div className="card p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Scenario Comparison</h3>
+          <h3 className="font-semibold text-stone-900 mb-4">Scenario Comparison</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={comparison.comparison || []}>
@@ -397,7 +397,7 @@ export default function TSPSimulator() {
                     type="monotone"
                     dataKey={`scenario_${s.scenario_id}_balance`}
                     name={s.scenario_name}
-                    stroke={['#3b82f6', '#22c55e', '#f59e0b', '#ef4444'][idx]}
+                    stroke={['#14b8a6', '#10b981', '#f59e0b', '#ef4444'][idx]}
                     strokeWidth={2}
                   />
                 ))}
@@ -471,29 +471,29 @@ function CreateScenarioModal({ profileId, onClose, onCreate }: CreateScenarioMod
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Create TSP Scenario</h3>
+        <div className="p-6 border-b border-stone-200">
+          <h3 className="text-lg font-semibold text-stone-900">Create TSP Scenario</h3>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Scenario Name</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Scenario Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Current TSP Balance</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Current TSP Balance</label>
               <input
                 type="number"
                 value={formData.current_balance}
                 onChange={(e) => setFormData({ ...formData, current_balance: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
           </div>
@@ -501,31 +501,31 @@ function CreateScenarioModal({ profileId, onClose, onCreate }: CreateScenarioMod
           {/* Personal Info */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Birth Year</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Birth Year</label>
               <input
                 type="number"
                 value={formData.birth_year}
                 onChange={(e) => setFormData({ ...formData, birth_year: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Retirement Age</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Retirement Age</label>
               <input
                 type="number"
                 value={formData.retirement_age}
                 onChange={(e) => setFormData({ ...formData, retirement_age: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Annual Pay Increase %</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Annual Pay Increase %</label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.annual_pay_increase_pct}
                 onChange={(e) => setFormData({ ...formData, annual_pay_increase_pct: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
           </div>
@@ -533,36 +533,36 @@ function CreateScenarioModal({ profileId, onClose, onCreate }: CreateScenarioMod
           {/* Contribution */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Annual Base Pay</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Annual Base Pay</label>
               <input
                 type="number"
                 value={formData.base_pay}
                 onChange={(e) => setFormData({ ...formData, base_pay: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contribution % (BRS Match up to 5%)</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Contribution % (BRS Match up to 5%)</label>
               <input
                 type="number"
                 step="0.5"
                 value={formData.contribution_pct}
                 onChange={(e) => setFormData({ ...formData, contribution_pct: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
           </div>
 
           {/* Fund Allocation */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               Fund Allocation (Total: {totalAllocation}%)
               {totalAllocation !== 100 && <span className="text-red-500 ml-2">Must equal 100%</span>}
             </label>
             <div className="grid grid-cols-5 gap-4">
               {(['G', 'F', 'C', 'S', 'I'] as const).map((fund) => (
                 <div key={fund}>
-                  <label className="block text-xs text-gray-500 mb-1 text-center">{fund} Fund</label>
+                  <label className="block text-xs text-stone-500 mb-1 text-center">{fund} Fund</label>
                   <input
                     type="number"
                     value={formData[`allocation_${fund.toLowerCase()}` as keyof typeof formData]}
@@ -570,7 +570,7 @@ function CreateScenarioModal({ profileId, onClose, onCreate }: CreateScenarioMod
                       ...formData,
                       [`allocation_${fund.toLowerCase()}`]: Number(e.target.value),
                     })}
-                    className="w-full px-2 py-2 border border-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-2 border border-stone-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-teal-500"
                     min="0"
                     max="100"
                   />
@@ -583,14 +583,14 @@ function CreateScenarioModal({ profileId, onClose, onCreate }: CreateScenarioMod
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={totalAllocation !== 100}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Create Scenario
             </button>

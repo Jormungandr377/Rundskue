@@ -21,7 +21,7 @@ import {
 } from 'recharts';
 import { analytics } from '../api';
 
-const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
+const COLORS = ['#14b8a6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-US', {
@@ -76,13 +76,13 @@ export default function Reports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-500">Analyze your financial data</p>
+          <h1 className="text-2xl font-bold text-stone-900">Reports</h1>
+          <p className="text-stone-500">Analyze your financial data</p>
         </div>
       </div>
 
       {/* Report Type Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-stone-200">
         {[
           { id: 'spending', label: 'Spending by Category' },
           { id: 'income-expense', label: 'Income vs Expenses' },
@@ -94,8 +94,8 @@ export default function Reports() {
             onClick={() => setReportType(tab.id as ReportType)}
             className={`px-4 py-3 font-medium text-sm transition-colors ${
               reportType === tab.id
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-teal-600 border-b-2 border-teal-600'
+                : 'text-stone-500 hover:text-stone-700'
             }`}
           >
             {tab.label}
@@ -106,19 +106,19 @@ export default function Reports() {
       {/* Date Range (for some reports) */}
       {(reportType === 'spending' || reportType === 'income-expense') && (
         <div className="card p-4 flex items-center gap-4">
-          <Calendar className="w-5 h-5 text-gray-400" />
+          <Calendar className="w-5 h-5 text-stone-400" />
           <input
             type="date"
             value={dateRange.start}
             onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
-          <span className="text-gray-400">to</span>
+          <span className="text-stone-400">to</span>
           <input
             type="date"
             value={dateRange.end}
             onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
       )}
@@ -127,7 +127,7 @@ export default function Reports() {
       <div className="card p-6">
         {reportType === 'spending' && spending && (
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending by Category</h3>
+            <h3 className="text-lg font-semibold text-stone-900 mb-4">Spending by Category</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Pie Chart */}
               <div className="h-80">
@@ -161,15 +161,15 @@ export default function Reports() {
                         className="w-4 h-4 rounded"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       />
-                      <span className="text-gray-700">{cat.category_name}</span>
+                      <span className="text-stone-700">{cat.category_name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="font-semibold text-gray-900">{formatCurrency(cat.amount)}</span>
-                      <span className="text-gray-500 text-sm ml-2">({cat.percentage}%)</span>
+                      <span className="font-semibold text-stone-900">{formatCurrency(cat.amount)}</span>
+                      <span className="text-stone-500 text-sm ml-2">({cat.percentage}%)</span>
                     </div>
                   </div>
                 ))}
-                <div className="pt-3 border-t border-gray-200 flex items-center justify-between font-semibold">
+                <div className="pt-3 border-t border-stone-200 flex items-center justify-between font-semibold">
                   <span>Total</span>
                   <span>{formatCurrency(spending.reduce((sum, cat) => sum + cat.amount, 0))}</span>
                 </div>
@@ -180,21 +180,21 @@ export default function Reports() {
 
         {reportType === 'income-expense' && cashFlow && (
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Income vs Expenses</h3>
+            <h3 className="text-lg font-semibold text-stone-900 mb-4">Income vs Expenses</h3>
             
             {/* Summary */}
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-green-700">Income</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(cashFlow.total_income)}</p>
+              <div className="p-4 bg-emerald-50 rounded-lg">
+                <p className="text-sm text-emerald-700">Income</p>
+                <p className="text-2xl font-bold text-emerald-600">{formatCurrency(cashFlow.total_income)}</p>
               </div>
               <div className="p-4 bg-red-50 rounded-lg">
                 <p className="text-sm text-red-700">Expenses</p>
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(cashFlow.total_expenses)}</p>
               </div>
-              <div className={`p-4 rounded-lg ${cashFlow.net_cash_flow >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-                <p className={`text-sm ${cashFlow.net_cash_flow >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>Net</p>
-                <p className={`text-2xl font-bold ${cashFlow.net_cash_flow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+              <div className={`p-4 rounded-lg ${cashFlow.net_cash_flow >= 0 ? 'bg-teal-50' : 'bg-orange-50'}`}>
+                <p className={`text-sm ${cashFlow.net_cash_flow >= 0 ? 'text-teal-700' : 'text-orange-700'}`}>Net</p>
+                <p className={`text-2xl font-bold ${cashFlow.net_cash_flow >= 0 ? 'text-teal-600' : 'text-orange-600'}`}>
                   {formatCurrency(cashFlow.net_cash_flow)}
                 </p>
               </div>
@@ -213,7 +213,7 @@ export default function Reports() {
                   <XAxis dataKey="name" />
                   <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
                   <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                  <Bar dataKey="amount" fill="#3b82f6" />
+                  <Bar dataKey="amount" fill="#14b8a6" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -222,7 +222,7 @@ export default function Reports() {
 
         {reportType === 'trends' && trends && (
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Trends (Past 12 Months)</h3>
+            <h3 className="text-lg font-semibold text-stone-900 mb-4">Monthly Trends (Past 12 Months)</h3>
             <div className="h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trends}>
@@ -241,8 +241,8 @@ export default function Reports() {
                     type="monotone"
                     dataKey="income"
                     name="Income"
-                    stroke="#22c55e"
-                    fill="#22c55e"
+                    stroke="#10b981"
+                    fill="#10b981"
                     fillOpacity={0.3}
                   />
                   <Area
@@ -257,7 +257,7 @@ export default function Reports() {
                     type="monotone"
                     dataKey="net"
                     name="Net"
-                    stroke="#3b82f6"
+                    stroke="#14b8a6"
                     strokeWidth={2}
                   />
                 </AreaChart>
@@ -268,7 +268,7 @@ export default function Reports() {
 
         {reportType === 'net-worth' && netWorth && (
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Net Worth Over Time</h3>
+            <h3 className="text-lg font-semibold text-stone-900 mb-4">Net Worth Over Time</h3>
             {netWorth.length > 0 ? (
               <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
@@ -288,8 +288,8 @@ export default function Reports() {
                       type="monotone"
                       dataKey="total_assets"
                       name="Assets"
-                      stroke="#22c55e"
-                      fill="#22c55e"
+                      stroke="#10b981"
+                      fill="#10b981"
                       fillOpacity={0.3}
                     />
                     <Area
@@ -304,14 +304,14 @@ export default function Reports() {
                       type="monotone"
                       dataKey="net_worth"
                       name="Net Worth"
-                      stroke="#3b82f6"
+                      stroke="#14b8a6"
                       strokeWidth={3}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-stone-500">
                 <p>No net worth history available.</p>
                 <p className="text-sm mt-2">Net worth snapshots are created automatically during daily syncs.</p>
               </div>

@@ -209,18 +209,18 @@ export default function RetirementTab() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Calculator className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-white flex items-center gap-2">
+          <Calculator className="w-7 h-7 text-teal-600 dark:text-teal-400" />
           Retirement Projections
         </h1>
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-stone-500 dark:text-stone-400">
           Estimate your retirement savings growth over time
         </p>
       </div>
 
       {/* Account Type Selector */}
       <div className="card p-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
           Account Type
         </label>
         <div className="flex flex-wrap gap-2">
@@ -230,8 +230,8 @@ export default function RetirementTab() {
               onClick={() => setAccountType(type.value)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 accountType === type.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
               }`}
             >
               {type.label}
@@ -242,15 +242,15 @@ export default function RetirementTab() {
 
       {/* Input Form */}
       <div className="card p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
+          <Briefcase className="w-5 h-5 text-stone-500 dark:text-stone-400" />
           {accountLabel} Parameters
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Current Age */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Current Age
             </label>
             <input
@@ -259,13 +259,13 @@ export default function RetirementTab() {
               max={80}
               value={currentAge}
               onChange={(e) => setCurrentAge(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           {/* Retirement Age */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Retirement Age
             </label>
             <input
@@ -274,13 +274,13 @@ export default function RetirementTab() {
               max={100}
               value={retirementAge}
               onChange={(e) => setRetirementAge(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           {/* Current Balance */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Current Balance ($)
             </label>
             <input
@@ -288,13 +288,13 @@ export default function RetirementTab() {
               min={0}
               value={currentBalance}
               onChange={(e) => setCurrentBalance(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           {/* Annual Contribution */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Annual Contribution ($)
             </label>
             <input
@@ -302,13 +302,13 @@ export default function RetirementTab() {
               min={0}
               value={annualContribution}
               onChange={(e) => setAnnualContribution(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           {/* Expected Return */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Expected Annual Return (%)
             </label>
             <input
@@ -318,13 +318,13 @@ export default function RetirementTab() {
               step={0.1}
               value={expectedReturn}
               onChange={(e) => setExpectedReturn(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           {/* Annual Raise */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Annual Raise (%)
             </label>
             <input
@@ -334,7 +334,7 @@ export default function RetirementTab() {
               step={0.1}
               value={annualRaisePct}
               onChange={(e) => setAnnualRaisePct(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
@@ -342,7 +342,7 @@ export default function RetirementTab() {
           {showEmployerMatch && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Employer Match (%)
                 </label>
                 <input
@@ -352,12 +352,12 @@ export default function RetirementTab() {
                   step={0.5}
                   value={employerMatchPct}
                   onChange={(e) => setEmployerMatchPct(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                   Annual Salary ($)
                 </label>
                 <input
@@ -365,7 +365,7 @@ export default function RetirementTab() {
                   min={0}
                   value={annualSalary}
                   onChange={(e) => setAnnualSalary(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
             </>
@@ -373,13 +373,13 @@ export default function RetirementTab() {
 
           {/* Tax Bracket */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Tax Bracket (%)
             </label>
             <select
               value={taxBracket}
               onChange={(e) => setTaxBracket(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               {TAX_BRACKETS.map((rate) => (
                 <option key={rate} value={rate}>
@@ -405,14 +405,14 @@ export default function RetirementTab() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="card p-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+              <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
                 Projected Balance at {retirementAge}
               </p>
-              <p className="text-xl font-bold text-green-600 dark:text-green-400">
+              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(projection.finalBalance)}
               </p>
             </div>
@@ -421,12 +421,12 @@ export default function RetirementTab() {
 
         <div className="card p-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-              <DollarSign className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-full">
+              <DollarSign className="w-6 h-6 text-teal-600 dark:text-teal-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Contributions</p>
-              <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+              <p className="text-sm text-stone-500 dark:text-stone-400">Total Contributions</p>
+              <p className="text-xl font-bold text-teal-600 dark:text-teal-400">
                 {formatCurrency(projection.totalContributions)}
               </p>
             </div>
@@ -440,7 +440,7 @@ export default function RetirementTab() {
                 <Briefcase className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Employer Match</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400">Total Employer Match</p>
                 <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
                   {formatCurrency(projection.totalEmployerMatch)}
                 </p>
@@ -455,7 +455,7 @@ export default function RetirementTab() {
               <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Investment Growth</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Total Investment Growth</p>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(projection.totalGrowth)}
               </p>
@@ -469,7 +469,7 @@ export default function RetirementTab() {
               <PiggyBank className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
                 Est. Monthly Income (4% Rule)
               </p>
               <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
@@ -485,10 +485,10 @@ export default function RetirementTab() {
               <Calendar className="w-6 h-6 text-teal-600 dark:text-teal-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
                 After-Tax Monthly Income
                 {isRoth && (
-                  <span className="ml-1 text-xs text-green-600 dark:text-green-400">(Roth: tax-free)</span>
+                  <span className="ml-1 text-xs text-emerald-600 dark:text-emerald-400">(Roth: tax-free)</span>
                 )}
               </p>
               <p className="text-xl font-bold text-teal-600 dark:text-teal-400">
@@ -502,17 +502,17 @@ export default function RetirementTab() {
       {/* Projection Chart */}
       {chartData.length > 0 && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">
             Balance Projection Over Time
           </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                 <XAxis
                   dataKey="age"
                   label={{ value: 'Age', position: 'insideBottom', offset: -5 }}
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  tick={{ fill: '#78716c', fontSize: 12 }}
                 />
                 <YAxis
                   tickFormatter={(value: number) => {
@@ -520,14 +520,14 @@ export default function RetirementTab() {
                     if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
                     return `$${value}`;
                   }}
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  tick={{ fill: '#78716c', fontSize: 12 }}
                 />
                 <Tooltip
                   formatter={(value: number, name: string) => [formatCurrency(value), name]}
                   labelFormatter={(label) => `Age ${label}`}
                   contentStyle={{
                     backgroundColor: 'rgba(255,255,255,0.95)',
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid #e7e5e4',
                     borderRadius: '8px',
                   }}
                 />
@@ -536,16 +536,16 @@ export default function RetirementTab() {
                   type="monotone"
                   dataKey="Contributions"
                   stackId="1"
-                  stroke="#3b82f6"
-                  fill="#3b82f6"
+                  stroke="#14b8a6"
+                  fill="#14b8a6"
                   fillOpacity={0.6}
                 />
                 <Area
                   type="monotone"
                   dataKey="Growth"
                   stackId="1"
-                  stroke="#22c55e"
-                  fill="#22c55e"
+                  stroke="#10b981"
+                  fill="#10b981"
                   fillOpacity={0.6}
                 />
               </AreaChart>
@@ -557,14 +557,14 @@ export default function RetirementTab() {
       {/* Year-by-Year Breakdown Table */}
       {projection.yearByYear.length > 0 && (
         <div className="card overflow-hidden">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="p-4 border-b border-stone-200 dark:border-stone-700 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
               Year-by-Year Breakdown
             </h3>
             {projection.yearByYear.length > 10 && (
               <button
                 onClick={() => setShowAllYears(!showAllYears)}
-                className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="flex items-center gap-1 text-sm text-teal-600 dark:text-teal-400 hover:underline"
               >
                 {showAllYears ? (
                   <>
@@ -581,26 +581,26 @@ export default function RetirementTab() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-stone-50 dark:bg-stone-800">
                 <tr>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
                     Year
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
                     Age
                   </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
                     Contribution
                   </th>
                   {showEmployerMatch && (
-                    <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                    <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
                       Employer Match
                     </th>
                   )}
-                  <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
                     Growth
                   </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
                     Balance
                   </th>
                 </tr>
@@ -611,13 +611,13 @@ export default function RetirementTab() {
                     key={row.year}
                     className={
                       idx % 2 === 0
-                        ? 'bg-white dark:bg-gray-900'
-                        : 'bg-gray-50 dark:bg-gray-800/50'
+                        ? 'bg-white dark:bg-stone-900'
+                        : 'bg-stone-50 dark:bg-stone-800/50'
                     }
                   >
-                    <td className="py-3 px-4 text-gray-900 dark:text-white">{row.year}</td>
-                    <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{row.age}</td>
-                    <td className="py-3 px-4 text-right text-blue-600 dark:text-blue-400">
+                    <td className="py-3 px-4 text-stone-900 dark:text-white">{row.year}</td>
+                    <td className="py-3 px-4 text-stone-600 dark:text-stone-400">{row.age}</td>
+                    <td className="py-3 px-4 text-right text-teal-600 dark:text-teal-400">
                       {formatCurrency(row.contribution)}
                     </td>
                     {showEmployerMatch && (
@@ -625,10 +625,10 @@ export default function RetirementTab() {
                         {formatCurrency(row.employerMatch)}
                       </td>
                     )}
-                    <td className="py-3 px-4 text-right text-green-600 dark:text-green-400">
+                    <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(row.growth)}
                     </td>
-                    <td className="py-3 px-4 text-right font-semibold text-gray-900 dark:text-white">
+                    <td className="py-3 px-4 text-right font-semibold text-stone-900 dark:text-white">
                       {formatCurrency(row.balance)}
                     </td>
                   </tr>
@@ -637,10 +637,10 @@ export default function RetirementTab() {
             </table>
           </div>
           {!showAllYears && projection.yearByYear.length > 10 && (
-            <div className="p-3 text-center border-t border-gray-200 dark:border-gray-700">
+            <div className="p-3 text-center border-t border-stone-200 dark:border-stone-700">
               <button
                 onClick={() => setShowAllYears(true)}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-sm text-teal-600 dark:text-teal-400 hover:underline"
               >
                 Show remaining {projection.yearByYear.length - 10} years
               </button>
@@ -652,11 +652,11 @@ export default function RetirementTab() {
       {/* Empty state */}
       {projection.yearByYear.length === 0 && (
         <div className="card p-12 text-center">
-          <Calculator className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <Calculator className="w-12 h-12 text-stone-400 dark:text-stone-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-stone-900 dark:text-white mb-2">
             No projection to display
           </h3>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-stone-500 dark:text-stone-400">
             Your retirement age must be greater than your current age to generate a projection.
           </p>
         </div>

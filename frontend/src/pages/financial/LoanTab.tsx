@@ -247,15 +247,15 @@ export default function LoanTab() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Loan Calculator</h1>
-        <p className="text-gray-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Loan Calculator</h1>
+        <p className="text-stone-500 dark:text-stone-400">
           Calculate payments, compare payoff strategies, and view amortization schedules
         </p>
       </div>
 
       {/* Loan Type Presets */}
       <div className="card p-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">
           Loan Type
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -269,14 +269,14 @@ export default function LoanTab() {
                   onClick={() => handlePresetChange(key)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
                     isActive
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                      ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300'
+                      : 'border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500 text-stone-700 dark:text-stone-300'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-teal-600 dark:text-teal-400' : 'text-stone-400 dark:text-stone-500'}`} />
                   <div className="text-left">
                     <p className="font-medium text-sm">{preset.label}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
                       {formatCurrency(preset.amount)} / {preset.rate}%
                     </p>
                   </div>
@@ -289,10 +289,10 @@ export default function LoanTab() {
 
       {/* Input Form */}
       <div className="card p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Loan Details</h2>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Loan Details</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Loan Amount ($)
             </label>
             <input
@@ -301,11 +301,11 @@ export default function LoanTab() {
               onChange={(e) => setLoanAmount(Number(e.target.value))}
               min={0}
               step={1000}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Annual Interest Rate (%)
             </label>
             <input
@@ -315,11 +315,11 @@ export default function LoanTab() {
               min={0}
               max={50}
               step={0.1}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Loan Term (years)
             </label>
             <input
@@ -329,11 +329,11 @@ export default function LoanTab() {
               min={1}
               max={50}
               step={1}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Extra Monthly Payment ($)
             </label>
             <input
@@ -342,7 +342,7 @@ export default function LoanTab() {
               onChange={(e) => setExtraPayment(Number(e.target.value))}
               min={0}
               step={50}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
         </div>
@@ -354,14 +354,14 @@ export default function LoanTab() {
           <div className={`grid gap-4 ${hasExtra ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' : 'grid-cols-2 lg:grid-cols-4'}`}>
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-1">
-                <DollarSign className="w-4 h-4 text-blue-500" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Monthly Payment</p>
+                <DollarSign className="w-4 h-4 text-teal-500" />
+                <p className="text-sm text-stone-500 dark:text-stone-400">Monthly Payment</p>
               </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-stone-900 dark:text-white">
                 {formatCurrency(result.monthlyPayment)}
               </p>
               {hasExtra && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                <p className="text-xs text-teal-600 dark:text-teal-400 mt-1">
                   + {formatCurrency(extraPayment)} extra
                 </p>
               )}
@@ -370,13 +370,13 @@ export default function LoanTab() {
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-1">
                 <TrendingDown className="w-4 h-4 text-red-500" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Interest</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400">Total Interest</p>
               </div>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(hasExtra ? result.extraTotalInterest : result.totalInterest)}
               </p>
               {hasExtra && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 line-through mt-1">
+                <p className="text-xs text-stone-400 dark:text-stone-500 line-through mt-1">
                   {formatCurrency(result.totalInterest)}
                 </p>
               )}
@@ -385,13 +385,13 @@ export default function LoanTab() {
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign className="w-4 h-4 text-purple-500" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Cost</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400">Total Cost</p>
               </div>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(hasExtra ? result.extraTotalCost : result.totalCost)}
               </p>
               {hasExtra && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 line-through mt-1">
+                <p className="text-xs text-stone-400 dark:text-stone-500 line-through mt-1">
                   {formatCurrency(result.totalCost)}
                 </p>
               )}
@@ -399,14 +399,14 @@ export default function LoanTab() {
 
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-1">
-                <Calendar className="w-4 h-4 text-green-500" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Payoff Date</p>
+                <Calendar className="w-4 h-4 text-emerald-500" />
+                <p className="text-sm text-stone-500 dark:text-stone-400">Payoff Date</p>
               </div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-stone-900 dark:text-white">
                 {formatDate(hasExtra ? result.extraPayoffDate : result.payoffDate)}
               </p>
               {hasExtra && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 line-through mt-1">
+                <p className="text-xs text-stone-400 dark:text-stone-500 line-through mt-1">
                   {formatDate(result.payoffDate)}
                 </p>
               )}
@@ -414,22 +414,22 @@ export default function LoanTab() {
 
             {hasExtra && (
               <>
-                <div className="card p-4 border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+                <div className="card p-4 border-green-200 dark:border-green-800 bg-emerald-50/50 dark:bg-emerald-900/10">
                   <div className="flex items-center gap-2 mb-1">
-                    <Clock className="w-4 h-4 text-green-500" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Time Saved</p>
+                    <Clock className="w-4 h-4 text-emerald-500" />
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Time Saved</p>
                   </div>
-                  <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                  <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                     {formatMonths(result.monthsSaved)}
                   </p>
                 </div>
 
-                <div className="card p-4 border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+                <div className="card p-4 border-green-200 dark:border-green-800 bg-emerald-50/50 dark:bg-emerald-900/10">
                   <div className="flex items-center gap-2 mb-1">
-                    <DollarSign className="w-4 h-4 text-green-500" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Interest Saved</p>
+                    <DollarSign className="w-4 h-4 text-emerald-500" />
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Interest Saved</p>
                   </div>
-                  <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                  <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(result.interestSaved)}
                   </p>
                 </div>
@@ -439,28 +439,28 @@ export default function LoanTab() {
 
           {/* Payment Breakdown Chart */}
           <div className="card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">
               Payment Breakdown Over Time
             </h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={result.chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                   <XAxis
                     dataKey="year"
                     label={{ value: 'Year', position: 'insideBottomRight', offset: -5 }}
-                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                    tick={{ fill: '#78716c', fontSize: 12 }}
                   />
                   <YAxis
                     tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                    tick={{ fill: '#78716c', fontSize: 12 }}
                   />
                   <Tooltip
                     formatter={(value: number, name: string) => [formatCurrency(value), name]}
                     labelFormatter={(label) => `Year ${label}`}
                     contentStyle={{
                       backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      border: '1px solid #e5e7eb',
+                      border: '1px solid #e7e5e4',
                       borderRadius: '8px',
                     }}
                   />
@@ -470,8 +470,8 @@ export default function LoanTab() {
                     dataKey="principal"
                     name="Principal"
                     stackId="1"
-                    stroke="#3b82f6"
-                    fill="#3b82f6"
+                    stroke="#14b8a6"
+                    fill="#14b8a6"
                     fillOpacity={0.6}
                   />
                   <Area
@@ -486,41 +486,41 @@ export default function LoanTab() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-2 text-center">
               Notice how principal payments increase over time while interest payments decrease
             </p>
           </div>
 
           {/* Amortization Schedule Table */}
           <div className="card overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="p-4 border-b border-stone-200 dark:border-stone-700">
+              <h2 className="text-lg font-semibold text-stone-900 dark:text-white">
                 Amortization Schedule (Yearly Summary)
               </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                <thead className="bg-stone-50 dark:bg-stone-700/50 border-b border-stone-200 dark:border-stone-700">
                   <tr>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Year</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Starting Balance</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Total Paid</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Principal</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Interest</th>
-                    <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-300">Ending Balance</th>
+                    <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Year</th>
+                    <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Starting Balance</th>
+                    <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Total Paid</th>
+                    <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Principal</th>
+                    <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Interest</th>
+                    <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Ending Balance</th>
                     {hasExtra && (
                       <>
-                        <th className="text-right py-3 px-4 font-medium text-green-600 dark:text-green-400 border-l border-gray-200 dark:border-gray-600">
+                        <th className="text-right py-3 px-4 font-medium text-emerald-600 dark:text-emerald-400 border-l border-stone-200 dark:border-stone-600">
                           Balance (w/ Extra)
                         </th>
-                        <th className="text-right py-3 px-4 font-medium text-green-600 dark:text-green-400">
+                        <th className="text-right py-3 px-4 font-medium text-emerald-600 dark:text-emerald-400">
                           Interest (w/ Extra)
                         </th>
                       </>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                <tbody className="divide-y divide-stone-100 dark:divide-stone-700">
                   {result.yearlySchedule.map((row, idx) => {
                     const extraRow = hasExtra ? result.extraYearlySchedule[idx] : null;
                     const extraPaidOff = hasExtra && (!extraRow || extraRow.startingBalance <= 0);
@@ -530,36 +530,36 @@ export default function LoanTab() {
                         key={row.year}
                         className={`${
                           idx % 2 === 0
-                            ? 'bg-white dark:bg-gray-800'
-                            : 'bg-gray-50/50 dark:bg-gray-750/50'
+                            ? 'bg-white dark:bg-stone-800'
+                            : 'bg-stone-50/50 dark:bg-gray-750/50'
                         } ${extraPaidOff ? 'opacity-50' : ''}`}
                       >
-                        <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{row.year}</td>
-                        <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
+                        <td className="py-3 px-4 font-medium text-stone-900 dark:text-white">{row.year}</td>
+                        <td className="py-3 px-4 text-right text-stone-600 dark:text-stone-400">
                           {formatCurrency(row.startingBalance)}
                         </td>
-                        <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">
+                        <td className="py-3 px-4 text-right text-stone-600 dark:text-stone-400">
                           {formatCurrency(row.totalPaid)}
                         </td>
-                        <td className="py-3 px-4 text-right text-blue-600 dark:text-blue-400">
+                        <td className="py-3 px-4 text-right text-teal-600 dark:text-teal-400">
                           {formatCurrency(row.principal)}
                         </td>
                         <td className="py-3 px-4 text-right text-red-600 dark:text-red-400">
                           {formatCurrency(row.interest)}
                         </td>
-                        <td className="py-3 px-4 text-right font-medium text-gray-900 dark:text-white">
+                        <td className="py-3 px-4 text-right font-medium text-stone-900 dark:text-white">
                           {formatCurrency(row.endingBalance)}
                         </td>
                         {hasExtra && (
                           <>
-                            <td className="py-3 px-4 text-right border-l border-gray-200 dark:border-gray-600 font-medium text-green-600 dark:text-green-400">
+                            <td className="py-3 px-4 text-right border-l border-stone-200 dark:border-stone-600 font-medium text-emerald-600 dark:text-emerald-400">
                               {extraRow && extraRow.startingBalance > 0
                                 ? formatCurrency(extraRow.endingBalance)
                                 : extraPaidOff
                                   ? 'Paid off'
                                   : formatCurrency(0)}
                             </td>
-                            <td className="py-3 px-4 text-right text-green-600 dark:text-green-400">
+                            <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400">
                               {extraRow && extraRow.startingBalance > 0
                                 ? formatCurrency(extraRow.interest)
                                 : '--'}
@@ -570,28 +570,28 @@ export default function LoanTab() {
                     );
                   })}
                 </tbody>
-                <tfoot className="bg-gray-50 dark:bg-gray-700/50 border-t-2 border-gray-300 dark:border-gray-600">
+                <tfoot className="bg-stone-50 dark:bg-stone-700/50 border-t-2 border-stone-300 dark:border-stone-600">
                   <tr>
-                    <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">Total</td>
-                    <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400">--</td>
-                    <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white">
+                    <td className="py-3 px-4 font-bold text-stone-900 dark:text-white">Total</td>
+                    <td className="py-3 px-4 text-right text-stone-600 dark:text-stone-400">--</td>
+                    <td className="py-3 px-4 text-right font-bold text-stone-900 dark:text-white">
                       {formatCurrency(result.totalCost)}
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-blue-600 dark:text-blue-400">
+                    <td className="py-3 px-4 text-right font-bold text-teal-600 dark:text-teal-400">
                       {formatCurrency(loanAmount)}
                     </td>
                     <td className="py-3 px-4 text-right font-bold text-red-600 dark:text-red-400">
                       {formatCurrency(result.totalInterest)}
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white">
+                    <td className="py-3 px-4 text-right font-bold text-stone-900 dark:text-white">
                       {formatCurrency(0)}
                     </td>
                     {hasExtra && (
                       <>
-                        <td className="py-3 px-4 text-right border-l border-gray-200 dark:border-gray-600 font-bold text-green-600 dark:text-green-400">
+                        <td className="py-3 px-4 text-right border-l border-stone-200 dark:border-stone-600 font-bold text-emerald-600 dark:text-emerald-400">
                           {formatCurrency(0)}
                         </td>
-                        <td className="py-3 px-4 text-right font-bold text-green-600 dark:text-green-400">
+                        <td className="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
                           {formatCurrency(result.extraTotalInterest)}
                         </td>
                       </>
@@ -607,11 +607,11 @@ export default function LoanTab() {
       {/* Empty state */}
       {!result && (
         <div className="card p-12 text-center">
-          <DollarSign className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <DollarSign className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-stone-900 dark:text-white mb-2">
             Enter loan details above
           </h3>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-stone-500 dark:text-stone-400">
             Fill in valid loan amount, interest rate, and term to see your amortization schedule.
           </p>
         </div>

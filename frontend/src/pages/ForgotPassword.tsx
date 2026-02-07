@@ -27,24 +27,24 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Finance Tracker</h1>
-          <p className="text-gray-500 mt-2">Reset your password</p>
+          <h1 className="text-3xl font-bold text-stone-900">Finance Tracker</h1>
+          <p className="text-stone-500 mt-2">Reset your password</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8">
           {sent ? (
             <div className="text-center py-4">
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Check your email</h2>
-              <p className="text-gray-500 text-sm mb-6">
+              <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+              <h2 className="text-lg font-semibold text-stone-900 mb-2">Check your email</h2>
+              <p className="text-stone-500 text-sm mb-6">
                 If an account exists for <strong>{email}</strong>, you'll receive a password reset link shortly.
               </p>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="inline-flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to sign in
@@ -58,13 +58,13 @@ export default function ForgotPassword() {
                 </div>
               )}
 
-              <p className="text-sm text-gray-500 mb-5">
+              <p className="text-sm text-stone-500 mb-5">
                 Enter your email address and we'll send you a link to reset your password.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">
                     Email address
                   </label>
                   <input
@@ -73,7 +73,7 @@ export default function ForgotPassword() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
                     placeholder="you@example.com"
                     autoComplete="email"
                   />
@@ -82,7 +82,7 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -97,8 +97,8 @@ export default function ForgotPassword() {
         </div>
 
         {!sent && (
-          <p className="text-center text-sm text-gray-500 mt-6">
-            <Link to="/login" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium">
+          <p className="text-center text-sm text-stone-500 mt-6">
+            <Link to="/login" className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 font-medium">
               <ArrowLeft className="w-4 h-4" />
               Back to sign in
             </Link>

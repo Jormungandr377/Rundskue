@@ -111,7 +111,7 @@ export default function RecurringBills() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
       </div>
     )
   }
@@ -121,14 +121,14 @@ export default function RecurringBills() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Bills & Subscriptions</h1>
-          <p className="text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Bills & Subscriptions</h1>
+          <p className="text-stone-500 dark:text-stone-400">
             {items.filter(i => i.is_active).length} active recurring transactions
           </p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add New
@@ -143,19 +143,19 @@ export default function RecurringBills() {
               <DollarSign className="w-5 h-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Monthly Bills</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(monthlyTotal)}</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Monthly Bills</p>
+              <p className="text-xl font-bold text-stone-900 dark:text-white">{formatCurrency(monthlyTotal)}</p>
             </div>
           </div>
         </div>
         <div className="card p-5">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+              <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Monthly Income</p>
-              <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(monthlyIncome)}</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Monthly Income</p>
+              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(monthlyIncome)}</p>
             </div>
           </div>
         </div>
@@ -165,8 +165,8 @@ export default function RecurringBills() {
               <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Due in 30 days</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{upcoming.length} bills</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Due in 30 days</p>
+              <p className="text-xl font-bold text-stone-900 dark:text-white">{upcoming.length} bills</p>
             </div>
           </div>
         </div>
@@ -175,37 +175,37 @@ export default function RecurringBills() {
       {/* Add Form */}
       {showForm && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Recurring Transaction</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Add Recurring Transaction</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g. Netflix, Rent, Salary"
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Amount</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.amount}
                 onChange={e => setFormData({ ...formData, amount: e.target.value })}
                 placeholder="0.00"
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Frequency</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Frequency</label>
               <select
                 value={formData.frequency}
                 onChange={e => setFormData({ ...formData, frequency: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
               >
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Every 2 Weeks</option>
@@ -215,7 +215,7 @@ export default function RecurringBills() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Day of Month</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Day of Month</label>
               <input
                 type="number"
                 min="1"
@@ -223,25 +223,25 @@ export default function RecurringBills() {
                 value={formData.day_of_month}
                 onChange={e => setFormData({ ...formData, day_of_month: e.target.value })}
                 placeholder="1-31 (optional)"
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Start Date</label>
               <input
                 type="date"
                 value={formData.start_date}
                 onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Category</label>
               <select
                 value={formData.category_id}
                 onChange={e => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
               >
                 <option value="">No category</option>
                 {categoryList?.map(cat => (
@@ -255,34 +255,34 @@ export default function RecurringBills() {
                 id="is_income"
                 checked={formData.is_income}
                 onChange={e => setFormData({ ...formData, is_income: e.target.checked })}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-stone-300 text-teal-600 focus:ring-teal-500"
               />
-              <label htmlFor="is_income" className="text-sm text-gray-700 dark:text-gray-300">
+              <label htmlFor="is_income" className="text-sm text-stone-700 dark:text-stone-300">
                 This is income (e.g., salary, dividends)
               </label>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Notes</label>
               <input
                 type="text"
                 value={formData.notes}
                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Optional notes"
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
               />
             </div>
             <div className="md:col-span-2 flex gap-3">
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
               >
                 {createMutation.isPending ? 'Adding...' : 'Add Recurring Transaction'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="px-4 py-2 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700"
               >
                 Cancel
               </button>
@@ -294,7 +294,7 @@ export default function RecurringBills() {
       {/* Upcoming Bills */}
       {upcoming.length > 0 && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-orange-500" />
             Upcoming in 30 Days
           </h3>
@@ -302,20 +302,20 @@ export default function RecurringBills() {
             {upcoming.map(item => {
               const daysUntil = differenceInDays(parseISO(item.next_due_date), new Date())
               return (
-                <div key={`upcoming-${item.id}`} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                <div key={`upcoming-${item.id}`} className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700 last:border-0">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
-                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-orange-500' : 'bg-green-500'
+                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-orange-500' : 'bg-emerald-500'
                     }`} />
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="font-medium text-stone-900 dark:text-white">{item.name}</p>
+                      <p className="text-sm text-stone-500 dark:text-stone-400">
                         {daysUntil === 0 ? 'Due today' : daysUntil === 1 ? 'Due tomorrow' : `Due in ${daysUntil} days`}
                         {' \u00b7 '}{format(parseISO(item.next_due_date), 'MMM d')}
                       </p>
                     </div>
                   </div>
-                  <p className={`font-semibold ${item.is_income ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                  <p className={`font-semibold ${item.is_income ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-white'}`}>
                     {item.is_income ? '+' : '-'}{formatCurrency(item.amount)}
                   </p>
                 </div>
@@ -327,54 +327,54 @@ export default function RecurringBills() {
 
       {/* All Recurring Items */}
       <div className="card overflow-hidden">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Recurring Transactions</h3>
+        <div className="p-4 border-b border-stone-100 dark:border-stone-700">
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white">All Recurring Transactions</h3>
         </div>
         {items.length === 0 ? (
           <div className="p-8 text-center">
-            <RefreshCw className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-500 dark:text-gray-400">No recurring transactions yet</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500">Add your bills and subscriptions to track them</p>
+            <RefreshCw className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
+            <p className="text-stone-500 dark:text-stone-400">No recurring transactions yet</p>
+            <p className="text-sm text-stone-400 dark:text-stone-500">Add your bills and subscriptions to track them</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="divide-y divide-stone-100 dark:divide-stone-700">
             {items.map(item => (
               <div
                 key={item.id}
-                className={`flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                className={`flex items-center justify-between p-4 hover:bg-stone-50 dark:hover:bg-stone-700/50 ${
                   !item.is_active ? 'opacity-50' : ''
                 }`}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                    <p className="font-medium text-stone-900 dark:text-white">{item.name}</p>
                     {item.is_income && (
-                      <span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
                         Income
                       </span>
                     )}
                     {!item.is_active && (
-                      <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-stone-100 dark:bg-stone-700 text-stone-500 rounded-full">
                         Paused
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-stone-500 dark:text-stone-400">
                     {FREQUENCY_LABELS[item.frequency] || item.frequency}
                     {item.category_name && ` \u00b7 ${item.category_name}`}
                     {' \u00b7 Next: '}{format(parseISO(item.next_due_date), 'MMM d, yyyy')}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <p className={`font-semibold ${item.is_income ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                  <p className={`font-semibold ${item.is_income ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-white'}`}>
                     {formatCurrency(item.amount)}
                   </p>
                   <button
                     onClick={() => toggleMutation.mutate({ id: item.id, is_active: !item.is_active })}
                     className={`p-1.5 rounded-lg transition-colors ${
                       item.is_active
-                        ? 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        : 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                        ? 'text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'
+                        : 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
                     }`}
                     title={item.is_active ? 'Pause' : 'Resume'}
                   >

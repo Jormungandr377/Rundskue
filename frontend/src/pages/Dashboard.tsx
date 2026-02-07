@@ -28,7 +28,7 @@ import { format, parseISO, differenceInDays } from 'date-fns';
 import { accounts, analytics, transactions, recurring, goals } from '../api';
 import type { SpendingByCategory, MonthlyTrend, Transaction } from '../types';
 
-const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const COLORS = ['#14b8a6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-US', {
@@ -90,7 +90,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
       </div>
     );
   }
@@ -99,8 +99,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400">Your financial overview</p>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Dashboard</h1>
+        <p className="text-stone-500 dark:text-stone-400">Your financial overview</p>
       </div>
 
       {/* Summary Cards */}
@@ -108,13 +108,13 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Net Worth</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              <p className="text-sm text-stone-500 dark:text-stone-400">Net Worth</p>
+              <p className="text-2xl font-bold text-stone-900 dark:text-white">
                 {formatCurrency(summary?.net_worth || 0)}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-              <Wallet className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-full">
+              <Wallet className="w-6 h-6 text-teal-600 dark:text-teal-400" />
             </div>
           </div>
         </div>
@@ -122,13 +122,13 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Assets</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <p className="text-sm text-stone-500 dark:text-stone-400">Total Assets</p>
+              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(summary?.total_assets || 0)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+              <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Liabilities</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Total Liabilities</p>
               <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(summary?.total_liabilities || 0)}
               </p>
@@ -150,14 +150,14 @@ export default function Dashboard() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">This Month's Cash Flow</p>
-              <p className={`text-2xl font-bold ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              <p className="text-sm text-stone-500 dark:text-stone-400">This Month's Cash Flow</p>
+              <p className={`text-2xl font-bold ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {formatCurrency(cashFlow?.net_cash_flow || 0)}
               </p>
             </div>
-            <div className={`p-3 rounded-full ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+            <div className={`p-3 rounded-full ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
               {(cashFlow?.net_cash_flow || 0) >= 0 ? (
-                <ArrowUpRight className="w-6 h-6 text-green-600 dark:text-green-400" />
+                <ArrowUpRight className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               ) : (
                 <ArrowDownRight className="w-6 h-6 text-red-600 dark:text-red-400" />
               )}
@@ -170,25 +170,25 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expenses - Bar Chart */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Income vs Expenses</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Income vs Expenses</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trends || []} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
                 <XAxis
                   dataKey="month"
                   tickFormatter={(value) => format(parseISO(value + '-01'), 'MMM')}
-                  stroke="#9CA3AF"
+                  stroke="#a8a29e"
                   fontSize={12}
                 />
-                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#9CA3AF" fontSize={12} />
+                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" fontSize={12} />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                   labelFormatter={(label) => format(parseISO(label + '-01'), 'MMMM yyyy')}
-                  contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e7e5e4', borderRadius: '8px' }}
                 />
                 <Legend />
-                <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -197,7 +197,7 @@ export default function Dashboard() {
 
         {/* Spending by Category */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Spending by Category</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Spending by Category</h3>
           <div className="h-64 flex">
             <div className="w-1/2">
               <ResponsiveContainer width="100%" height="100%">
@@ -227,8 +227,8 @@ export default function Dashboard() {
                     className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
-                  <span className="text-gray-600 dark:text-gray-400 truncate flex-1">{cat.category_name}</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{cat.percentage}%</span>
+                  <span className="text-stone-600 dark:text-stone-400 truncate flex-1">{cat.category_name}</span>
+                  <span className="font-medium text-stone-900 dark:text-white">{cat.percentage}%</span>
                 </div>
               ))}
             </div>
@@ -241,24 +241,24 @@ export default function Dashboard() {
         {/* Net Worth Trend */}
         {netWorthHistory && netWorthHistory.length > 1 && (
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Net Worth Trend</h3>
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Net Worth Trend</h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={netWorthHistory}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
                   <XAxis
                     dataKey="date"
                     tickFormatter={(value) => format(parseISO(value), 'MMM')}
-                    stroke="#9CA3AF"
+                    stroke="#a8a29e"
                     fontSize={12}
                   />
-                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#9CA3AF" fontSize={12} />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" fontSize={12} />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => format(parseISO(label), 'MMM d, yyyy')}
-                    contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                    contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e7e5e4', borderRadius: '8px' }}
                   />
-                  <Area type="monotone" dataKey="net_worth" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} name="Net Worth" />
+                  <Area type="monotone" dataKey="net_worth" stroke="#14b8a6" fill="#14b8a6" fillOpacity={0.15} name="Net Worth" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -268,23 +268,23 @@ export default function Dashboard() {
         {/* Savings Goals Progress */}
         {savingsGoals && savingsGoals.length > 0 && (
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Savings Goals</h3>
+            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Savings Goals</h3>
             <div className="space-y-4">
               {savingsGoals.filter(g => !g.is_completed).slice(0, 4).map((goal) => (
                 <div key={goal.id}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium text-gray-900 dark:text-white">{goal.name}</span>
-                    <span className="text-gray-500 dark:text-gray-400">
+                    <span className="font-medium text-stone-900 dark:text-white">{goal.name}</span>
+                    <span className="text-stone-500 dark:text-stone-400">
                       {formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                  <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2.5">
                     <div
                       className="h-2.5 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(goal.progress_pct, 100)}%`, backgroundColor: goal.color || '#3b82f6' }}
+                      style={{ width: `${Math.min(goal.progress_pct, 100)}%`, backgroundColor: goal.color || '#14b8a6' }}
                     />
                   </div>
-                  <p className="text-right text-xs text-gray-400 dark:text-gray-500 mt-0.5">{goal.progress_pct}%</p>
+                  <p className="text-right text-xs text-stone-400 dark:text-stone-500 mt-0.5">{goal.progress_pct}%</p>
                 </div>
               ))}
             </div>
@@ -296,28 +296,28 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Transactions */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Transactions</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Recent Transactions</h3>
           <div className="space-y-3">
             {recentTxns?.transactions?.slice(0, 6).map((txn) => (
-              <div key={txn.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+              <div key={txn.id} className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700 last:border-0">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">{txn.custom_name || txn.merchant_name || txn.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{format(parseISO(txn.date), 'MMM d')}</p>
+                  <p className="font-medium text-stone-900 dark:text-white text-sm">{txn.custom_name || txn.merchant_name || txn.name}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">{format(parseISO(txn.date), 'MMM d')}</p>
                 </div>
-                <p className={`font-semibold text-sm ${txn.amount < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                <p className={`font-semibold text-sm ${txn.amount < 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-white'}`}>
                   {txn.amount < 0 ? '+' : '-'}{formatCurrency(Math.abs(txn.amount))}
                 </p>
               </div>
             ))}
             {(!recentTxns?.transactions || recentTxns.transactions.length === 0) && (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No transactions yet</p>
+              <p className="text-stone-500 dark:text-stone-400 text-center py-4">No transactions yet</p>
             )}
           </div>
         </div>
 
         {/* Upcoming Bills */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-orange-500" />
             Upcoming Bills
           </h3>
@@ -325,54 +325,54 @@ export default function Dashboard() {
             {upcomingBills?.slice(0, 6).map((bill) => {
               const daysUntil = differenceInDays(parseISO(bill.next_due_date), new Date())
               return (
-                <div key={bill.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                <div key={bill.id} className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700 last:border-0">
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${
-                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-orange-500' : 'bg-green-500'
+                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-orange-500' : 'bg-emerald-500'
                     }`} />
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-white text-sm">{bill.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="font-medium text-stone-900 dark:text-white text-sm">{bill.name}</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">
                         {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil}d`}
                       </p>
                     </div>
                   </div>
-                  <p className="font-semibold text-sm text-gray-900 dark:text-white">
+                  <p className="font-semibold text-sm text-stone-900 dark:text-white">
                     {formatCurrency(bill.amount)}
                   </p>
                 </div>
               )
             })}
             {(!upcomingBills || upcomingBills.length === 0) && (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No upcoming bills</p>
+              <p className="text-stone-500 dark:text-stone-400 text-center py-4">No upcoming bills</p>
             )}
           </div>
         </div>
 
         {/* Insights */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Spending Insights</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Spending Insights</h3>
           <div className="space-y-3">
             {insights?.slice(0, 5).map((insight, index) => (
               <div
                 key={index}
                 className={`p-3 rounded-lg ${
-                  insight.type === 'increase' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-green-50 dark:bg-green-900/20'
+                  insight.type === 'increase' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-emerald-50 dark:bg-emerald-900/20'
                 }`}
               >
                 <div className="flex items-start">
                   <AlertCircle className={`w-5 h-5 mr-2 mt-0.5 flex-shrink-0 ${
-                    insight.type === 'increase' ? 'text-orange-500' : 'text-green-500'
+                    insight.type === 'increase' ? 'text-orange-500' : 'text-emerald-500'
                   }`} />
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{insight.category}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{insight.message}</p>
+                    <p className="text-sm font-medium text-stone-900 dark:text-white">{insight.category}</p>
+                    <p className="text-sm text-stone-600 dark:text-stone-400">{insight.message}</p>
                   </div>
                 </div>
               </div>
             ))}
             {(!insights || insights.length === 0) && (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No insights available yet</p>
+              <p className="text-stone-500 dark:text-stone-400 text-center py-4">No insights available yet</p>
             )}
           </div>
         </div>

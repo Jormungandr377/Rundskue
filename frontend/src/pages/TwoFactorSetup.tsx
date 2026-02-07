@@ -95,17 +95,17 @@ export default function TwoFactorSetup() {
     <div className="max-w-lg mx-auto py-8">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6"
+        className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
 
       <div className="flex items-center gap-3 mb-6">
-        <Shield className="w-8 h-8 text-blue-600" />
+        <Shield className="w-8 h-8 text-teal-600" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Two-Factor Authentication</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-bold text-stone-900">Two-Factor Authentication</h1>
+          <p className="text-stone-500 text-sm">
             {user?.totp_enabled
               ? '2FA is currently enabled on your account'
               : 'Add an extra layer of security to your account'}
@@ -113,7 +113,7 @@ export default function TwoFactorSetup() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-6">
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
@@ -123,11 +123,11 @@ export default function TwoFactorSetup() {
         {/* Step: Enter password */}
         {step === 'password' && (
           <form onSubmit={handlePasswordSubmit} className="space-y-5">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-stone-600">
               To set up two-factor authentication, first verify your identity by entering your password.
             </p>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
                 Current password
               </label>
               <div className="relative">
@@ -137,13 +137,13 @@ export default function TwoFactorSetup() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors pr-10"
+                  className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors pr-10"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -152,7 +152,7 @@ export default function TwoFactorSetup() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 font-medium"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -166,30 +166,30 @@ export default function TwoFactorSetup() {
         {/* Step: Scan QR code */}
         {step === 'scan' && (
           <div className="space-y-5">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-stone-600">
               Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.).
             </p>
 
             {/* QR Code */}
             <div className="flex justify-center">
-              <div className="bg-white p-4 border-2 border-gray-200 rounded-lg">
+              <div className="bg-white p-4 border-2 border-stone-200 rounded-lg">
                 <img src={`data:image/png;base64,${qrCode}`} alt="2FA QR Code" className="w-48 h-48" />
               </div>
             </div>
 
             {/* Manual entry key */}
             <div>
-              <p className="text-xs text-gray-500 mb-1">Or enter this key manually:</p>
+              <p className="text-xs text-stone-500 mb-1">Or enter this key manually:</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 break-all">
+                <code className="flex-1 bg-stone-50 px-3 py-2 rounded-lg text-sm font-mono text-stone-700 break-all">
                   {secret}
                 </code>
                 <button
                   onClick={() => copyToClipboard(secret, 'secret')}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50"
+                  className="p-2 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-50"
                   title="Copy secret"
                 >
-                  {copiedSecret ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                  {copiedSecret ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function TwoFactorSetup() {
               </p>
               <div className="grid grid-cols-2 gap-1.5">
                 {backupCodes.map((code, i) => (
-                  <code key={i} className="bg-white px-2.5 py-1.5 rounded text-sm font-mono text-center text-gray-700">
+                  <code key={i} className="bg-white px-2.5 py-1.5 rounded text-sm font-mono text-center text-stone-700">
                     {code}
                   </code>
                 ))}
@@ -220,7 +220,7 @@ export default function TwoFactorSetup() {
 
             <button
               onClick={() => setStep('verify')}
-              className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="w-full px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium"
             >
               I've saved the codes, continue
             </button>
@@ -230,11 +230,11 @@ export default function TwoFactorSetup() {
         {/* Step: Verify code */}
         {step === 'verify' && (
           <form onSubmit={handleVerify} className="space-y-5">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-stone-600">
               Enter the 6-digit code from your authenticator app to verify setup.
             </p>
             <div>
-              <label htmlFor="totp" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="totp" className="block text-sm font-medium text-stone-700 mb-1">
                 Verification code
               </label>
               <input
@@ -246,7 +246,7 @@ export default function TwoFactorSetup() {
                 required
                 value={totpCode}
                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-center text-2xl tracking-widest"
+                className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors text-center text-2xl tracking-widest"
                 placeholder="000000"
                 autoFocus
                 autoComplete="one-time-code"
@@ -255,7 +255,7 @@ export default function TwoFactorSetup() {
             <button
               type="submit"
               disabled={isSubmitting || totpCode.length !== 6}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 font-medium"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -269,14 +269,14 @@ export default function TwoFactorSetup() {
         {/* Step: Complete */}
         {step === 'complete' && (
           <div className="text-center py-4">
-            <ShieldCheck className="w-12 h-12 text-green-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">2FA is now enabled!</h2>
-            <p className="text-gray-500 text-sm mb-6">
+            <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-stone-900 mb-2">2FA is now enabled!</h2>
+            <p className="text-stone-500 text-sm mb-6">
               Your account is now protected with two-factor authentication. You'll need your authenticator app each time you sign in.
             </p>
             <button
               onClick={() => navigate(-1)}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+              className="px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium text-sm"
             >
               Done
             </button>
@@ -294,7 +294,7 @@ export default function TwoFactorSetup() {
             </div>
 
             <div>
-              <label htmlFor="disablePassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="disablePassword" className="block text-sm font-medium text-stone-700 mb-1">
                 Current password
               </label>
               <div className="relative">
@@ -304,13 +304,13 @@ export default function TwoFactorSetup() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors pr-10"
+                  className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors pr-10"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -318,7 +318,7 @@ export default function TwoFactorSetup() {
             </div>
 
             <div>
-              <label htmlFor="disableTotp" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="disableTotp" className="block text-sm font-medium text-stone-700 mb-1">
                 Authentication code
               </label>
               <input
@@ -330,7 +330,7 @@ export default function TwoFactorSetup() {
                 required
                 value={disableTotpCode}
                 onChange={(e) => setDisableTotpCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-center text-2xl tracking-widest"
+                className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors text-center text-2xl tracking-widest"
                 placeholder="000000"
                 autoComplete="one-time-code"
               />
@@ -340,7 +340,7 @@ export default function TwoFactorSetup() {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                className="flex-1 px-4 py-2.5 border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 font-medium"
               >
                 Cancel
               </button>

@@ -60,13 +60,13 @@ export default function Budgets() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Budgets</h1>
-          <p className="text-gray-500">Track your spending against your budget</p>
+          <h1 className="text-2xl font-bold text-stone-900">Budgets</h1>
+          <p className="text-stone-500">Track your spending against your budget</p>
         </div>
         {!budget && (
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
           >
             <Plus className="w-5 h-5" />
             Create Budget
@@ -78,17 +78,17 @@ export default function Budgets() {
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={handlePrevMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg"
+          className="p-2 hover:bg-stone-100 rounded-lg"
           aria-label="Previous month"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h2 className="text-xl font-semibold text-gray-900 w-48 text-center">
+        <h2 className="text-xl font-semibold text-stone-900 w-48 text-center">
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <button
           onClick={handleNextMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg"
+          className="p-2 hover:bg-stone-100 rounded-lg"
           aria-label="Next month"
         >
           <ChevronRight className="w-5 h-5" />
@@ -97,30 +97,30 @@ export default function Budgets() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
         </div>
       ) : budget ? (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-6">
-              <p className="text-sm text-gray-500">Total Budgeted</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-stone-500">Total Budgeted</p>
+              <p className="text-2xl font-bold text-stone-900">
                 {formatCurrency(budget.total_budgeted || 0)}
               </p>
             </div>
             <div className="card p-6">
-              <p className="text-sm text-gray-500">Total Spent</p>
+              <p className="text-sm text-stone-500">Total Spent</p>
               <p className={`text-2xl font-bold ${
-                (budget.total_spent || 0) > (budget.total_budgeted || 0) ? 'text-red-600' : 'text-gray-900'
+                (budget.total_spent || 0) > (budget.total_budgeted || 0) ? 'text-red-600' : 'text-stone-900'
               }`}>
                 {formatCurrency(budget.total_spent || 0)}
               </p>
             </div>
             <div className="card p-6">
-              <p className="text-sm text-gray-500">Remaining</p>
+              <p className="text-sm text-stone-500">Remaining</p>
               <p className={`text-2xl font-bold ${
-                (budget.total_budgeted || 0) - (budget.total_spent || 0) < 0 ? 'text-red-600' : 'text-green-600'
+                (budget.total_budgeted || 0) - (budget.total_spent || 0) < 0 ? 'text-red-600' : 'text-emerald-600'
               }`}>
                 {formatCurrency((budget.total_budgeted || 0) - (budget.total_spent || 0))}
               </p>
@@ -129,12 +129,12 @@ export default function Budgets() {
 
           {/* Budget Items */}
           <div className="card">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{budget.name}</h3>
+            <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-stone-900">{budget.name}</h3>
               <div className="flex gap-2">
                 <button
                   onClick={() => setEditingBudget(budget)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
@@ -144,13 +144,13 @@ export default function Budgets() {
                       deleteMutation.mutate(budget.id);
                     }
                   }}
-                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                  className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-stone-100">
               {(budget.items || []).map((item) => {
                 const budgeted = item.budgeted ?? item.amount ?? 0;
                 const spent = item.spent ?? 0;
@@ -160,21 +160,21 @@ export default function Budgets() {
                 return (
                   <div key={item.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-stone-900">
                         {item.category_name || item.category?.name || 'Unknown Category'}
                       </span>
                       <div className="text-right">
-                        <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-gray-600'}>
+                        <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-stone-600'}>
                           {formatCurrency(spent)}
                         </span>
-                        <span className="text-gray-400"> / </span>
-                        <span className="text-gray-900">{formatCurrency(budgeted)}</span>
+                        <span className="text-stone-400"> / </span>
+                        <span className="text-stone-900">{formatCurrency(budgeted)}</span>
                       </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all ${
-                          isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                          isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-yellow-500' : 'bg-emerald-500'
                         }`}
                         style={{ width: `${Math.min(percentage, 100)}%` }}
                       />
@@ -192,13 +192,13 @@ export default function Budgets() {
         </>
       ) : (
         <div className="card p-12 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No budget for this month</h3>
-          <p className="text-gray-500 mb-4">
+          <h3 className="text-lg font-medium text-stone-900 mb-2">No budget for this month</h3>
+          <p className="text-stone-500 mb-4">
             Create a budget to start tracking your spending.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
           >
             <Plus className="w-5 h-5 mr-2" />
             Create Budget
@@ -266,25 +266,25 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Create Budget</h3>
+        <div className="p-6 border-b border-stone-200">
+          <h3 className="text-lg font-semibold text-stone-900">Create Budget</h3>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-stone-700 mb-1">
               Budget Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               Budget Items
             </label>
             <div className="space-y-2">
@@ -293,7 +293,7 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
                   <select
                     value={item.category_id}
                     onChange={(e) => handleItemChange(index, 'category_id', Number(e.target.value))}
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
                     {categories.filter(c => !c.is_income).map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -304,13 +304,13 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
                     placeholder="Amount"
                     value={item.amount}
                     onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
-                    className="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-32 px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   {items.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="p-2 text-gray-400 hover:text-red-600"
+                      className="p-2 text-stone-400 hover:text-red-600"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -321,7 +321,7 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
             <button
               type="button"
               onClick={handleAddItem}
-              className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+              className="mt-2 text-sm text-teal-600 hover:text-teal-700"
             >
               + Add Category
             </button>
@@ -331,13 +331,13 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
             >
               Create Budget
             </button>

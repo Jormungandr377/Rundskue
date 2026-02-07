@@ -11,35 +11,35 @@
 body {
   margin: 0;
   min-height: 100vh;
-  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200;
+  @apply bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 transition-colors duration-200;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  @apply bg-stone-100 dark:bg-stone-900;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded;
+  @apply bg-stone-300 dark:bg-stone-600 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  @apply bg-stone-400 dark:bg-stone-500;
 }
 
-/* Card animations */
+/* Card component */
 .card {
-  @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-shadow hover:shadow-md;
+  @apply bg-white dark:bg-stone-800 rounded-xl shadow-sm border border-stone-200 dark:border-stone-700/60 transition-all hover:shadow-md;
 }
 
 /* Status colors */
 .text-income {
-  @apply text-green-600 dark:text-green-400;
+  @apply text-emerald-600 dark:text-emerald-400;
 }
 
 .text-expense {
@@ -47,11 +47,11 @@ body {
 }
 
 .bg-income {
-  @apply bg-green-100 dark:bg-green-900/30;
+  @apply bg-emerald-50 dark:bg-emerald-900/20;
 }
 
 .bg-expense {
-  @apply bg-red-100 dark:bg-red-900/30;
+  @apply bg-red-50 dark:bg-red-900/20;
 }
 
 /* Toast slide-in animation */
@@ -98,5 +98,5 @@ body {
 .dark input[type="date"],
 .dark input[type="search"],
 .dark textarea {
-  @apply bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400;
+  @apply bg-stone-700 border-stone-600 text-stone-100 placeholder-stone-400;
 }
