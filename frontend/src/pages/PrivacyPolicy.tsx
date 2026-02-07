@@ -224,9 +224,16 @@ export default function PrivacyPolicy() {
           </section>
         </div>
 
-        <p className="text-center text-sm text-stone-500 dark:text-stone-400 mt-6">
-          &copy; {new Date().getFullYear()} Rundskue. All rights reserved.
-        </p>
+        <div className="text-center mt-6 space-y-2">
+          <div className="flex justify-center gap-4 text-sm">
+            <Link to="/security" className="text-teal-600 dark:text-teal-400 hover:underline">Security Policy</Link>
+            <span className="text-stone-400">&middot;</span>
+            <Link to="/data-retention" className="text-teal-600 dark:text-teal-400 hover:underline">Data Retention Policy</Link>
+          </div>
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            &copy; {new Date().getFullYear()} Rundskue. All rights reserved.
+          </p>
+        </div>
       </div>
     </div>
   )

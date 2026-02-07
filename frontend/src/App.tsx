@@ -57,6 +57,8 @@ const CategoryRules = lazy(() => import('./pages/CategoryRules'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const Onboarding = lazy(() => import('./pages/Onboarding'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
+const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
+const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
 
 // Page loading spinner for lazy-loaded routes
 function PageLoader() {
@@ -439,6 +441,8 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/security" element={<SecurityPolicy />} />
+                <Route path="/data-retention" element={<DataRetentionPolicy />} />
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
 
                 {/* Protected routes */}
