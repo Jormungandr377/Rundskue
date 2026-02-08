@@ -22,9 +22,11 @@ RUN npm run build
 # ============================================
 FROM python:3.11-slim
 
-# Install system dependencies
+# Install system dependencies (runtime + build tools for pip packages with C extensions)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends libpq5 curl && \
+    apt-get install -y --no-install-recommends \
+        libpq5 curl \
+        gcc g++ libffi-dev libpq-dev python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user to run the application
@@ -38,7 +40,9 @@ WORKDIR /app
 
 # Copy backend requirements and install Python deps (as root, before switching user)
 COPY backend/requirements.txt ./backend/requirements.txt
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt && \
+    apt-get purge -y --auto-remove gcc g++ libffi-dev libpq-dev python3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy backend source code
 COPY backend/ ./backend/
