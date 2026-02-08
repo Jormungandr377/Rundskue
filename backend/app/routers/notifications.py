@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from ..database import get_db
 from ..models import (
     Notification, User, Budget, BudgetItem, Transaction, Account,
-    RecurringTransaction, Profile, Category
+    RecurringTransaction, Profile, Category, BudgetAlert
 )
 from ..dependencies import get_current_active_user
 
@@ -158,7 +158,15 @@ async def check_budget_alerts(
             spent = float(spent_result) if spent_result else 0
             pct = (spent / budgeted) * 100
 
-            if pct >= 80:
+            # Check for custom alert threshold; default to 80%
+            custom_alert = db.query(BudgetAlert).filter(
+                BudgetAlert.budget_item_id == item.id,
+                BudgetAlert.user_id == current_user.id,
+                BudgetAlert.is_enabled == True,
+            ).first()
+            threshold = custom_alert.threshold_pct if custom_alert else 80
+
+            if pct >= threshold:
                 # Check if we already sent this alert today
                 existing = db.query(Notification).filter(
                     Notification.user_id == current_user.id,

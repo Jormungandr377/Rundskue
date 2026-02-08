@@ -240,13 +240,17 @@ class Transaction(Base):
     
     # Status
     pending = Column(Boolean, default=False)
-    
+
+    # Envelope budgeting
+    envelope_id = Column(Integer, ForeignKey("envelopes.id"), nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
     account = relationship("Account", back_populates="transactions")
     category = relationship("Category", back_populates="transactions")
+    envelope = relationship("Envelope", back_populates="transactions")
     
     # Indexes for common queries
     __table_args__ = (
@@ -288,7 +292,8 @@ class BudgetItem(Base):
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     
     amount = Column(Numeric(12, 2), nullable=False)  # Budgeted amount
-    
+    rollover_amount = Column(Numeric(12, 2), default=0)  # Carried over from previous month
+
     # Relationships
     budget = relationship("Budget", back_populates="items")
     category = relationship("Category", back_populates="budget_items")
@@ -516,4 +521,73 @@ class AuditLog(Base):
         Index("ix_audit_logs_timestamp", "timestamp"),
         Index("ix_audit_logs_user_action", "user_id", "action"),
         Index("ix_audit_logs_action", "action"),
+    )
+
+
+# ============================================================================
+# Phase 1: Budget Enhancements
+# ============================================================================
+
+class Envelope(Base):
+    """Virtual envelope for zero-based budgeting."""
+    __tablename__ = "envelopes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    allocated_amount = Column(Numeric(14, 2), default=0)
+    color = Column(String(7), default="#3b82f6")
+    icon = Column(String(50), default="wallet")
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    profile = relationship("Profile")
+    transactions = relationship("Transaction", back_populates="envelope")
+
+    __table_args__ = (
+        Index("ix_envelopes_profile_active", "profile_id", "is_active"),
+    )
+
+
+class BudgetAlert(Base):
+    """Configurable spending alert thresholds per budget item."""
+    __tablename__ = "budget_alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    budget_item_id = Column(Integer, ForeignKey("budget_items.id"), nullable=False)
+    threshold_pct = Column(Integer, nullable=False, default=80)
+    is_enabled = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+    budget_item = relationship("BudgetItem")
+
+
+class Subscription(Base):
+    """Detected or manually added subscription/recurring charge."""
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    merchant_name = Column(String(255), nullable=True)
+    amount = Column(Numeric(14, 2), nullable=False)
+    frequency = Column(String(20), default="monthly")
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    last_charged = Column(Date, nullable=True)
+    next_expected = Column(Date, nullable=True)
+    is_active = Column(Boolean, default=True)
+    is_flagged_unused = Column(Boolean, default=False)
+    detected_at = Column(DateTime, default=datetime.utcnow)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    profile = relationship("Profile")
+    category = relationship("Category")
+
+    __table_args__ = (
+        Index("ix_subscriptions_profile_active", "profile_id", "is_active"),
     )

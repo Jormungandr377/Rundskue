@@ -149,25 +149,30 @@ export default function Budgets() {
             <div className="divide-y divide-stone-100">
               {(budget.items || []).map((item) => {
                 const budgeted = item.budgeted ?? item.amount ?? 0;
+                const rollover = item.rollover_amount ?? 0;
+                const effective = item.effective_budget ?? (budgeted + rollover);
                 const spent = item.spent ?? 0;
-                const percentage = item.percent_used ?? (budgeted > 0 ? Math.min((spent / budgeted) * 100, 100) : 0);
-                const isOverBudget = spent > budgeted;
+                const percentage = item.percent_used ?? (effective > 0 ? Math.min((spent / effective) * 100, 100) : 0);
+                const isOverBudget = spent > effective;
 
                 return (
                   <div key={item.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-stone-900">
+                      <span className="font-medium text-stone-900 dark:text-white">
                         {item.category_name || item.category?.name || 'Unknown Category'}
                       </span>
                       <div className="text-right">
-                        <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-stone-600'}>
+                        <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-stone-600 dark:text-stone-300'}>
                           {formatCurrency(spent)}
                         </span>
                         <span className="text-stone-400"> / </span>
-                        <span className="text-stone-900">{formatCurrency(budgeted)}</span>
+                        <span className="text-stone-900 dark:text-white">{formatCurrency(effective)}</span>
+                        {rollover > 0 && (
+                          <span className="text-xs text-teal-600 ml-1">(+{formatCurrency(rollover)} rollover)</span>
+                        )}
                       </div>
                     </div>
-                    <div className="w-full bg-stone-200 rounded-full h-2">
+                    <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all ${
                           isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-yellow-500' : 'bg-emerald-500'
@@ -177,7 +182,7 @@ export default function Budgets() {
                     </div>
                     {isOverBudget && (
                       <p className="text-sm text-red-600 mt-1">
-                        Over budget by {formatCurrency(spent - budgeted)}
+                        Over budget by {formatCurrency(spent - effective)}
                       </p>
                     )}
                   </div>

@@ -91,6 +91,8 @@ export interface BudgetItem {
   spent?: number;
   remaining?: number;
   percent_used?: number;
+  rollover_amount?: number;
+  effective_budget?: number;
   category_name?: string;
   category_icon?: string;
   category_color?: string;
@@ -259,4 +261,51 @@ export interface UserSession {
   created_at: string;
   expires_at: string;
   is_current: boolean;
+}
+
+// Envelopes
+export interface Envelope {
+  id: number;
+  profile_id: number;
+  name: string;
+  allocated_amount: number;
+  spent_amount: number;
+  remaining_amount: number;
+  color: string;
+  icon: string;
+  is_active: boolean;
+  transaction_count: number;
+  created_at: string;
+}
+
+export interface EnvelopeSummary {
+  total_allocated: number;
+  total_spent: number;
+  total_remaining: number;
+  unallocated_income: number;
+  envelope_count: number;
+}
+
+// Subscriptions
+export interface SubscriptionItem {
+  id: number;
+  profile_id: number;
+  name: string;
+  merchant_name?: string;
+  amount: number;
+  frequency: string;
+  category_id?: number;
+  last_charged?: string;
+  next_expected?: string;
+  is_active: boolean;
+  is_flagged_unused: boolean;
+  notes?: string;
+  created_at: string;
+}
+
+export interface SubscriptionSummary {
+  total_monthly_cost: number;
+  total_annual_cost: number;
+  active_count: number;
+  flagged_unused_count: number;
 }

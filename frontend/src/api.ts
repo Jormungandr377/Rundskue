@@ -22,6 +22,10 @@ import type {
   CategoryRule,
   AppNotification,
   UserSession,
+  Envelope,
+  EnvelopeSummary,
+  SubscriptionItem,
+  SubscriptionSummary,
 } from './types';
 
 const client = authenticatedApi;
@@ -253,6 +257,36 @@ export const sessions = {
   revokeAllOthers: () => client.delete('/sessions'),
 };
 
+// Envelopes
+export const envelopes = {
+  list: (profileId: number, activeOnly = true) =>
+    client.get<Envelope[]>('/envelopes', { params: { profile_id: profileId, active_only: activeOnly } }).then(r => r.data),
+  summary: (profileId: number) =>
+    client.get<EnvelopeSummary>('/envelopes/summary', { params: { profile_id: profileId } }).then(r => r.data),
+  create: (data: { profile_id: number; name: string; allocated_amount?: number; color?: string; icon?: string }) =>
+    client.post<Envelope>('/envelopes', data).then(r => r.data),
+  update: (id: number, data: Partial<Envelope>) =>
+    client.put<Envelope>(`/envelopes/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/envelopes/${id}`),
+  assign: (id: number, transactionIds: number[]) =>
+    client.post<{ assigned: number }>(`/envelopes/${id}/assign`, transactionIds).then(r => r.data),
+};
+
+// Subscriptions
+export const subscriptions = {
+  list: (profileId?: number, activeOnly = true) =>
+    client.get<SubscriptionItem[]>('/subscriptions', { params: { profile_id: profileId, active_only: activeOnly } }).then(r => r.data),
+  summary: (profileId?: number) =>
+    client.get<SubscriptionSummary>('/subscriptions/summary', { params: { profile_id: profileId } }).then(r => r.data),
+  create: (data: { profile_id: number; name: string; amount: number; frequency?: string; merchant_name?: string; category_id?: number; notes?: string }) =>
+    client.post<SubscriptionItem>('/subscriptions', data).then(r => r.data),
+  update: (id: number, data: Partial<SubscriptionItem>) =>
+    client.put<SubscriptionItem>(`/subscriptions/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/subscriptions/${id}`),
+  detect: (profileId: number) =>
+    client.post<{ detected: number; subscriptions: Record<string, unknown>[] }>('/subscriptions/detect', null, { params: { profile_id: profileId } }).then(r => r.data),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -269,6 +303,8 @@ export const api = {
   notifications,
   categorization,
   sessions,
+  envelopes,
+  subscriptions,
 };
 
 export default api;

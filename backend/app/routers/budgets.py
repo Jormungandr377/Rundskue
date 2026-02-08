@@ -28,7 +28,9 @@ class BudgetItemResponse(BaseModel):
     spent: float
     remaining: float
     percent_used: float
-    
+    rollover_amount: float = 0
+    effective_budget: float = 0  # budgeted + rollover
+
     class Config:
         from_attributes = True
 
@@ -128,9 +130,11 @@ def get_budgets(
         for item in budget.items:
             spent = spending.get(item.category_id, 0)
             budgeted = float(item.amount)
-            remaining = budgeted - spent
-            percent = (spent / budgeted * 100) if budgeted > 0 else 0
-            
+            rollover = float(item.rollover_amount) if item.rollover_amount else 0
+            effective = budgeted + rollover
+            remaining = effective - spent
+            percent = (spent / effective * 100) if effective > 0 else 0
+
             items.append(BudgetItemResponse(
                 id=item.id,
                 category_id=item.category_id,
@@ -140,10 +144,12 @@ def get_budgets(
                 budgeted=budgeted,
                 spent=spent,
                 remaining=remaining,
-                percent_used=min(percent, 100)
+                percent_used=min(percent, 100),
+                rollover_amount=rollover,
+                effective_budget=effective,
             ))
-            
-            total_budgeted += budgeted
+
+            total_budgeted += effective
             total_spent += spent
         
         result.append(BudgetResponse(
@@ -436,5 +442,69 @@ def delete_budget(
     
     db.delete(budget)
     db.commit()
-    
+
     return {"status": "deleted"}
+
+
+@router.post("/apply-rollover")
+def apply_rollover(
+    profile_id: int,
+    target_year: int,
+    target_month: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """Calculate rollover from previous month and apply to target month's budget."""
+    profile_ids = [p.id for p in current_user.profiles]
+    if profile_id not in profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
+    target_date = date(target_year, target_month, 1)
+
+    # Find previous month
+    if target_month == 1:
+        prev_month = date(target_year - 1, 12, 1)
+    else:
+        prev_month = date(target_year, target_month - 1, 1)
+
+    prev_budget = db.query(Budget).filter(
+        Budget.profile_id == profile_id,
+        Budget.month == prev_month,
+    ).first()
+    if not prev_budget:
+        raise HTTPException(status_code=404, detail="No previous month budget found")
+
+    target_budget = db.query(Budget).filter(
+        Budget.profile_id == profile_id,
+        Budget.month == target_date,
+    ).first()
+    if not target_budget:
+        raise HTTPException(status_code=404, detail="No target month budget found")
+
+    # Calculate unspent from previous month
+    _, last_day = monthrange(prev_month.year, prev_month.month)
+    prev_end = date(prev_month.year, prev_month.month, last_day)
+    prev_spending = get_spending_by_category(db, profile_id, prev_month, prev_end)
+
+    rollovers_applied = 0
+    for prev_item in prev_budget.items:
+        prev_budgeted = float(prev_item.amount) + (float(prev_item.rollover_amount) if prev_item.rollover_amount else 0)
+        prev_spent = prev_spending.get(prev_item.category_id, 0)
+        unspent = max(0, prev_budgeted - prev_spent)
+
+        if unspent <= 0:
+            continue
+
+        # Find matching category in target budget
+        target_item = None
+        for ti in target_budget.items:
+            if ti.category_id == prev_item.category_id:
+                target_item = ti
+                break
+
+        if target_item:
+            target_item.rollover_amount = unspent
+            rollovers_applied += 1
+
+    db.commit()
+    return {"rollovers_applied": rollovers_applied}
