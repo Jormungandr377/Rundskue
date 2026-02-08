@@ -667,3 +667,51 @@ class SavingsRule(Base):
     __table_args__ = (
         Index("ix_savings_rules_profile_active", "profile_id", "is_active"),
     )
+
+
+# ============================================================================
+# Phase 4: Debt Management
+# ============================================================================
+
+class Debt(Base):
+    """Debt tracking for payoff planning."""
+    __tablename__ = "debts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True)
+    name = Column(String(255), nullable=False)
+    balance = Column(Numeric(14, 2), nullable=False)
+    interest_rate = Column(Numeric(5, 2), nullable=False)  # APR %
+    minimum_payment = Column(Numeric(14, 2), nullable=False)
+    loan_type = Column(String(30), nullable=False)  # mortgage, auto, student, personal, credit_card, other
+    start_date = Column(Date, nullable=True)
+    original_balance = Column(Numeric(14, 2), nullable=True)
+    extra_info = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    profile = relationship("Profile")
+
+    __table_args__ = (
+        Index("ix_debts_profile", "profile_id"),
+    )
+
+
+class CreditScore(Base):
+    """Credit score history tracking."""
+    __tablename__ = "credit_scores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    score = Column(Integer, nullable=False)
+    source = Column(String(50), default="manual")  # manual or api
+    date = Column(Date, nullable=False)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("ix_credit_scores_user_date", "user_id", "date"),
+    )

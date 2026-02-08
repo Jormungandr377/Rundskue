@@ -375,3 +375,65 @@ export interface PaycheckRule {
   is_active: boolean;
   allocations: PaycheckAllocation[];
 }
+
+// Debt Management
+export interface Debt {
+  id: number;
+  profile_id: number;
+  account_id?: number;
+  name: string;
+  balance: number;
+  interest_rate: number;
+  minimum_payment: number;
+  loan_type: string;
+  start_date?: string;
+  original_balance?: number;
+  extra_info?: Record<string, unknown>;
+}
+
+export interface PayoffScheduleMonth {
+  debt_id: number;
+  debt_name: string;
+  month_number: number;
+  payment: number;
+  principal: number;
+  interest: number;
+  remaining_balance: number;
+}
+
+export interface PayoffPlan {
+  strategy: string;
+  total_months: number;
+  total_interest: number;
+  total_paid: number;
+  payoff_date: string;
+  schedule: PayoffScheduleMonth[];
+}
+
+export interface StrategyComparison {
+  snowball: PayoffPlan;
+  avalanche: PayoffPlan;
+  months_saved: number;
+  interest_saved: number;
+}
+
+// Credit Score
+export interface CreditScoreEntry {
+  id: number;
+  user_id: number;
+  score: number;
+  source: string;
+  date: string;
+  notes?: string;
+  rating: string;
+}
+
+export interface CreditScoreHistory {
+  latest_score?: number;
+  latest_rating?: string;
+  score_change?: number;
+  highest_score?: number;
+  lowest_score?: number;
+  total_entries: number;
+  entries: CreditScoreEntry[];
+}

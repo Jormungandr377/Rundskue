@@ -30,6 +30,11 @@ import type {
   CashFlowDay,
   PaycheckRule,
   SavingsRuleItem,
+  Debt,
+  PayoffPlan,
+  StrategyComparison,
+  CreditScoreEntry,
+  CreditScoreHistory,
 } from './types';
 
 const client = authenticatedApi;
@@ -328,6 +333,35 @@ export const paycheckRules = {
     client.post(`/paycheck/${ruleId}/apply/${transactionId}`).then(r => r.data),
 };
 
+// Debt Management
+export const debt = {
+  list: () => client.get<Debt[]>('/debt').then(r => r.data),
+  create: (data: { profile_id: number; name: string; balance: number; interest_rate: number; minimum_payment: number; loan_type: string; start_date?: string; original_balance?: number }) =>
+    client.post<Debt>('/debt', data).then(r => r.data),
+  update: (id: number, data: Partial<Debt>) =>
+    client.put<Debt>(`/debt/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/debt/${id}`),
+  payoffPlan: (params: { strategy: string; extra_payment?: number }) =>
+    client.get<PayoffPlan>('/debt/payoff-plan', { params }).then(r => r.data),
+  comparison: (extraPayment?: number) =>
+    client.get<StrategyComparison>('/debt/comparison', { params: { extra_payment: extraPayment } }).then(r => r.data),
+  totalInterest: () =>
+    client.get<{ total_balance: number; total_minimum_payments: number; total_interest_if_minimum_only: number; estimated_payoff_months: number }>('/debt/total-interest').then(r => r.data),
+  amortization: (id: number) =>
+    client.get<{ month_number: number; payment: number; principal: number; interest: number; remaining_balance: number }[]>(`/debt/${id}/amortization`).then(r => r.data),
+};
+
+// Credit Score
+export const creditScore = {
+  create: (data: { score: number; date: string; source?: string; notes?: string }) =>
+    client.post<CreditScoreEntry>('/credit-score', data).then(r => r.data),
+  history: (limit = 50) =>
+    client.get<CreditScoreHistory>('/credit-score/history', { params: { limit } }).then(r => r.data),
+  latest: () =>
+    client.get<CreditScoreEntry>('/credit-score/latest').then(r => r.data),
+  delete: (id: number) => client.delete(`/credit-score/${id}`),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -349,6 +383,8 @@ export const api = {
   cashflow,
   paycheckRules,
   savingsRules,
+  debt,
+  creditScore,
 };
 
 export default api;
