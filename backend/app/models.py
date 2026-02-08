@@ -591,3 +591,44 @@ class Subscription(Base):
     __table_args__ = (
         Index("ix_subscriptions_profile_active", "profile_id", "is_active"),
     )
+
+
+# ============================================================================
+# Phase 2: Cash Flow & Income
+# ============================================================================
+
+class PaycheckRule(Base):
+    """Rule for automatically splitting paycheck income into envelopes/goals."""
+    __tablename__ = "paycheck_rules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    match_merchant = Column(String(255), nullable=False)
+    match_amount_min = Column(Numeric(14, 2), nullable=True)
+    match_amount_max = Column(Numeric(14, 2), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    profile = relationship("Profile")
+    allocations = relationship("PaycheckAllocation", back_populates="rule", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_paycheck_rules_profile_active", "profile_id", "is_active"),
+    )
+
+
+class PaycheckAllocation(Base):
+    """Individual allocation within a paycheck splitting rule."""
+    __tablename__ = "paycheck_allocations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    rule_id = Column(Integer, ForeignKey("paycheck_rules.id"), nullable=False, index=True)
+    target_type = Column(String(20), nullable=False)  # envelope, goal, category
+    target_id = Column(Integer, nullable=False)
+    amount_type = Column(String(20), nullable=False)  # fixed, percentage
+    amount = Column(Numeric(14, 2), nullable=False)
+    priority = Column(Integer, default=0)
+
+    rule = relationship("PaycheckRule", back_populates="allocations")

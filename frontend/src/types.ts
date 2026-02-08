@@ -309,3 +309,50 @@ export interface SubscriptionSummary {
   active_count: number;
   flagged_unused_count: number;
 }
+
+// Cash Flow Forecast
+export interface CashFlowEvent {
+  name: string;
+  amount: number;
+  type: string;
+}
+
+export interface CashFlowDay {
+  date: string;
+  projected_balance: number;
+  events: CashFlowEvent[];
+  cumulative_income: number;
+  cumulative_expenses: number;
+}
+
+// Income vs Expense Comparison
+export interface IncomeExpenseComparison {
+  month: string;
+  income: number;
+  expenses: number;
+  net: number;
+  income_change_pct?: number;
+  expense_change_pct?: number;
+  net_change_pct?: number;
+}
+
+// Paycheck Rules
+export interface PaycheckAllocation {
+  id: number;
+  target_type: string;
+  target_id: number;
+  amount_type: string;
+  amount: number;
+  priority: number;
+}
+
+export interface PaycheckRule {
+  id: number;
+  profile_id: number;
+  name: string;
+  match_merchant: string;
+  match_amount_min?: number;
+  match_amount_max?: number;
+  is_active: boolean;
+  allocations: PaycheckAllocation[];
+}

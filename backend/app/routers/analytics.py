@@ -499,5 +499,104 @@ def get_spending_insights(
     
     # Sort by absolute percentage change
     insights.sort(key=lambda x: abs(x.percentage_change or 0), reverse=True)
-    
+
     return insights[:10]  # Top 10 insights
+
+
+class IncomeExpenseComparison(BaseModel):
+    month: str
+    income: float
+    expenses: float
+    net: float
+    income_change_pct: Optional[float] = None
+    expense_change_pct: Optional[float] = None
+    net_change_pct: Optional[float] = None
+
+
+@router.get("/income-expense-comparison", response_model=List[IncomeExpenseComparison])
+def get_income_expense_comparison(
+    profile_id: Optional[int] = None,
+    months: int = 12,
+    comparison: Optional[str] = None,  # "yoy" for year-over-year
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Get income vs expense comparison with MoM or YoY percentage changes."""
+    user_profile_ids = [p.id for p in current_user.profiles]
+    if profile_id and profile_id not in user_profile_ids:
+        raise HTTPException(status_code=403, detail="Access denied to this profile")
+
+    # Fetch enough months for comparison
+    fetch_months = months + (12 if comparison == "yoy" else 1)
+    today = date.today()
+    start_date = date(today.year, today.month, 1) - timedelta(days=30 * fetch_months)
+    filter_profile_ids = [profile_id] if profile_id else user_profile_ids
+
+    query = db.query(
+        extract('year', Transaction.date).label('year'),
+        extract('month', Transaction.date).label('month'),
+        func.sum(case((Transaction.amount < 0, Transaction.amount), else_=0)).label('income'),
+        func.sum(case((Transaction.amount > 0, Transaction.amount), else_=0)).label('expenses')
+    ).join(Account).filter(
+        Account.profile_id.in_(filter_profile_ids),
+        Transaction.date >= start_date,
+        Transaction.is_excluded == False,
+        Transaction.is_transfer == False
+    ).group_by(
+        extract('year', Transaction.date),
+        extract('month', Transaction.date)
+    ).order_by(
+        extract('year', Transaction.date),
+        extract('month', Transaction.date)
+    )
+
+    results = query.all()
+    monthly_data = {}
+    for r in results:
+        key = f"{int(r.year)}-{int(r.month):02d}"
+        income = abs(float(r.income)) if r.income else 0
+        expenses = float(r.expenses) if r.expenses else 0
+        monthly_data[key] = {"income": income, "expenses": expenses, "net": income - expenses}
+
+    # Build comparison output (only the requested number of months)
+    output = []
+    sorted_months = sorted(monthly_data.keys())
+    target_months = sorted_months[-months:] if len(sorted_months) > months else sorted_months
+
+    for month_key in target_months:
+        data = monthly_data[month_key]
+        year, mon = int(month_key.split("-")[0]), int(month_key.split("-")[1])
+
+        # Determine comparison period
+        if comparison == "yoy":
+            comp_key = f"{year - 1}-{mon:02d}"
+        else:
+            # MoM: previous month
+            if mon == 1:
+                comp_key = f"{year - 1}-12"
+            else:
+                comp_key = f"{year}-{mon - 1:02d}"
+
+        comp = monthly_data.get(comp_key)
+        income_pct = None
+        expense_pct = None
+        net_pct = None
+        if comp:
+            if comp["income"] > 0:
+                income_pct = round((data["income"] - comp["income"]) / comp["income"] * 100, 1)
+            if comp["expenses"] > 0:
+                expense_pct = round((data["expenses"] - comp["expenses"]) / comp["expenses"] * 100, 1)
+            if comp["net"] != 0:
+                net_pct = round((data["net"] - comp["net"]) / abs(comp["net"]) * 100, 1)
+
+        output.append(IncomeExpenseComparison(
+            month=month_key,
+            income=data["income"],
+            expenses=data["expenses"],
+            net=data["net"],
+            income_change_pct=income_pct,
+            expense_change_pct=expense_pct,
+            net_change_pct=net_pct,
+        ))
+
+    return output

@@ -59,6 +59,8 @@ const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const Onboarding = lazy(() => import('./pages/Onboarding'))
 const Envelopes = lazy(() => import('./pages/Envelopes'))
 const Subscriptions = lazy(() => import('./pages/Subscriptions'))
+const CashFlowPage = lazy(() => import('./pages/CashFlow'))
+const PaycheckRules = lazy(() => import('./pages/PaycheckRules'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
 const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
@@ -122,6 +124,7 @@ const navItems = [
   { path: '/recurring', icon: RefreshCw, label: 'Bills & Subs' },
   { path: '/subscriptions', icon: CreditCard, label: 'Subscriptions' },
   { path: '/goals', icon: Target, label: 'Savings Goals' },
+  { path: '/cash-flow', icon: TrendingUp, label: 'Cash Flow' },
   { path: '/reports', icon: TrendingUp, label: 'Reports' },
   { path: '/planning', icon: Calculator, label: 'Financial Planning' },
   { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
@@ -426,6 +429,8 @@ function AuthenticatedLayout() {
               <Route path="/envelopes" element={<Envelopes />} />
               <Route path="/recurring" element={<RecurringBills />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/cash-flow" element={<CashFlowPage />} />
+              <Route path="/paycheck-rules" element={<PaycheckRules />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/planning" element={<FinancialPlanning />} />
               <Route path="/link-account" element={<LinkAccount />} />

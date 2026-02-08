@@ -26,6 +26,9 @@ import type {
   EnvelopeSummary,
   SubscriptionItem,
   SubscriptionSummary,
+  IncomeExpenseComparison,
+  CashFlowDay,
+  PaycheckRule,
 } from './types';
 
 const client = authenticatedApi;
@@ -155,6 +158,8 @@ export const analytics = {
     client.post('/analytics/snapshot-net-worth', null, { params: { profile_id: profileId } }).then(r => r.data),
   insights: (profileId?: number) =>
     client.get<SpendingInsight[]>('/analytics/insights', { params: { profile_id: profileId } }).then(r => r.data),
+  incomeExpenseComparison: (params: { profile_id?: number; months?: number; comparison?: string }) =>
+    client.get<IncomeExpenseComparison[]>('/analytics/income-expense-comparison', { params }).then(r => r.data),
 };
 
 // TSP
@@ -287,6 +292,26 @@ export const subscriptions = {
     client.post<{ detected: number; subscriptions: Record<string, unknown>[] }>('/subscriptions/detect', null, { params: { profile_id: profileId } }).then(r => r.data),
 };
 
+// Cash Flow Forecasting
+export const cashflow = {
+  forecast: (params: { profile_id?: number; days?: number }) =>
+    client.get<CashFlowDay[]>('/cashflow/forecast', { params }).then(r => r.data),
+  scenarios: (params: { profile_id?: number; days?: number; add_expense_name?: string; add_expense_amount?: number; add_expense_frequency?: string; remove_recurring_id?: number }) =>
+    client.get<CashFlowDay[]>('/cashflow/scenarios', { params }).then(r => r.data),
+};
+
+// Paycheck Rules
+export const paycheckRules = {
+  list: () => client.get<PaycheckRule[]>('/paycheck').then(r => r.data),
+  create: (data: { profile_id: number; name: string; match_merchant: string; match_amount_min?: number; match_amount_max?: number; allocations?: { target_type: string; target_id: number; amount_type: string; amount: number; priority?: number }[] }) =>
+    client.post<PaycheckRule>('/paycheck', data).then(r => r.data),
+  update: (id: number, data: Partial<PaycheckRule>) =>
+    client.put<PaycheckRule>(`/paycheck/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/paycheck/${id}`),
+  apply: (ruleId: number, transactionId: number) =>
+    client.post(`/paycheck/${ruleId}/apply/${transactionId}`).then(r => r.data),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -305,6 +330,8 @@ export const api = {
   sessions,
   envelopes,
   subscriptions,
+  cashflow,
+  paycheckRules,
 };
 
 export default api;
