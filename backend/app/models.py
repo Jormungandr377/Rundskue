@@ -694,6 +694,10 @@ class Debt(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
+    # Credit health integration
+    payoff_impact = Column(Integer, nullable=True)  # Estimated credit score impact
+    priority = Column(Integer, default=0)  # User-defined payoff priority
+
     profile = relationship("Profile")
 
     __table_args__ = (
@@ -712,6 +716,14 @@ class CreditScore(Base):
     date = Column(Date, nullable=False)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Credit health metrics
+    credit_utilization = Column(Numeric(5, 2), nullable=True)  # Percentage
+    debt_to_income_ratio = Column(Numeric(5, 2), nullable=True)  # Percentage
+    total_credit_limit = Column(Numeric(14, 2), nullable=True)
+    total_credit_used = Column(Numeric(14, 2), nullable=True)
+    monthly_income = Column(Numeric(14, 2), nullable=True)
+    monthly_debt_payment = Column(Numeric(14, 2), nullable=True)
 
     user = relationship("User")
 

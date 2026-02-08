@@ -1,6 +1,6 @@
 """Credit score tracking router."""
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -8,9 +8,10 @@ from sqlalchemy import func
 from pydantic import BaseModel, Field, field_validator
 
 from ..database import get_db
-from ..models import CreditScore, User
+from ..models import CreditScore, User, Profile
 from ..dependencies import get_current_active_user
 from ..services import audit
+from ..services.credit_health import CreditHealthService
 
 router = APIRouter()
 
@@ -55,6 +56,40 @@ class CreditScoreHistory(BaseModel):
     lowest_score: Optional[int] = None
     total_entries: int = 0
     entries: List[CreditScoreResponse] = []
+
+
+class CreditHealthMetrics(BaseModel):
+    """Comprehensive credit health metrics."""
+    credit_score: Optional[int] = None
+    credit_score_date: Optional[str] = None
+    credit_utilization: float
+    total_credit_limit: float
+    total_credit_used: float
+    debt_to_income_ratio: float
+    monthly_debt_payment: float
+    monthly_income: float
+    total_debt: float
+    debt_count: int
+    health_score: int
+    health_rating: str
+
+
+class PayoffScenario(BaseModel):
+    """Debt payoff scenario for credit score projection."""
+    payoff_plan: Dict[int, float] = Field(
+        ...,
+        description="Map of debt_id to additional monthly payment amount"
+    )
+
+
+class CreditProjection(BaseModel):
+    """Credit score projection based on debt payoff."""
+    current_score: int
+    current_utilization: float
+    current_dti: float
+    projections: List[Dict]
+    total_months: int
+    total_debts: int
 
 
 # ============================================================================
@@ -199,3 +234,134 @@ async def delete_credit_score(
     db.commit()
     audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="credit_score", resource_id=str(score_id))
     return {"message": "Credit score entry deleted"}
+
+
+@router.get("/health", response_model=CreditHealthMetrics)
+async def get_credit_health(
+    monthly_income: Optional[float] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get comprehensive credit health metrics.
+
+    Includes:
+    - Credit score and history
+    - Credit utilization percentage
+    - Debt-to-income ratio
+    - Overall health score (0-100)
+
+    Query params:
+    - monthly_income: Override estimated monthly income (optional)
+    """
+    # Get user's profiles
+    profiles = db.query(Profile).filter(Profile.user_id == current_user.id).all()
+    profile_ids = [p.id for p in profiles]
+
+    if not profile_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No profiles found for user"
+        )
+
+    # Calculate metrics
+    service = CreditHealthService(db)
+    metrics = service.get_credit_health_snapshot(
+        user_id=current_user.id,
+        profile_ids=profile_ids,
+        monthly_income=monthly_income
+    )
+
+    return CreditHealthMetrics(**metrics)
+
+
+@router.post("/project", response_model=CreditProjection)
+async def project_credit_score(
+    scenario: PayoffScenario,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Project credit score improvement based on debt payoff scenario.
+
+    Provide a map of debt_id to additional monthly payment to see
+    projected credit score improvements over time.
+
+    Example request body:
+    ```json
+    {
+        "payoff_plan": {
+            "1": 500.00,
+            "2": 200.00
+        }
+    }
+    ```
+    """
+    # Get user's profiles
+    profiles = db.query(Profile).filter(Profile.user_id == current_user.id).all()
+    profile_ids = [p.id for p in profiles]
+
+    if not profile_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No profiles found for user"
+        )
+
+    # Generate projection
+    service = CreditHealthService(db)
+    projection = service.project_credit_score(
+        user_id=current_user.id,
+        profile_ids=profile_ids,
+        payoff_scenario=scenario.payoff_plan
+    )
+
+    return CreditProjection(**projection)
+
+
+@router.post("/{score_id}/calculate-metrics", response_model=CreditScoreResponse)
+async def calculate_credit_metrics(
+    score_id: int,
+    monthly_income: Optional[float] = None,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Calculate and attach credit health metrics to a specific credit score entry.
+
+    This will populate utilization, DTI, and other metrics for historical tracking.
+
+    Query params:
+    - monthly_income: Override estimated monthly income (optional)
+    """
+    # Verify credit score belongs to user
+    entry = db.query(CreditScore).filter(
+        CreditScore.id == score_id,
+        CreditScore.user_id == current_user.id,
+    ).first()
+
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Credit score entry not found"
+        )
+
+    # Get user's profiles
+    profiles = db.query(Profile).filter(Profile.user_id == current_user.id).all()
+    profile_ids = [p.id for p in profiles]
+
+    if not profile_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No profiles found for user"
+        )
+
+    # Calculate and update metrics
+    service = CreditHealthService(db)
+    updated_entry = service.update_credit_score_metrics(
+        credit_score_id=score_id,
+        user_id=current_user.id,
+        profile_ids=profile_ids,
+        monthly_income=monthly_income
+    )
+
+    return score_to_response(updated_entry)

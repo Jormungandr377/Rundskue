@@ -1,16 +1,18 @@
 """Debt payoff planning router - manage debts and generate payoff strategies."""
 from datetime import datetime, date, timedelta
-from typing import Optional, List
+from typing import Optional, List, Dict
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from pydantic import BaseModel, Field
 
 from ..database import get_db
-from ..models import Debt, User, Profile
+from ..models import Debt, User, Profile, CreditScore
 from ..dependencies import get_current_active_user
 from ..services import audit
+from ..services.credit_health import CreditHealthService
 
 router = APIRouter(tags=["Debt Payoff"])
 
@@ -46,6 +48,8 @@ class DebtUpdate(BaseModel):
     start_date: Optional[date] = None
     original_balance: Optional[float] = None
     extra_info: Optional[dict] = None
+    payoff_impact: Optional[int] = None
+    priority: Optional[int] = None
 
 
 class DebtResponse(BaseModel):
@@ -61,6 +65,8 @@ class DebtResponse(BaseModel):
     start_date: Optional[date]
     original_balance: Optional[float]
     extra_info: Optional[dict]
+    payoff_impact: Optional[int] = None
+    priority: Optional[int] = None
     created_at: datetime
     updated_at: datetime
 
@@ -132,6 +138,8 @@ def debt_to_response(debt: Debt) -> DebtResponse:
         start_date=debt.start_date,
         original_balance=float(debt.original_balance) if debt.original_balance else None,
         extra_info=debt.extra_info,
+        payoff_impact=debt.payoff_impact,
+        priority=debt.priority,
         created_at=debt.created_at,
         updated_at=debt.updated_at,
     )
@@ -629,3 +637,154 @@ async def get_amortization_schedule(
     )
 
     return schedule
+
+
+# ============================================================================
+# Unified Debt + Credit Dashboard
+# ============================================================================
+
+class DebtCreditDashboard(BaseModel):
+    """Unified dashboard showing debt payoff status and credit health."""
+    # Debt summary
+    total_debt: float
+    debt_count: int
+    total_minimum_payment: float
+    debts: List[DebtResponse]
+
+    # Credit health
+    credit_score: Optional[int] = None
+    credit_score_date: Optional[str] = None
+    credit_utilization: float
+    debt_to_income_ratio: float
+    health_score: int
+    health_rating: str
+
+    # Payoff projections with credit impact
+    payoff_plan_snowball: Optional[Dict] = None
+    payoff_plan_avalanche: Optional[Dict] = None
+    credit_projection: Optional[Dict] = None
+
+
+@router.get("/dashboard", response_model=DebtCreditDashboard)
+async def get_debt_credit_dashboard(
+    extra_payment: float = Query(0, ge=0, description="Extra monthly payment to apply"),
+    strategy: str = Query("avalanche", description="Payoff strategy: snowball or avalanche"),
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get unified dashboard showing debt payoff status and credit health.
+
+    This endpoint combines:
+    - All debts with total balance and minimum payments
+    - Credit health metrics (score, utilization, DTI)
+    - Payoff plan projections (snowball and avalanche)
+    - Credit score projection based on debt payoff
+
+    Query params:
+    - extra_payment: Additional monthly payment beyond minimums (default: 0)
+    - strategy: Preferred strategy for detailed plan (default: avalanche)
+    """
+    # Get user's profiles
+    profile_ids = [p.id for p in current_user.profiles]
+
+    if not profile_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No profiles found for user"
+        )
+
+    # Get all debts
+    debts = db.query(Debt).filter(
+        Debt.profile_id.in_(profile_ids)
+    ).order_by(Debt.balance.desc()).all()
+
+    total_debt = sum(float(d.balance) for d in debts)
+    total_minimum_payment = sum(float(d.minimum_payment) for d in debts)
+    debt_responses = [debt_to_response(d) for d in debts]
+
+    # Get credit health metrics
+    credit_service = CreditHealthService(db)
+    health_metrics = credit_service.get_credit_health_snapshot(
+        user_id=current_user.id,
+        profile_ids=profile_ids
+    )
+
+    # Generate payoff plans if there are debts
+    snowball_plan = None
+    avalanche_plan = None
+    credit_projection = None
+
+    if debts:
+        debts_data = [
+            {
+                "id": d.id,
+                "name": d.name,
+                "balance": float(d.balance),
+                "interest_rate": float(d.interest_rate),
+                "minimum_payment": float(d.minimum_payment),
+            }
+            for d in debts
+        ]
+
+        # Compute both strategies
+        snowball_plan = compute_payoff_plan(debts_data, "snowball", extra_payment)
+        avalanche_plan = compute_payoff_plan(debts_data, "avalanche", extra_payment)
+
+        # Convert to dict for response
+        snowball_dict = {
+            "strategy": snowball_plan.strategy,
+            "total_months": snowball_plan.total_months,
+            "total_interest": snowball_plan.total_interest,
+            "total_paid": snowball_plan.total_paid,
+            "payoff_date": snowball_plan.payoff_date.isoformat(),
+        }
+
+        avalanche_dict = {
+            "strategy": avalanche_plan.strategy,
+            "total_months": avalanche_plan.total_months,
+            "total_interest": avalanche_plan.total_interest,
+            "total_paid": avalanche_plan.total_paid,
+            "payoff_date": avalanche_plan.payoff_date.isoformat(),
+        }
+
+        # Generate credit score projection based on selected strategy
+        # Map debt_id to extra payment (evenly distributed for simplicity)
+        payoff_scenario = {}
+        if extra_payment > 0:
+            # Apply extra payment to priority debt based on strategy
+            selected_plan = avalanche_plan if strategy == "avalanche" else snowball_plan
+            if selected_plan.schedule:
+                # Find first debt that gets extra payment
+                first_debt_id = selected_plan.schedule[0].debt_id
+                payoff_scenario[first_debt_id] = extra_payment
+
+        projection = credit_service.project_credit_score(
+            user_id=current_user.id,
+            profile_ids=profile_ids,
+            payoff_scenario=payoff_scenario
+        )
+
+        credit_projection = {
+            "current_score": projection["current_score"],
+            "current_utilization": projection["current_utilization"],
+            "current_dti": projection["current_dti"],
+            "projections": projection["projections"],
+            "total_months": projection["total_months"],
+        }
+
+    return DebtCreditDashboard(
+        total_debt=round(total_debt, 2),
+        debt_count=len(debts),
+        total_minimum_payment=round(total_minimum_payment, 2),
+        debts=debt_responses,
+        credit_score=health_metrics["credit_score"],
+        credit_score_date=health_metrics["credit_score_date"],
+        credit_utilization=health_metrics["credit_utilization"],
+        debt_to_income_ratio=health_metrics["debt_to_income_ratio"],
+        health_score=health_metrics["health_score"],
+        health_rating=health_metrics["health_rating"],
+        payoff_plan_snowball=snowball_dict if snowball_plan else None,
+        payoff_plan_avalanche=avalanche_dict if avalanche_plan else None,
+        credit_projection=credit_projection,
+    )
