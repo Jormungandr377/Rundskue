@@ -27,12 +27,16 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends libpq5 curl && \
     rm -rf /var/lib/apt/lists/*
 
+# Create a non-root user to run the application
+RUN groupadd --gid 1001 appuser && \
+    useradd --uid 1001 --gid appuser --shell /bin/bash --create-home appuser
+
 # Set working directory to monorepo root
 # Critical: uvicorn runs as backend.app.main:app from this directory
 # and main.py resolves static files via Path(__file__).parent.parent.parent / "frontend" / "dist"
 WORKDIR /app
 
-# Copy backend requirements and install Python deps
+# Copy backend requirements and install Python deps (as root, before switching user)
 COPY backend/requirements.txt ./backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
@@ -47,11 +51,17 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
 
+# Make app directory owned by appuser
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 ENV PORT=8000
 
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/api/health || exit 1
 
 CMD ["./start.sh"]

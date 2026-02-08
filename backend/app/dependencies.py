@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from jose import JWTError
+import jwt as pyjwt
 
 from .database import get_db
 from .models import User
@@ -46,7 +46,7 @@ async def get_current_user(
         if user_id is None or token_type != "access":
             raise credentials_exception
 
-    except JWTError:
+    except pyjwt.PyJWTError:
         raise credentials_exception
 
     user = db.query(User).filter(User.id == int(user_id)).first()

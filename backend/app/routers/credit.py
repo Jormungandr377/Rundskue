@@ -2,7 +2,7 @@
 from datetime import datetime, date
 from typing import Optional, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel, Field, field_validator
@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 from ..database import get_db
 from ..models import CreditScore, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter()
 
@@ -180,6 +181,7 @@ async def get_latest_credit_score(
 @router.delete("/{score_id}")
 async def delete_credit_score(
     score_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -195,4 +197,5 @@ async def delete_credit_score(
         )
     db.delete(entry)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="credit_score", resource_id=str(score_id))
     return {"message": "Credit score entry deleted"}

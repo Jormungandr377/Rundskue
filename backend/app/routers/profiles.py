@@ -1,5 +1,5 @@
 """Profiles API router - manage household member profiles."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
@@ -8,6 +8,7 @@ from datetime import date
 from ..database import get_db
 from ..models import Profile, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter()
 
@@ -129,6 +130,7 @@ def update_profile(
 @router.delete("/{profile_id}")
 def delete_profile(
     profile_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -142,4 +144,5 @@ def delete_profile(
 
     db.delete(db_profile)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="profile", resource_id=str(profile_id))
     return {"status": "deleted"}

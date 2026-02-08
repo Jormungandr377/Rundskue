@@ -1,11 +1,13 @@
 """Data export endpoints for transactions and reports (CSV, Excel, PDF)."""
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Optional
 from io import BytesIO
 import csv
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
@@ -14,6 +16,7 @@ from ..dependencies import get_current_active_user
 from ..services import audit
 
 router = APIRouter(tags=["Export"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 def get_user_profile(db: Session, user) -> Profile:
@@ -28,7 +31,9 @@ def get_user_profile(db: Session, user) -> Profile:
 
 
 @router.get("/transactions/csv")
+@limiter.limit("10/minute")
 async def export_transactions_csv(
+    request: Request,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     current_user=Depends(get_current_active_user),
@@ -96,7 +101,9 @@ async def export_transactions_csv(
 
 
 @router.get("/transactions/excel")
+@limiter.limit("10/minute")
 async def export_transactions_excel(
+    request: Request,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     current_user=Depends(get_current_active_user),
@@ -187,7 +194,9 @@ async def export_transactions_excel(
 
 
 @router.get("/report/pdf")
+@limiter.limit("5/minute")
 async def export_report_pdf(
+    request: Request,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     current_user=Depends(get_current_active_user),
@@ -310,7 +319,7 @@ async def export_report_pdf(
 
     elements.append(Spacer(1, 0.2 * inch))
     elements.append(Paragraph(
-        f"Generated on {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')} by Rundskue Finance Tracker",
+        f"Generated on {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} by Rundskue Finance Tracker",
         subtitle_style
     ))
 

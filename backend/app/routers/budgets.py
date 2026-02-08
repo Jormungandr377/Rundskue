@@ -1,5 +1,5 @@
 """Budgets API router - manage monthly budgets."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_
 from pydantic import BaseModel
@@ -10,6 +10,7 @@ from calendar import monthrange
 from ..database import get_db
 from ..models import Budget, BudgetItem, Category, Transaction, Account, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter()
 
@@ -427,6 +428,7 @@ def copy_from_template(
 @router.delete("/{budget_id}")
 def delete_budget(
     budget_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -439,9 +441,10 @@ def delete_budget(
     ).first()
     if not budget:
         raise HTTPException(status_code=404, detail="Budget not found")
-    
+
     db.delete(budget)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="budget", resource_id=str(budget_id))
 
     return {"status": "deleted"}
 

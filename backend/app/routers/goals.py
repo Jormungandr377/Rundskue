@@ -1,9 +1,9 @@
 """Savings goals management router."""
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import Optional, List
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel, Field
@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from ..database import get_db
 from ..models import SavingsGoal, Profile, User, Notification, Transaction, Account
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Savings Goals"])
 
@@ -162,7 +163,7 @@ async def create_goal(
     # Check if already completed on creation
     if data.current_amount >= data.target_amount:
         goal.is_completed = True
-        goal.completed_at = datetime.utcnow()
+        goal.completed_at = datetime.now(timezone.utc)
 
     db.add(goal)
     db.commit()
@@ -215,7 +216,7 @@ async def update_goal(
     current = float(goal.current_amount) if goal.current_amount else 0
     if current >= target and not goal.is_completed:
         goal.is_completed = True
-        goal.completed_at = datetime.utcnow()
+        goal.completed_at = datetime.now(timezone.utc)
         # Create notification
         notif = Notification(
             user_id=current_user.id,
@@ -255,7 +256,7 @@ async def contribute_to_goal(
     current = float(goal.current_amount)
     if current >= target and not goal.is_completed:
         goal.is_completed = True
-        goal.completed_at = datetime.utcnow()
+        goal.completed_at = datetime.now(timezone.utc)
         notif = Notification(
             user_id=current_user.id,
             type="goal_reached",
@@ -273,6 +274,7 @@ async def contribute_to_goal(
 @router.delete("/{goal_id}")
 async def delete_goal(
     goal_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -288,6 +290,7 @@ async def delete_goal(
 
     db.delete(goal)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="savings_goal", resource_id=str(goal_id))
     return {"message": "Goal deleted"}
 
 

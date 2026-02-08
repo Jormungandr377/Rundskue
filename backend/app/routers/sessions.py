@@ -1,5 +1,5 @@
 """Session management router - view active sessions, logout all devices."""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -46,7 +46,7 @@ async def list_sessions(
     sessions = db.query(RefreshToken).filter(
         RefreshToken.user_id == current_user.id,
         RefreshToken.is_revoked == False,
-        RefreshToken.expires_at > datetime.utcnow()
+        RefreshToken.expires_at > datetime.now(timezone.utc)
     ).order_by(RefreshToken.created_at.desc()).all()
 
     result = []

@@ -2,7 +2,9 @@
 from typing import List, Optional, Dict
 from collections import Counter
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel, Field
@@ -10,8 +12,10 @@ from pydantic import BaseModel, Field
 from ..database import get_db
 from ..models import CategoryRule, Category, Transaction, Account, Profile, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Auto-Categorization"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 # ============================================================================
@@ -206,6 +210,7 @@ async def update_rule(
 @router.delete("/rules/{rule_id}")
 async def delete_rule(
     rule_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -221,11 +226,14 @@ async def delete_rule(
 
     db.delete(rule)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="category_rule", resource_id=str(rule_id))
     return {"message": "Rule deleted"}
 
 
 @router.post("/apply", response_model=ApplyResult)
+@limiter.limit("10/minute")
 async def apply_rules(
+    request: Request,
     uncategorized_only: bool = True,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)

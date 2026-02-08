@@ -1,5 +1,5 @@
 """Audit logging service for security-relevant events."""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 from fastapi import Request
@@ -27,6 +27,7 @@ ACCESS_REVIEW = "access_review"
 DATA_EXPORT = "data_export"
 EMAIL_VERIFIED = "email_verified"
 VERIFICATION_RESENT = "verification_resent"
+RESOURCE_DELETED = "resource_deleted"
 
 
 def log_audit_event(
@@ -42,7 +43,7 @@ def log_audit_event(
 ):
     """Write an immutable audit log entry."""
     entry = AuditLog(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         user_id=user_id,
         action=action,
         resource_type=resource_type,

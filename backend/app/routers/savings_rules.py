@@ -3,13 +3,14 @@ from typing import List, Optional
 from datetime import datetime
 import math
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from ..database import get_db
 from ..models import SavingsRule, SavingsGoal, User, Profile
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter()
 
@@ -209,6 +210,7 @@ def update_savings_rule(
 @router.delete("/{rule_id}")
 def delete_savings_rule(
     rule_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -223,6 +225,7 @@ def delete_savings_rule(
 
     db.delete(rule)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="savings_rule", resource_id=str(rule_id))
     return {"message": "Rule deleted"}
 
 

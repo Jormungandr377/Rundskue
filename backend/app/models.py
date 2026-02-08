@@ -1,5 +1,5 @@
 """SQLAlchemy database models."""
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from decimal import Decimal
 from sqlalchemy import (
     Column, Integer, String, DateTime, Date, Numeric, Boolean, 
@@ -29,8 +29,8 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Preferences
     theme = Column(String(10), default="light")  # light, dark, system
@@ -59,7 +59,7 @@ class RefreshToken(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     expires_at = Column(DateTime, nullable=False)
     is_revoked = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_agent = Column(String(255), nullable=True)
     ip_address = Column(String(50), nullable=True)
 
@@ -76,7 +76,7 @@ class PasswordResetToken(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     expires_at = Column(DateTime, nullable=False)
     is_used = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user = relationship("User", back_populates="password_reset_tokens")
@@ -91,7 +91,7 @@ class EmailVerificationToken(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     expires_at = Column(DateTime, nullable=False)
     is_used = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user = relationship("User", back_populates="email_verification_tokens")
@@ -106,8 +106,8 @@ class Profile(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=True)
     is_primary = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Military-specific fields for TSP
     service_start_date = Column(Date, nullable=True)
@@ -144,8 +144,8 @@ class PlaidItem(Base):
     error_code = Column(String(50), nullable=True)
     error_message = Column(Text, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationships
     profile = relationship("Profile", back_populates="plaid_items")
@@ -179,8 +179,8 @@ class Account(Base):
     is_hidden = Column(Boolean, default=False)
     display_name = Column(String(255), nullable=True)  # Custom name override
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationships
     profile = relationship("Profile", back_populates="accounts")
@@ -247,8 +247,8 @@ class Transaction(Base):
     # Dividend tracking
     is_dividend = Column(Boolean, default=False)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     account = relationship("Account", back_populates="transactions")
@@ -274,8 +274,8 @@ class Budget(Base):
     month = Column(Date, nullable=False)  # First day of month
     is_template = Column(Boolean, default=False)  # Use as template for new months
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationships
     profile = relationship("Profile", back_populates="budgets")
@@ -327,7 +327,7 @@ class NetWorthSnapshot(Base):
     # Breakdown by account (JSON for flexibility)
     account_breakdown = Column(JSON, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     __table_args__ = (
         Index("ix_net_worth_profile_date", "profile_id", "date"),
@@ -370,8 +370,8 @@ class TSPScenario(Base):
     retirement_age = Column(Integer, default=60)
     birth_year = Column(Integer, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationships
     profile = relationship("Profile", back_populates="tsp_scenarios")
@@ -415,8 +415,8 @@ class RecurringTransaction(Base):
 
     notes = Column(Text, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     profile = relationship("Profile")
@@ -451,8 +451,8 @@ class SavingsGoal(Base):
     is_completed = Column(Boolean, default=False)
     completed_at = Column(DateTime, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     profile = relationship("Profile")
@@ -477,7 +477,7 @@ class CategoryRule(Base):
     is_active = Column(Boolean, default=True)
     priority = Column(Integer, default=0)  # Higher = checked first
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     profile = relationship("Profile")
@@ -501,7 +501,7 @@ class Notification(Base):
     data = Column(JSON, nullable=True)  # Extra context (budget_id, goal_id, etc.)
 
     is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user = relationship("User")
@@ -516,7 +516,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     action = Column(String(100), nullable=False)
     resource_type = Column(String(50), nullable=True)
@@ -548,8 +548,8 @@ class Envelope(Base):
     color = Column(String(7), default="#3b82f6")
     icon = Column(String(50), default="wallet")
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     profile = relationship("Profile")
     transactions = relationship("Transaction", back_populates="envelope")
@@ -568,7 +568,7 @@ class BudgetAlert(Base):
     budget_item_id = Column(Integer, ForeignKey("budget_items.id"), nullable=False)
     threshold_pct = Column(Integer, nullable=False, default=80)
     is_enabled = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
     budget_item = relationship("BudgetItem")
@@ -589,10 +589,10 @@ class Subscription(Base):
     next_expected = Column(Date, nullable=True)
     is_active = Column(Boolean, default=True)
     is_flagged_unused = Column(Boolean, default=False)
-    detected_at = Column(DateTime, default=datetime.utcnow)
+    detected_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     profile = relationship("Profile")
     category = relationship("Category")
@@ -617,8 +617,8 @@ class PaycheckRule(Base):
     match_amount_min = Column(Numeric(14, 2), nullable=True)
     match_amount_max = Column(Numeric(14, 2), nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     profile = relationship("Profile")
     allocations = relationship("PaycheckAllocation", back_populates="rule", cascade="all, delete-orphan")
@@ -661,8 +661,8 @@ class SavingsRule(Base):
     frequency = Column(String(20), nullable=True)  # weekly, monthly (for fixed_schedule)
     is_active = Column(Boolean, default=True)
     total_saved = Column(Numeric(14, 2), default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     profile = relationship("Profile")
     goal = relationship("SavingsGoal")
@@ -691,8 +691,8 @@ class Debt(Base):
     start_date = Column(Date, nullable=True)
     original_balance = Column(Numeric(14, 2), nullable=True)
     extra_info = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     profile = relationship("Profile")
 
@@ -711,7 +711,7 @@ class CreditScore(Base):
     source = Column(String(50), default="manual")  # manual or api
     date = Column(Date, nullable=False)
     notes = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
 
@@ -738,8 +738,8 @@ class InvestmentHolding(Base):
     cost_basis = Column(Numeric(14, 2), nullable=True)
     gain_loss = Column(Numeric(14, 2), nullable=True)
     asset_class = Column(String(30), default="stocks")  # stocks, bonds, cash, real_estate, crypto, other
-    last_updated = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    last_updated = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     account = relationship("Account")
 
@@ -765,7 +765,7 @@ class FinancialHealthSnapshot(Base):
     emergency_fund_score = Column(Integer, default=0)
     budget_adherence_score = Column(Integer, default=0)
     details = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
 
@@ -786,7 +786,7 @@ class SharedBudget(Base):
     budget_id = Column(Integer, ForeignKey("budgets.id"), nullable=False, index=True)
     shared_with_profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
     permission = Column(String(10), default="view")  # view, edit
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     budget = relationship("Budget")
     shared_with_profile = relationship("Profile")
@@ -802,7 +802,7 @@ class SplitExpense(Base):
     description = Column(String(255), nullable=False)
     total_amount = Column(Numeric(14, 2), nullable=False)
     date = Column(Date, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     profile = relationship("Profile")
     participants = relationship("SplitParticipant", back_populates="split_expense", cascade="all, delete-orphan")
@@ -844,8 +844,8 @@ class ScheduledReport(Base):
     day_of_month = Column(Integer, nullable=True)  # 1-28 (for monthly)
     is_active = Column(Boolean, default=True)
     last_sent = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
 
@@ -866,7 +866,7 @@ class Webhook(Base):
     is_active = Column(Boolean, default=True)
     last_triggered = Column(DateTime, nullable=True)
     failure_count = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User")
 

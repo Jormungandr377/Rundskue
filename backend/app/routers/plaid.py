@@ -1,7 +1,9 @@
 """Plaid API router - handle account linking and syncing."""
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 logger = logging.getLogger(__name__)
 from sqlalchemy.orm import Session
@@ -20,6 +22,7 @@ from ..services.plaid_service import (
 )
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 # Pydantic schemas
@@ -167,7 +170,9 @@ def list_items(
 
 
 @router.post("/sync", response_model=SyncResponse)
+@limiter.limit("5/minute")
 async def trigger_sync(
+    request: Request,
     background_tasks: BackgroundTasks,
     item_id: Optional[int] = None,
     current_user: User = Depends(get_current_active_user),

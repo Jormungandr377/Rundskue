@@ -1,9 +1,9 @@
 """Investments API router - portfolio tracking, asset allocation, and dividends."""
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, extract
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import InvestmentHolding, Account, Transaction, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter()
 
@@ -229,7 +230,7 @@ def update_holding(
             value = value.upper()
         setattr(holding, field, value)
 
-    holding.last_updated = datetime.utcnow()
+    holding.last_updated = datetime.now(timezone.utc)
     db.commit()
     db.refresh(holding)
     return _holding_to_response(holding)
@@ -238,6 +239,7 @@ def update_holding(
 @router.delete("/holdings/{holding_id}", status_code=204)
 def delete_holding(
     holding_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -258,6 +260,7 @@ def delete_holding(
 
     db.delete(holding)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="investment_holding", resource_id=str(holding_id))
     return None
 
 

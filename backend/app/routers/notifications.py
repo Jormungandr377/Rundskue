@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 from typing import List, Optional
 from calendar import monthrange
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel
@@ -14,6 +14,7 @@ from ..models import (
     RecurringTransaction, Profile, Category, BudgetAlert
 )
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Notifications"])
 
@@ -102,6 +103,7 @@ async def mark_all_read(
 @router.delete("/{notification_id}")
 async def delete_notification(
     notification_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -114,6 +116,7 @@ async def delete_notification(
         raise HTTPException(status_code=404, detail="Notification not found")
     db.delete(notif)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="notification", resource_id=str(notification_id))
     return {"message": "Notification deleted"}
 
 

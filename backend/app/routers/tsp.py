@@ -1,5 +1,5 @@
 """TSP (Thrift Savings Plan) API router - retirement projections."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel
@@ -10,6 +10,7 @@ from decimal import Decimal
 from ..database import get_db
 from ..models import Profile, TSPScenario, TSPFundHistory, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 from ..services.tsp_simulator import (
     project_tsp_balance,
     compare_scenarios as compare_tsp_scenarios,
@@ -183,6 +184,7 @@ def create_scenario(
 @router.delete("/scenarios/{scenario_id}")
 def delete_scenario(
     scenario_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -195,10 +197,11 @@ def delete_scenario(
     ).first()
     if not scenario:
         raise HTTPException(status_code=404, detail="Scenario not found")
-    
+
     db.delete(scenario)
     db.commit()
-    
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="tsp_scenario", resource_id=str(scenario_id))
+
     return {"status": "deleted"}
 
 

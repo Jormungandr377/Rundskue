@@ -1,10 +1,10 @@
 """Bill splitting router - split expenses among participants."""
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from pydantic import BaseModel, Field
@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from ..database import get_db
 from ..models import SplitExpense, SplitParticipant, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -225,6 +226,7 @@ def update_split_expense(
 @router.delete("/{split_id}")
 def delete_split_expense(
     split_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -240,6 +242,7 @@ def delete_split_expense(
 
     db.delete(expense)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="split_expense", resource_id=str(split_id))
     return {"message": "Split expense deleted"}
 
 
@@ -274,7 +277,7 @@ def toggle_participant_paid(
 
     # Toggle is_paid and set/clear paid_at
     participant.is_paid = not participant.is_paid
-    participant.paid_at = datetime.utcnow() if participant.is_paid else None
+    participant.paid_at = datetime.now(timezone.utc) if participant.is_paid else None
 
     db.commit()
     db.refresh(participant)

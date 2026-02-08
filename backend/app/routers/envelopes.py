@@ -3,7 +3,7 @@ import logging
 from typing import List, Optional
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel
@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from ..database import get_db
 from ..models import Envelope, Transaction, Account, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -232,6 +233,7 @@ def update_envelope(
 @router.delete("/{envelope_id}")
 def delete_envelope(
     envelope_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -250,6 +252,7 @@ def delete_envelope(
     )
     db.delete(envelope)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="envelope", resource_id=str(envelope_id))
     return {"message": "Envelope deleted"}
 
 

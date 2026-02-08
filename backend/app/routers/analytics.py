@@ -1,5 +1,7 @@
 """Analytics API router - spending reports, trends, and insights."""
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_, extract, case
 from pydantic import BaseModel
@@ -13,6 +15,7 @@ from ..models import Transaction, Account, Category, NetWorthSnapshot, User, Bud
 from ..dependencies import get_current_active_user
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 class SpendingByCategory(BaseModel):
@@ -55,7 +58,9 @@ class SpendingInsight(BaseModel):
 
 
 @router.get("/spending-by-category", response_model=List[SpendingByCategory])
+@limiter.limit("60/minute")
 def get_spending_by_category(
+    request: Request,
     profile_id: Optional[int] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
@@ -679,7 +684,9 @@ class YearInReviewResponse(BaseModel):
 # ── 1. Spending Heatmap ─────────────────────────────────────────────────────
 
 @router.get("/spending-heatmap", response_model=List[HeatmapDay])
+@limiter.limit("30/minute")
 def get_spending_heatmap(
+    request: Request,
     profile_id: Optional[int] = None,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -720,7 +727,9 @@ def get_spending_heatmap(
 # ── 2. Merchant Analysis ────────────────────────────────────────────────────
 
 @router.get("/merchant-analysis", response_model=List[MerchantAnalysisItem])
+@limiter.limit("30/minute")
 def get_merchant_analysis(
+    request: Request,
     profile_id: Optional[int] = None,
     limit: int = Query(50, ge=1, le=500),
     sort_by: str = "total_spent",
@@ -823,7 +832,9 @@ def get_merchant_analysis(
 # ── 3. Financial Health Score ────────────────────────────────────────────────
 
 @router.get("/health-score", response_model=HealthScoreResponse)
+@limiter.limit("30/minute")
 def get_health_score(
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -1000,7 +1011,9 @@ def get_health_score(
 # ── 4. Year-in-Review ───────────────────────────────────────────────────────
 
 @router.get("/year-in-review", response_model=YearInReviewResponse)
+@limiter.limit("10/minute")
 def get_year_in_review(
+    request: Request,
     year: Optional[int] = None,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),

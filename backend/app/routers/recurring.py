@@ -3,13 +3,14 @@ from datetime import date, timedelta
 from typing import Optional, List
 from dateutil.relativedelta import relativedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
 from ..database import get_db
 from ..models import RecurringTransaction, Profile, Category
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Recurring Transactions"])
 
@@ -263,6 +264,7 @@ async def update_recurring(
 @router.delete("/{recurring_id}", response_model=dict)
 async def delete_recurring(
     recurring_id: int,
+    request: Request,
     current_user=Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -278,6 +280,7 @@ async def delete_recurring(
 
     db.delete(item)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="recurring_transaction", resource_id=str(recurring_id))
     return {"message": "Recurring transaction deleted"}
 
 

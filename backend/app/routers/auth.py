@@ -1,6 +1,6 @@
 """Authentication routes for user registration, login, 2FA, and password reset."""
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 import json
 
@@ -8,11 +8,12 @@ logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from ..database import get_db
-from ..models import User, RefreshToken, PasswordResetToken, EmailVerificationToken, Profile
+from ..models import User, RefreshToken, PasswordResetToken, EmailVerificationToken, Profile, AuditLog
 from ..schemas.auth import (
     UserRegister, UserLogin, Token, UserResponse, TwoFactorSetup,
     TwoFactorSetupResponse, TwoFactorVerify, TwoFactorDisable,
@@ -22,7 +23,8 @@ from ..schemas.auth import (
 from ..core.security import (
     hash_password, verify_password, create_access_token, create_refresh_token,
     validate_password, generate_totp_secret, get_totp_uri, generate_qr_code,
-    verify_totp, generate_backup_codes, generate_reset_token
+    verify_totp, generate_backup_codes, generate_reset_token,
+    encrypt_totp_secret, decrypt_totp_secret,
 )
 from ..dependencies import get_current_active_user
 from ..services.email import send_password_reset_email, send_welcome_email, send_verification_email
@@ -32,6 +34,29 @@ from ..config import get_settings
 settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 limiter = Limiter(key_func=get_remote_address)
+
+# ---------------------------------------------------------------------------
+# Account lockout settings
+# ---------------------------------------------------------------------------
+_MAX_FAILED_ATTEMPTS = 5
+_LOCKOUT_MINUTES = 15
+
+
+def _utcnow() -> datetime:
+    """Return timezone-aware UTC now."""
+    return datetime.now(timezone.utc)
+
+
+def _is_account_locked(db: Session, user_id: int) -> bool:
+    """Check if a user account is temporarily locked due to failed login attempts."""
+    cutoff = _utcnow() - timedelta(minutes=_LOCKOUT_MINUTES)
+    recent_failures = db.query(func.count(AuditLog.id)).filter(
+        AuditLog.user_id == user_id,
+        AuditLog.action == audit.LOGIN_FAILED,
+        AuditLog.status == "failure",
+        AuditLog.timestamp >= cutoff,
+    ).scalar() or 0
+    return recent_failures >= _MAX_FAILED_ATTEMPTS
 
 
 # ============================================================================
@@ -92,7 +117,7 @@ async def register(
     token_obj = EmailVerificationToken(
         token=verification_token,
         user_id=user.id,
-        expires_at=datetime.utcnow() + timedelta(hours=24)
+        expires_at=_utcnow() + timedelta(hours=24)
     )
     db.add(token_obj)
     db.commit()
@@ -121,17 +146,33 @@ async def login(
     Login with email and password.
 
     Supports 2FA if enabled. Returns JWT access token and sets refresh token cookie.
+    Implements account lockout after repeated failed attempts.
     """
     # Verify user credentials
     user = db.query(User).filter(User.email == user_data.email).first()
     if not user or not verify_password(user_data.password, user.hashed_password):
-        audit.log_from_request(
-            db, request, audit.LOGIN_FAILED,
-            details={"email": user_data.email}, status="failure",
-        )
+        # If user exists, log failed attempt with user_id for lockout tracking
+        if user:
+            audit.log_from_request(
+                db, request, audit.LOGIN_FAILED,
+                user_id=user.id, details={"email": user_data.email}, status="failure",
+            )
+        else:
+            audit.log_from_request(
+                db, request, audit.LOGIN_FAILED,
+                details={"email": user_data.email}, status="failure",
+            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
+        )
+
+    # Check account lockout (after confirming user exists)
+    if _is_account_locked(db, user.id):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Account temporarily locked due to too many failed login attempts. "
+                   f"Please try again in {_LOCKOUT_MINUTES} minutes.",
         )
 
     if not user.is_active:
@@ -168,8 +209,15 @@ async def login(
                 headers={"X-Require-2FA": "true"}
             )
 
+        # Decrypt TOTP secret for verification
+        try:
+            totp_secret = decrypt_totp_secret(user.totp_secret)
+        except Exception:
+            # Fallback for unencrypted legacy secrets
+            totp_secret = user.totp_secret
+
         # Verify TOTP code
-        if not verify_totp(user.totp_secret, user_data.totp_code):
+        if not verify_totp(totp_secret, user_data.totp_code):
             # Check backup codes
             if user.backup_codes:
                 backup_codes = json.loads(user.backup_codes)
@@ -200,6 +248,7 @@ async def login(
     refresh_token = create_refresh_token()
 
     # Store refresh token
+    now = _utcnow()
     expires_days = (
         settings.refresh_token_remember_me_days if user_data.remember_me
         else settings.refresh_token_expire_days
@@ -207,7 +256,7 @@ async def login(
     refresh_token_obj = RefreshToken(
         token=refresh_token,
         user_id=user.id,
-        expires_at=datetime.utcnow() + timedelta(days=expires_days),
+        expires_at=now + timedelta(days=expires_days),
         user_agent=request.headers.get("user-agent"),
         ip_address=request.client.host if request.client else None
     )
@@ -246,11 +295,12 @@ async def verify_email(
 
     Marks user as verified and invalidates the token.
     """
+    now = _utcnow()
     # Validate verification token
     token_obj = db.query(EmailVerificationToken).filter(
         EmailVerificationToken.token == verify_data.token,
         EmailVerificationToken.is_used == False,
-        EmailVerificationToken.expires_at > datetime.utcnow()
+        EmailVerificationToken.expires_at > now
     ).first()
 
     if not token_obj:
@@ -309,7 +359,7 @@ async def resend_verification(
         token_obj = EmailVerificationToken(
             token=verification_token,
             user_id=user.id,
-            expires_at=datetime.utcnow() + timedelta(hours=24)
+            expires_at=_utcnow() + timedelta(hours=24)
         )
         db.add(token_obj)
         db.commit()
@@ -376,7 +426,8 @@ async def refresh_token(
         )
 
     # Check expiration
-    if token_obj.expires_at <= datetime.utcnow():
+    now = _utcnow()
+    if token_obj.expires_at <= now:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Expired refresh token"
@@ -394,7 +445,7 @@ async def refresh_token(
     token_obj.is_revoked = True
 
     new_refresh = create_refresh_token()
-    remaining_seconds = (token_obj.expires_at - datetime.utcnow()).total_seconds()
+    remaining_seconds = (token_obj.expires_at - now).total_seconds()
     new_token_obj = RefreshToken(
         token=new_refresh,
         user_id=user.id,
@@ -536,8 +587,8 @@ async def setup_2fa(
     backup_codes = generate_backup_codes()
     hashed_backup_codes = [hash_password(code) for code in backup_codes]
 
-    # Save to user (not enabled yet - requires verification)
-    current_user.totp_secret = secret
+    # Save encrypted secret to user (not enabled yet - requires verification)
+    current_user.totp_secret = encrypt_totp_secret(secret)
     current_user.backup_codes = json.dumps(hashed_backup_codes)
     db.commit()
 
@@ -562,8 +613,14 @@ async def verify_2fa(
     if not current_user.totp_secret:
         raise HTTPException(status_code=400, detail="2FA not set up")
 
+    # Decrypt TOTP secret
+    try:
+        totp_secret = decrypt_totp_secret(current_user.totp_secret)
+    except Exception:
+        totp_secret = current_user.totp_secret  # Fallback for unencrypted
+
     # Verify TOTP code
-    if not verify_totp(current_user.totp_secret, verify_data.totp_code):
+    if not verify_totp(totp_secret, verify_data.totp_code):
         raise HTTPException(status_code=400, detail="Invalid 2FA code")
 
     # Enable 2FA
@@ -595,7 +652,14 @@ async def disable_2fa(
     if current_user.totp_enabled:
         if not disable_data.totp_code:
             raise HTTPException(status_code=400, detail="2FA code required")
-        if not verify_totp(current_user.totp_secret, disable_data.totp_code):
+
+        # Decrypt TOTP secret
+        try:
+            totp_secret = decrypt_totp_secret(current_user.totp_secret)
+        except Exception:
+            totp_secret = current_user.totp_secret  # Fallback for unencrypted
+
+        if not verify_totp(totp_secret, disable_data.totp_code):
             raise HTTPException(status_code=400, detail="Invalid 2FA code")
 
     # Disable 2FA
@@ -642,7 +706,7 @@ async def forgot_password(
         token_obj = PasswordResetToken(
             token=reset_token,
             user_id=user.id,
-            expires_at=datetime.utcnow() + timedelta(hours=1)
+            expires_at=_utcnow() + timedelta(hours=1)
         )
         db.add(token_obj)
         db.commit()
@@ -669,11 +733,12 @@ async def reset_password(
 
     Validates token and updates password.
     """
+    now = _utcnow()
     # Validate reset token
     token_obj = db.query(PasswordResetToken).filter(
         PasswordResetToken.token == reset_data.token,
         PasswordResetToken.is_used == False,
-        PasswordResetToken.expires_at > datetime.utcnow()
+        PasswordResetToken.expires_at > now
     ).first()
 
     if not token_obj:

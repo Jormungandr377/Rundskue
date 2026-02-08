@@ -3,7 +3,7 @@ import hmac
 import hashlib
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 import httpx
@@ -53,7 +53,7 @@ async def dispatch_webhook_event(
 
             body = json.dumps({
                 "event": event_type,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "data": payload,
             }, default=str)
 
@@ -77,7 +77,7 @@ async def dispatch_webhook_event(
                     )
 
                 if resp.status_code < 300:
-                    webhook.last_triggered = datetime.utcnow()
+                    webhook.last_triggered = datetime.now(timezone.utc)
                     webhook.failure_count = 0
                 else:
                     webhook.failure_count = (webhook.failure_count or 0) + 1

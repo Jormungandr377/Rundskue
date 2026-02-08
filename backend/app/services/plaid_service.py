@@ -9,7 +9,7 @@ from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from cryptography.fernet import Fernet
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from sqlalchemy.orm import Session
 
@@ -260,7 +260,7 @@ def sync_transactions(db: Session, plaid_item: PlaidItem, cursor: str = None) ->
         has_more = response.has_more
     
     # Update last sync time and clear errors
-    plaid_item.last_sync = datetime.utcnow()
+    plaid_item.last_sync = datetime.now(timezone.utc)
     plaid_item.error_code = None
     plaid_item.error_message = None
     

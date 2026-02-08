@@ -3,13 +3,14 @@ from datetime import datetime, date, timedelta
 from typing import Optional, List
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
 from ..database import get_db
 from ..models import Debt, User, Profile
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 router = APIRouter(tags=["Debt Payoff"])
 
@@ -416,6 +417,7 @@ async def update_debt(
 @router.delete("/{debt_id}")
 async def delete_debt(
     debt_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -432,6 +434,7 @@ async def delete_debt(
 
     db.delete(debt)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="debt", resource_id=str(debt_id))
     return {"message": "Debt deleted"}
 
 

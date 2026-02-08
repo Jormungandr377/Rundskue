@@ -6,18 +6,19 @@ import json
 import ipaddress
 import socket
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
 
 from ..database import get_db
 from ..models import Webhook, User
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 logger = logging.getLogger(__name__)
 
@@ -257,6 +258,7 @@ async def update_webhook(
 @router.delete("/{webhook_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_webhook(
     webhook_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -264,6 +266,7 @@ async def delete_webhook(
     webhook = _get_user_webhook(webhook_id, current_user.id, db)
     db.delete(webhook)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="webhook", resource_id=str(webhook_id))
     return None
 
 
@@ -282,7 +285,7 @@ async def test_webhook(
     test_payload = {
         "event": "test",
         "webhook_id": webhook.id,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "data": {
             "message": "This is a test event from Finance Tracker.",
         },
@@ -303,7 +306,7 @@ async def test_webhook(
             )
 
         # Update last_triggered timestamp on successful delivery
-        webhook.last_triggered = datetime.utcnow()
+        webhook.last_triggered = datetime.now(timezone.utc)
 
         if response.status_code < 400:
             webhook.failure_count = 0

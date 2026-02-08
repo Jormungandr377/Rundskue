@@ -3,13 +3,14 @@ import logging
 from typing import List, Optional
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 
 from ..database import get_db
 from ..models import PaycheckRule, PaycheckAllocation, User, Profile, Transaction, SavingsGoal, Envelope, Account
 from ..dependencies import get_current_active_user
+from ..services import audit
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -290,6 +291,7 @@ def update_paycheck_rule(
 @router.delete("/{rule_id}")
 def delete_paycheck_rule(
     rule_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -304,6 +306,7 @@ def delete_paycheck_rule(
 
     db.delete(rule)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="paycheck_rule", resource_id=str(rule_id))
 
     return {"message": "Paycheck rule deleted"}
 
@@ -374,9 +377,9 @@ def apply_rule_to_transaction(
                 goal.current_amount = float(goal.current_amount or 0) + amount_to_apply
                 # Check if goal is now completed
                 if float(goal.current_amount) >= float(goal.target_amount) and not goal.is_completed:
-                    from datetime import datetime
+                    from datetime import datetime, timezone
                     goal.is_completed = True
-                    goal.completed_at = datetime.utcnow()
+                    goal.completed_at = datetime.now(timezone.utc)
                 action = "goal_contribution"
             else:
                 logger.warning(f"Goal {alloc.target_id} not found for allocation {alloc.id}")

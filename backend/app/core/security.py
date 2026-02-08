@@ -1,5 +1,5 @@
 """Security utilities for authentication and authorization."""
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Optional, Tuple
 import secrets
 import base64
@@ -7,11 +7,12 @@ import io
 import json
 
 from passlib.context import CryptContext
-from jose import jwt, JWTError
+import jwt as pyjwt
 import pyotp
 import qrcode
 
 from ..config import get_settings
+from ..services.encryption import encrypt_value, decrypt_value
 
 settings = get_settings()
 
@@ -74,7 +75,51 @@ def validate_password(password: str) -> Tuple[bool, str]:
         if not any(c in special_chars for c in password):
             return False, "Password must contain at least one special character"
 
+    # Check against common passwords list
+    if password.lower() in _COMMON_PASSWORDS:
+        return False, "This password is too common. Please choose a more unique password."
+
     return True, ""
+
+
+# Top 200 most common passwords (lowercase for case-insensitive comparison)
+_COMMON_PASSWORDS = frozenset({
+    "password", "123456", "12345678", "1234", "qwerty", "12345", "dragon",
+    "baseball", "football", "letmein", "monkey", "696969", "abc123",
+    "mustang", "shadow", "master", "666666", "qwertyuiop", "123456789",
+    "hottie", "princess", "0987654321", "iloveyou", "trustno1", "batman",
+    "access", "hello", "charlie", "donald", "password1", "qwerty123",
+    "welcome", "login", "admin", "solo", "monkey123", "starwars",
+    "ashley", "michael", "superman", "passw0rd", "sunshine", "jordan",
+    "harley", "pepper", "daniel", "hunter", "buster", "soccer",
+    "hockey", "ranger", "george", "asshole", "thomas", "robert",
+    "matrix", "andrea", "joshua", "freedom", "whatever", "nicole",
+    "jessica", "diamond", "forever", "summer", "corvette", "mercedes",
+    "thunder", "phoenix", "camaro", "midnight", "richard", "secret",
+    "hammer", "compaq", "ginger", "yankees", "dallas", "taylor",
+    "austin", "thunder", "james", "jennifer", "angel", "tigers",
+    "purple", "banana", "peanut", "abcdef", "johnson", "soccer1",
+    "killer", "flower", "cookie", "silver", "samantha", "sparky",
+    "panther", "william", "maggie", "fishing", "jackson", "bigdog",
+    "jasmine", "anthony", "champion", "computer", "changeme", "123123",
+    "111111", "1234567", "12345678", "987654321", "00000000", "121212",
+    "654321", "000000", "11111111", "1q2w3e4r", "qwerty1", "1qaz2wsx",
+    "password123", "letmein1", "welcome1", "p@ssword", "p@ssw0rd",
+    "password1!", "test", "test123", "guest", "pass", "pass123",
+    "default", "changethis", "administrator", "root", "toor",
+    "pa$$word", "pa55word", "password!", "passpass", "master123",
+    "winter", "spring", "summer1", "autumn", "baseball1", "football1",
+    "basketball", "chocolate", "butterfly", "sunshine1", "princess1",
+    "trustno01", "michael1", "jordan23", "chelsea", "arsenal", "liverpool",
+    "manchester", "pokemon", "naruto", "minecraft", "roblox", "fortnite",
+    "google", "facebook", "twitter", "apple", "amazon", "netflix",
+    "spotify", "youtube", "instagram", "tiktok", "linkedin", "yahoo",
+    "maria", "lakers", "boston", "phoenix1", "cowboys", "steelers",
+    "packers", "eagles", "patriots", "chiefs", "broncos", "raiders",
+    "asdfgh", "zxcvbn", "qazwsx", "asdf1234", "1234qwer", "aaaaaa",
+    "abcabc", "abcd1234", "1111", "2222", "5555", "7777", "9999",
+    "abc", "password2", "password12", "iloveu", "trustme", "letmein!",
+})
 
 
 # ============================================================================
@@ -94,17 +139,18 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     """
     to_encode = data.copy()
 
+    now = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
+        expire = now + timedelta(minutes=settings.access_token_expire_minutes)
 
     to_encode.update({
         "exp": expire,
         "type": "access"
     })
 
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    encoded_jwt = pyjwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
 
 
@@ -119,9 +165,9 @@ def decode_token(token: str) -> dict:
         Decoded token payload
 
     Raises:
-        JWTError: If token is invalid or expired
+        pyjwt.PyJWTError: If token is invalid or expired
     """
-    payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+    payload = pyjwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
     return payload
 
 
@@ -147,6 +193,16 @@ def generate_totp_secret() -> str:
         Base32-encoded TOTP secret
     """
     return pyotp.random_base32()
+
+
+def encrypt_totp_secret(secret: str) -> str:
+    """Encrypt a TOTP secret for safe database storage."""
+    return encrypt_value(secret)
+
+
+def decrypt_totp_secret(encrypted: str) -> str:
+    """Decrypt a TOTP secret retrieved from the database."""
+    return decrypt_value(encrypted)
 
 
 def get_totp_uri(secret: str, email: str) -> str:

@@ -3,7 +3,7 @@ import logging
 from typing import List, Literal, Optional
 from datetime import datetime, date
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel
@@ -12,6 +12,7 @@ from ..database import get_db
 from ..models import Subscription, Transaction, Account, User
 from ..dependencies import get_current_active_user
 from ..services.subscription_detector import detect_subscriptions
+from ..services import audit
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -187,6 +188,7 @@ def update_subscription(
 @router.delete("/{subscription_id}")
 def delete_subscription(
     subscription_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -200,6 +202,7 @@ def delete_subscription(
         raise HTTPException(status_code=404, detail="Subscription not found")
     db.delete(sub)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="subscription", resource_id=str(subscription_id))
     return {"message": "Subscription deleted"}
 
 

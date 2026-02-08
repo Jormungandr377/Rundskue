@@ -1,6 +1,6 @@
 """Admin router - user management, audit logs, access reviews."""
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
@@ -99,7 +99,7 @@ async def list_users(
     last_logins = {row.user_id: row.last_login for row in last_login_subq}
 
     # Batch: active sessions per user (single query instead of N)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     session_counts = db.query(
         RefreshToken.user_id,
         func.count(RefreshToken.id).label("cnt")
@@ -316,7 +316,7 @@ async def generate_access_review(
         last_logins = {row.user_id: row.last_login for row in last_login_rows}
 
         # Batch: active sessions per user
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         session_rows = db.query(
             RefreshToken.user_id,
             func.count(RefreshToken.id).label("cnt")
@@ -363,7 +363,7 @@ async def generate_access_review(
         ))
 
     return AccessReviewReport(
-        generated_at=datetime.utcnow(),
+        generated_at=datetime.now(timezone.utc),
         total_users=len(users),
         active_users=sum(1 for u in users if u.is_active),
         admin_users=sum(1 for u in users if u.role == "admin"),

@@ -1,12 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..dependencies import get_current_active_user
+from ..services import audit
 from ..models import User, ScheduledReport, Profile
 from ..services.email import send_email
 from ..services.report_generator import (
@@ -204,6 +205,7 @@ def update_scheduled_report(
 @router.delete("/scheduled/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_scheduled_report(
     report_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
@@ -211,6 +213,7 @@ def delete_scheduled_report(
     report = _get_report_or_404(report_id, current_user, db)
     db.delete(report)
     db.commit()
+    audit.log_from_request(db, request, audit.RESOURCE_DELETED, user_id=current_user.id, resource_type="scheduled_report", resource_id=str(report_id))
     return None
 
 
@@ -251,7 +254,7 @@ def send_report_now(
         html_body=html_content,
     )
 
-    report.last_sent = datetime.utcnow()
+    report.last_sent = datetime.now(timezone.utc)
     db.commit()
 
     return {"success": True, "message": "Report sent successfully"}
