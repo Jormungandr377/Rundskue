@@ -22,12 +22,16 @@ RUN npm run build
 # ============================================
 FROM python:3.11-slim
 
-# Install system dependencies (runtime + build tools for pip packages with C extensions)
+# Install runtime deps, build deps, pip install, then remove build deps in one layer
+COPY backend/requirements.txt /tmp/requirements.txt
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libpq5 curl \
         gcc g++ libffi-dev libpq-dev python3-dev && \
-    rm -rf /var/lib/apt/lists/*
+    pip install --no-cache-dir -r /tmp/requirements.txt && \
+    apt-get purge -y --auto-remove gcc g++ libffi-dev libpq-dev python3-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/requirements.txt
 
 # Create a non-root user to run the application
 RUN groupadd --gid 1001 appuser && \
@@ -38,11 +42,8 @@ RUN groupadd --gid 1001 appuser && \
 # and main.py resolves static files via Path(__file__).parent.parent.parent / "frontend" / "dist"
 WORKDIR /app
 
-# Copy backend requirements and install Python deps (as root, before switching user)
+# Copy backend requirements (needed by app at runtime for reference)
 COPY backend/requirements.txt ./backend/requirements.txt
-RUN pip install --no-cache-dir -r backend/requirements.txt && \
-    apt-get purge -y --auto-remove gcc g++ libffi-dev libpq-dev python3-dev && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copy backend source code
 COPY backend/ ./backend/
