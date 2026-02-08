@@ -1,14 +1,15 @@
 """Savings goals management router."""
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Optional, List
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel, Field
 
 from ..database import get_db
-from ..models import SavingsGoal, Profile, User, Notification
+from ..models import SavingsGoal, Profile, User, Notification, Transaction, Account
 from ..dependencies import get_current_active_user
 
 router = APIRouter(tags=["Savings Goals"])
@@ -25,6 +26,9 @@ class GoalCreate(BaseModel):
     deadline: Optional[date] = None
     color: str = Field(default="#3b82f6", max_length=7)
     icon: str = Field(default="piggy-bank", max_length=50)
+    is_emergency_fund: bool = False
+    fund_type: str = "general"  # general, sinking_fund, emergency
+    target_date: Optional[date] = None
 
 
 class GoalUpdate(BaseModel):
@@ -34,6 +38,9 @@ class GoalUpdate(BaseModel):
     deadline: Optional[date] = None
     color: Optional[str] = None
     icon: Optional[str] = None
+    is_emergency_fund: Optional[bool] = None
+    fund_type: Optional[str] = None
+    target_date: Optional[date] = None
 
 
 class GoalContribution(BaseModel):
@@ -52,6 +59,10 @@ class GoalResponse(BaseModel):
     completed_at: Optional[datetime]
     progress_pct: float
     monthly_needed: Optional[float] = None
+    is_emergency_fund: bool = False
+    fund_type: str = "general"
+    target_date: Optional[date] = None
+    monthly_contribution: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -76,11 +87,13 @@ def goal_to_response(goal: SavingsGoal) -> GoalResponse:
     current = float(goal.current_amount) if goal.current_amount else 0
     progress = min((current / target * 100) if target > 0 else 0, 100)
 
+    # Calculate monthly needed from deadline or target_date
     monthly_needed = None
-    if goal.deadline and not goal.is_completed and target > current:
+    effective_deadline = goal.target_date or goal.deadline
+    if effective_deadline and not goal.is_completed and target > current:
         today = date.today()
-        if goal.deadline > today:
-            months_left = (goal.deadline.year - today.year) * 12 + (goal.deadline.month - today.month)
+        if effective_deadline > today:
+            months_left = (effective_deadline.year - today.year) * 12 + (effective_deadline.month - today.month)
             if months_left > 0:
                 monthly_needed = (target - current) / months_left
 
@@ -96,6 +109,10 @@ def goal_to_response(goal: SavingsGoal) -> GoalResponse:
         completed_at=goal.completed_at,
         progress_pct=round(progress, 1),
         monthly_needed=round(monthly_needed, 2) if monthly_needed else None,
+        is_emergency_fund=goal.is_emergency_fund or False,
+        fund_type=goal.fund_type or "general",
+        target_date=goal.target_date,
+        monthly_contribution=float(goal.monthly_contribution) if goal.monthly_contribution else None,
     )
 
 
@@ -137,6 +154,9 @@ async def create_goal(
         deadline=data.deadline,
         color=data.color,
         icon=data.icon,
+        is_emergency_fund=data.is_emergency_fund,
+        fund_type=data.fund_type,
+        target_date=data.target_date,
     )
 
     # Check if already completed on creation
@@ -269,3 +289,67 @@ async def delete_goal(
     db.delete(goal)
     db.commit()
     return {"message": "Goal deleted"}
+
+
+# ============================================================================
+# Emergency Fund & Sinking Fund Endpoints
+# ============================================================================
+
+@router.get("/emergency-fund")
+async def get_emergency_fund(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Get emergency fund goal with recommended target based on average spending."""
+    profile = get_user_profile(db, current_user)
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Find emergency fund goal
+    ef_goal = db.query(SavingsGoal).filter(
+        SavingsGoal.profile_id == profile.id,
+        SavingsGoal.is_emergency_fund == True,
+    ).first()
+
+    # Calculate average monthly expenses from last 3 months
+    today = date.today()
+    three_months_ago = today - timedelta(days=90)
+
+    total_expenses = db.query(func.sum(Transaction.amount)).join(Account).filter(
+        Account.profile_id.in_(profile_ids),
+        Transaction.date >= three_months_ago,
+        Transaction.amount > 0,
+        Transaction.is_excluded == False,
+        Transaction.is_transfer == False,
+    ).scalar()
+
+    avg_monthly = float(total_expenses or 0) / 3
+    recommended_3mo = round(avg_monthly * 3, 2)
+    recommended_6mo = round(avg_monthly * 6, 2)
+
+    result = {
+        "avg_monthly_expenses": round(avg_monthly, 2),
+        "recommended_3_months": recommended_3mo,
+        "recommended_6_months": recommended_6mo,
+        "goal": goal_to_response(ef_goal) if ef_goal else None,
+        "months_covered": 0,
+    }
+
+    if ef_goal and avg_monthly > 0:
+        result["months_covered"] = round(float(ef_goal.current_amount or 0) / avg_monthly, 1)
+
+    return result
+
+
+@router.get("/sinking-funds", response_model=List[GoalResponse])
+async def list_sinking_funds(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """List all sinking fund goals."""
+    profile = get_user_profile(db, current_user)
+    goals = db.query(SavingsGoal).filter(
+        SavingsGoal.profile_id == profile.id,
+        SavingsGoal.fund_type == "sinking_fund",
+        SavingsGoal.is_completed == False,
+    ).order_by(SavingsGoal.target_date.asc().nullslast()).all()
+    return [goal_to_response(g) for g in goals]

@@ -439,6 +439,12 @@ class SavingsGoal(Base):
     color = Column(String(7), default="#3b82f6")  # Hex color for UI
     icon = Column(String(50), default="piggy-bank")
 
+    # Phase 3: Emergency fund & sinking funds
+    is_emergency_fund = Column(Boolean, default=False)
+    fund_type = Column(String(20), default="general")  # general, sinking_fund, emergency
+    target_date = Column(Date, nullable=True)  # For sinking funds
+    monthly_contribution = Column(Numeric(14, 2), nullable=True)  # Auto-calculated
+
     is_completed = Column(Boolean, default=False)
     completed_at = Column(DateTime, nullable=True)
 
@@ -632,3 +638,32 @@ class PaycheckAllocation(Base):
     priority = Column(Integer, default=0)
 
     rule = relationship("PaycheckRule", back_populates="allocations")
+
+
+# ============================================================================
+# Phase 3: Savings & Goals Enhancements
+# ============================================================================
+
+class SavingsRule(Base):
+    """Automated savings rules (round-up, percentage, fixed schedule)."""
+    __tablename__ = "savings_rules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    goal_id = Column(Integer, ForeignKey("savings_goals.id"), nullable=False)
+    rule_type = Column(String(20), nullable=False)  # round_up, percentage, fixed_schedule
+    round_up_to = Column(Integer, nullable=True)  # 1, 5, or 10
+    percentage = Column(Numeric(5, 2), nullable=True)  # % of transaction
+    fixed_amount = Column(Numeric(14, 2), nullable=True)
+    frequency = Column(String(20), nullable=True)  # weekly, monthly (for fixed_schedule)
+    is_active = Column(Boolean, default=True)
+    total_saved = Column(Numeric(14, 2), default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    profile = relationship("Profile")
+    goal = relationship("SavingsGoal")
+
+    __table_args__ = (
+        Index("ix_savings_rules_profile_active", "profile_id", "is_active"),
+    )

@@ -29,6 +29,7 @@ import type {
   IncomeExpenseComparison,
   CashFlowDay,
   PaycheckRule,
+  SavingsRuleItem,
 } from './types';
 
 const client = authenticatedApi;
@@ -222,6 +223,21 @@ export const goals = {
   contribute: (id: number, amount: number) =>
     client.post<SavingsGoal>(`/goals/${id}/contribute`, { amount }).then(r => r.data),
   delete: (id: number) => client.delete(`/goals/${id}`),
+  emergencyFund: () =>
+    client.get<{ avg_monthly_expenses: number; recommended_3_months: number; recommended_6_months: number; goal: SavingsGoal | null; months_covered: number }>('/goals/emergency-fund').then(r => r.data),
+  sinkingFunds: () =>
+    client.get<SavingsGoal[]>('/goals/sinking-funds').then(r => r.data),
+};
+
+// Savings Rules
+export const savingsRules = {
+  list: () => client.get<SavingsRuleItem[]>('/savings-rules').then(r => r.data),
+  summary: () => client.get<{ total_rules: number; active_rules: number; total_saved_all_rules: number; rules_by_type: Record<string, number> }>('/savings-rules/summary').then(r => r.data),
+  create: (data: { goal_id: number; rule_type: string; round_up_to?: number; percentage?: number; fixed_amount?: number; frequency?: string }) =>
+    client.post<SavingsRuleItem>('/savings-rules', data).then(r => r.data),
+  update: (id: number, is_active: boolean) =>
+    client.put<SavingsRuleItem>(`/savings-rules/${id}`, null, { params: { is_active } }).then(r => r.data),
+  delete: (id: number) => client.delete(`/savings-rules/${id}`),
 };
 
 // Notifications
@@ -332,6 +348,7 @@ export const api = {
   subscriptions,
   cashflow,
   paycheckRules,
+  savingsRules,
 };
 
 export default api;

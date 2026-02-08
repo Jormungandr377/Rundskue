@@ -228,6 +228,25 @@ export interface SavingsGoal {
   completed_at?: string;
   progress_pct: number;
   monthly_needed?: number;
+  is_emergency_fund?: boolean;
+  fund_type?: string;
+  target_date?: string;
+  monthly_contribution?: number;
+}
+
+// Savings Rules
+export interface SavingsRuleItem {
+  id: number;
+  profile_id: number;
+  goal_id: number;
+  goal_name?: string;
+  rule_type: string;
+  round_up_to?: number;
+  percentage?: number;
+  fixed_amount?: number;
+  frequency?: string;
+  is_active: boolean;
+  total_saved: number;
 }
 
 // Category Rules (auto-categorization)

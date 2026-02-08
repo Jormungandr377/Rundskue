@@ -23,7 +23,7 @@ import sentry_sdk
 from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
 from .routers import tsp, auth, recurring, export, goals, notifications, categorization, sessions
-from .routers import admin, envelopes, subscriptions, cashflow, paycheck
+from .routers import admin, envelopes, subscriptions, cashflow, paycheck, savings_rules
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
@@ -236,6 +236,7 @@ app.include_router(envelopes.router, prefix="/api/envelopes", tags=["Envelopes"]
 app.include_router(subscriptions.router, prefix="/api/subscriptions", tags=["Subscriptions"])
 app.include_router(cashflow.router, prefix="/api/cashflow", tags=["Cash Flow"])
 app.include_router(paycheck.router, prefix="/api/paycheck", tags=["Paycheck"])
+app.include_router(savings_rules.router, prefix="/api/savings-rules", tags=["Savings Rules"])
 
 
 @app.get("/")
