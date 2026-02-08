@@ -66,6 +66,8 @@ const PaycheckRules = lazy(() => import('./pages/PaycheckRules'))
 const DebtPayoff = lazy(() => import('./pages/DebtPayoff'))
 const NetWorthPage = lazy(() => import('./pages/NetWorth'))
 const InvestmentsPage = lazy(() => import('./pages/Investments'))
+const YearInReview = lazy(() => import('./pages/YearInReview'))
+const MerchantAnalysis = lazy(() => import('./pages/MerchantAnalysis'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
 const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
@@ -443,6 +445,8 @@ function AuthenticatedLayout() {
               <Route path="/investments" element={<InvestmentsPage />} />
               <Route path="/net-worth" element={<NetWorthPage />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/year-in-review" element={<YearInReview />} />
+              <Route path="/merchant-analysis" element={<MerchantAnalysis />} />
               <Route path="/planning" element={<FinancialPlanning />} />
               <Route path="/link-account" element={<LinkAccount />} />
               <Route path="/profiles" element={<Profiles />} />

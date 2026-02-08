@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
-from ..models import Transaction, Account, Category, Profile
+from ..models import Transaction, Account, Category, Profile, NetWorthSnapshot
 from ..dependencies import get_current_active_user
 from ..services import audit
 
@@ -182,5 +182,150 @@ async def export_transactions_excel(
     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+@router.get("/report/pdf")
+async def export_report_pdf(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user=Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Export a financial summary report as PDF."""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from sqlalchemy import func, case
+
+    profile = get_user_profile(db, current_user)
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Date range
+    if start_date:
+        sd = date.fromisoformat(start_date)
+    else:
+        today = date.today()
+        sd = date(today.year, today.month, 1)
+    if end_date:
+        ed = date.fromisoformat(end_date)
+    else:
+        ed = date.today()
+
+    account_ids = [a.id for a in db.query(Account).filter(Account.profile_id.in_(profile_ids)).all()]
+
+    # Summary stats
+    income_total = db.query(func.sum(Transaction.amount)).filter(
+        Transaction.account_id.in_(account_ids),
+        Transaction.date >= sd, Transaction.date <= ed,
+        Transaction.is_excluded == False, Transaction.is_transfer == False,
+        Transaction.amount < 0
+    ).scalar() or 0
+    income_total = abs(float(income_total))
+
+    expense_total = db.query(func.sum(Transaction.amount)).filter(
+        Transaction.account_id.in_(account_ids),
+        Transaction.date >= sd, Transaction.date <= ed,
+        Transaction.is_excluded == False, Transaction.is_transfer == False,
+        Transaction.amount > 0
+    ).scalar() or 0
+    expense_total = float(expense_total)
+
+    # Spending by category
+    cat_data = db.query(
+        Category.name, func.sum(Transaction.amount).label("total")
+    ).select_from(Transaction).outerjoin(Category).filter(
+        Transaction.account_id.in_(account_ids),
+        Transaction.date >= sd, Transaction.date <= ed,
+        Transaction.is_excluded == False, Transaction.is_transfer == False,
+        Transaction.amount > 0
+    ).group_by(Category.name).order_by(func.sum(Transaction.amount).desc()).limit(10).all()
+
+    # Net worth
+    latest_nw = db.query(NetWorthSnapshot).filter(
+        NetWorthSnapshot.profile_id.in_(profile_ids + [None])
+    ).order_by(NetWorthSnapshot.date.desc()).first()
+
+    # Build PDF
+    output = BytesIO()
+    doc = SimpleDocTemplate(output, pagesize=letter, topMargin=0.5 * inch, bottomMargin=0.5 * inch)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle("CustomTitle", parent=styles["Title"], fontSize=18, spaceAfter=6)
+    subtitle_style = ParagraphStyle("Subtitle", parent=styles["Normal"], fontSize=10, textColor=colors.grey)
+
+    elements = []
+
+    # Title
+    elements.append(Paragraph("Financial Report", title_style))
+    elements.append(Paragraph(f"{sd.isoformat()} to {ed.isoformat()}", subtitle_style))
+    elements.append(Spacer(1, 0.3 * inch))
+
+    # Summary
+    elements.append(Paragraph("Summary", styles["Heading2"]))
+    summary_data = [
+        ["Metric", "Amount"],
+        ["Total Income", f"${income_total:,.2f}"],
+        ["Total Expenses", f"${expense_total:,.2f}"],
+        ["Net Savings", f"${income_total - expense_total:,.2f}"],
+    ]
+    if latest_nw:
+        summary_data.append(["Net Worth", f"${float(latest_nw.net_worth):,.2f}"])
+
+    summary_table = Table(summary_data, colWidths=[3 * inch, 2.5 * inch])
+    summary_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0d9488")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 0.3 * inch))
+
+    # Spending by category
+    if cat_data:
+        elements.append(Paragraph("Top Spending Categories", styles["Heading2"]))
+        cat_rows = [["Category", "Amount"]]
+        for row in cat_data:
+            cat_rows.append([row.name or "Uncategorized", f"${float(row.total):,.2f}"])
+
+        cat_table = Table(cat_rows, colWidths=[3 * inch, 2.5 * inch])
+        cat_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0d9488")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ]))
+        elements.append(cat_table)
+
+    elements.append(Spacer(1, 0.2 * inch))
+    elements.append(Paragraph(
+        f"Generated on {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')} by Rundskue Finance Tracker",
+        subtitle_style
+    ))
+
+    doc.build(elements)
+    output.seek(0)
+
+    # Audit log
+    audit.log_audit_event(
+        db, audit.DATA_EXPORT, user_id=current_user.id,
+        details={"format": "pdf", "start_date": str(sd), "end_date": str(ed)},
+    )
+
+    filename = f"financial_report_{date.today().isoformat()}.pdf"
+    return StreamingResponse(
+        output,
+        media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )

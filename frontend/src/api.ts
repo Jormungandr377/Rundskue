@@ -218,6 +218,8 @@ export const dataExport = {
     client.get('/export/transactions/csv', { params, responseType: 'blob' }).then(r => r.data),
   transactionsExcel: (params?: { start_date?: string; end_date?: string }) =>
     client.get('/export/transactions/excel', { params, responseType: 'blob' }).then(r => r.data),
+  reportPdf: (params?: { start_date?: string; end_date?: string }) =>
+    client.get('/export/report/pdf', { params, responseType: 'blob' }).then(r => r.data),
 };
 
 // Savings Goals

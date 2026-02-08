@@ -746,3 +746,29 @@ class InvestmentHolding(Base):
     __table_args__ = (
         Index("ix_investment_holdings_account", "account_id"),
     )
+
+
+# ============================================================================
+# Phase 6: Reports & Insights
+# ============================================================================
+
+class FinancialHealthSnapshot(Base):
+    """Periodic financial health score snapshot."""
+    __tablename__ = "financial_health_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    date = Column(Date, nullable=False)
+    overall_score = Column(Integer, nullable=False)
+    savings_rate_score = Column(Integer, default=0)
+    debt_ratio_score = Column(Integer, default=0)
+    emergency_fund_score = Column(Integer, default=0)
+    budget_adherence_score = Column(Integer, default=0)
+    details = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("ix_financial_health_user_date", "user_id", "date"),
+    )
