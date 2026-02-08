@@ -18,6 +18,8 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
 import uuid
+import signal
+import sys
 from pathlib import Path
 import sentry_sdk
 
@@ -27,6 +29,7 @@ from .routers import tsp, auth, recurring, export, goals, notifications, categor
 from .routers import admin, envelopes, subscriptions, cashflow, paycheck, savings_rules
 from .routers import debt, credit, investments, splits, webhooks, reports
 from .services.sync_service import sync_all_items
+from .services.scheduled_reports import send_scheduled_reports
 from .init_db import init_db
 
 settings = get_settings()
@@ -99,9 +102,19 @@ async def lifespan(app: FastAPI):
         replace_existing=True,
     )
 
+    # Schedule daily email reports (configurable time, default 6 AM)
+    scheduler.add_job(
+        send_scheduled_reports,
+        CronTrigger(hour=settings.scheduled_reports_hour, minute=settings.scheduled_reports_minute),
+        id="send_scheduled_reports",
+        name="Send Scheduled Email Reports",
+        replace_existing=True,
+    )
+
     scheduler.start()
     print(f"Scheduled daily sync at {settings.sync_hour:02d}:{settings.sync_minute:02d}")
     print("Scheduled quarterly access review reminders")
+    print(f"Scheduled daily email reports at {settings.scheduled_reports_hour:02d}:{settings.scheduled_reports_minute:02d}")
 
     # Startup check: warn if admin users don't have 2FA
     from .database import SessionLocal
@@ -115,12 +128,33 @@ async def lifespan(app: FastAPI):
             print(f"WARNING: {admins_no_2fa} admin user(s) do not have 2FA enabled!")
     finally:
         check_db.close()
-    
+
+    # Register signal handlers for graceful shutdown
+    def handle_shutdown(signum, frame):
+        """Handle shutdown signals gracefully."""
+        sig_name = signal.Signals(signum).name
+        print(f"\nReceived {sig_name} signal - initiating graceful shutdown...")
+
+        # Shutdown scheduler and wait for running jobs
+        if scheduler.running:
+            print("Stopping scheduler and waiting for running jobs...")
+            scheduler.shutdown(wait=True)
+            print("Scheduler stopped successfully")
+
+        print("Graceful shutdown complete")
+        sys.exit(0)
+
+    # Register handlers for SIGTERM and SIGINT
+    signal.signal(signal.SIGTERM, handle_shutdown)
+    signal.signal(signal.SIGINT, handle_shutdown)
+    print("Registered graceful shutdown handlers (SIGTERM, SIGINT)")
+
     yield
-    
+
     # Shutdown
     print("Shutting down Finance Tracker API...")
-    scheduler.shutdown()
+    if scheduler.running:
+        scheduler.shutdown(wait=True)
 
 
 app = FastAPI(
@@ -353,21 +387,21 @@ if static_dir.exists():
         favicon_path = static_dir / "favicon.ico"
         if favicon_path.exists():
             return FileResponse(favicon_path)
-        return {"error": "Favicon not found"}
+        raise HTTPException(status_code=404, detail="Favicon not found")
 
     @app.get("/favicon.svg")
     async def favicon_svg():
         svg_path = static_dir / "favicon.svg"
         if svg_path.exists():
             return FileResponse(svg_path, media_type="image/svg+xml")
-        return {"error": "Favicon not found"}
+        raise HTTPException(status_code=404, detail="Favicon not found")
 
     @app.get("/manifest.json")
     async def manifest():
         manifest_path = static_dir / "manifest.json"
         if manifest_path.exists():
             return FileResponse(manifest_path, media_type="application/manifest+json")
-        return {"error": "Manifest not found"}
+        raise HTTPException(status_code=404, detail="Manifest not found")
 
     @app.get("/sw.js")
     async def service_worker():
@@ -378,7 +412,7 @@ if static_dir.exists():
                 media_type="application/javascript",
                 headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
             )
-        return {"error": "Service worker not found"}
+        raise HTTPException(status_code=404, detail="Service worker not found")
 
     # Exception handler for 404s - serve SPA for non-API routes
     @app.exception_handler(404)

@@ -50,6 +50,20 @@ class CategorySplit(BaseModel):
     category_id: int
     amount: float
 
+class BulkCategorizeRequest(BaseModel):
+    transaction_ids: List[int]
+    category_id: int
+
+class BulkUpdateRequest(BaseModel):
+    transaction_ids: List[int]
+    is_excluded: Optional[bool] = None
+    is_transfer: Optional[bool] = None
+
+class BulkOperationResponse(BaseModel):
+    success: bool
+    updated_count: int
+    message: str
+
 
 @router.get("/", response_model=TransactionListResponse)
 def get_transactions(
@@ -347,3 +361,149 @@ def search_merchants(
     ).distinct().limit(limit).all()
     
     return [m[0] for m in merchants if m[0]]
+
+
+@router.post("/bulk-categorize", response_model=BulkOperationResponse)
+def bulk_categorize_transactions(
+    data: BulkCategorizeRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Bulk categorize multiple transactions at once.
+
+    This endpoint allows updating the category for multiple transactions
+    in a single request, improving UX for mass categorization tasks.
+    """
+    if not data.transaction_ids:
+        raise HTTPException(status_code=400, detail="No transaction IDs provided")
+
+    if len(data.transaction_ids) > 100:
+        raise HTTPException(status_code=400, detail="Maximum 100 transactions per request")
+
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Verify category exists
+    category = db.query(Category).filter(Category.id == data.category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # Get transactions owned by user
+    transactions = db.query(Transaction).join(Account).filter(
+        Transaction.id.in_(data.transaction_ids),
+        Account.profile_id.in_(profile_ids)
+    ).all()
+
+    if not transactions:
+        raise HTTPException(status_code=404, detail="No matching transactions found")
+
+    # Update all transactions
+    updated_count = 0
+    for txn in transactions:
+        txn.category_id = data.category_id
+        updated_count += 1
+
+    db.commit()
+
+    return BulkOperationResponse(
+        success=True,
+        updated_count=updated_count,
+        message=f"Successfully categorized {updated_count} transaction(s)"
+    )
+
+
+@router.post("/bulk-update", response_model=BulkOperationResponse)
+def bulk_update_transactions(
+    data: BulkUpdateRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Bulk update transaction properties (exclude, transfer status).
+
+    Allows mass updating of is_excluded and is_transfer flags for
+    multiple transactions, useful for cleanup and data management.
+    """
+    if not data.transaction_ids:
+        raise HTTPException(status_code=400, detail="No transaction IDs provided")
+
+    if len(data.transaction_ids) > 100:
+        raise HTTPException(status_code=400, detail="Maximum 100 transactions per request")
+
+    if data.is_excluded is None and data.is_transfer is None:
+        raise HTTPException(status_code=400, detail="No update fields provided")
+
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Get transactions owned by user
+    transactions = db.query(Transaction).join(Account).filter(
+        Transaction.id.in_(data.transaction_ids),
+        Account.profile_id.in_(profile_ids)
+    ).all()
+
+    if not transactions:
+        raise HTTPException(status_code=404, detail="No matching transactions found")
+
+    # Update all transactions
+    updated_count = 0
+    for txn in transactions:
+        if data.is_excluded is not None:
+            txn.is_excluded = data.is_excluded
+        if data.is_transfer is not None:
+            txn.is_transfer = data.is_transfer
+        updated_count += 1
+
+    db.commit()
+
+    return BulkOperationResponse(
+        success=True,
+        updated_count=updated_count,
+        message=f"Successfully updated {updated_count} transaction(s)"
+    )
+
+
+@router.delete("/bulk-delete")
+def bulk_delete_transactions(
+    transaction_ids: List[int],
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Bulk delete multiple transactions at once.
+
+    Use with caution - this permanently removes transactions.
+    Only works for manually created transactions, not Plaid synced ones.
+    """
+    if not transaction_ids:
+        raise HTTPException(status_code=400, detail="No transaction IDs provided")
+
+    if len(transaction_ids) > 100:
+        raise HTTPException(status_code=400, detail="Maximum 100 transactions per request")
+
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Get transactions owned by user (only manually created ones)
+    transactions = db.query(Transaction).join(Account).filter(
+        Transaction.id.in_(transaction_ids),
+        Account.profile_id.in_(profile_ids),
+        Transaction.plaid_transaction_id.is_(None)  # Only delete manual transactions
+    ).all()
+
+    if not transactions:
+        raise HTTPException(
+            status_code=404,
+            detail="No matching manual transactions found. Cannot delete Plaid-synced transactions."
+        )
+
+    deleted_count = len(transactions)
+
+    for txn in transactions:
+        db.delete(txn)
+
+    db.commit()
+
+    return BulkOperationResponse(
+        success=True,
+        updated_count=deleted_count,
+        message=f"Successfully deleted {deleted_count} transaction(s)"
+    )

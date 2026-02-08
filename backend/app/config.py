@@ -68,6 +68,14 @@ class Settings(BaseSettings):
     # Error monitoring
     sentry_dsn: str = ""  # Set in env to enable Sentry
 
+    # Database connection pooling
+    db_pool_size: int = 5
+    db_max_overflow: int = 10
+
+    # Scheduled jobs timing
+    scheduled_reports_hour: int = 6  # Hour to send scheduled reports (6 AM)
+    scheduled_reports_minute: int = 0
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
