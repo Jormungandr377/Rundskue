@@ -35,6 +35,10 @@ import type {
   StrategyComparison,
   CreditScoreEntry,
   CreditScoreHistory,
+  InvestmentHolding,
+  AssetAllocation,
+  DividendSummary,
+  PortfolioSummary,
 } from './types';
 
 const client = authenticatedApi;
@@ -362,6 +366,23 @@ export const creditScore = {
   delete: (id: number) => client.delete(`/credit-score/${id}`),
 };
 
+// Investments
+export const investmentsApi = {
+  holdings: (params?: { account_id?: number; asset_class?: string }) =>
+    client.get<InvestmentHolding[]>('/investments/holdings', { params }).then(r => r.data),
+  createHolding: (data: { account_id: number; symbol: string; name?: string; quantity: number; price: number; value: number; cost_basis?: number; gain_loss?: number; asset_class?: string }) =>
+    client.post<InvestmentHolding>('/investments/holdings', data).then(r => r.data),
+  updateHolding: (id: number, data: Partial<InvestmentHolding>) =>
+    client.put<InvestmentHolding>(`/investments/holdings/${id}`, data).then(r => r.data),
+  deleteHolding: (id: number) => client.delete(`/investments/holdings/${id}`),
+  allocation: () =>
+    client.get<AssetAllocation[]>('/investments/allocation').then(r => r.data),
+  dividends: (params?: { year?: number; account_id?: number }) =>
+    client.get<DividendSummary>('/investments/dividends', { params }).then(r => r.data),
+  summary: () =>
+    client.get<PortfolioSummary>('/investments/summary').then(r => r.data),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -385,6 +406,7 @@ export const api = {
   savingsRules,
   debt,
   creditScore,
+  investmentsApi,
 };
 
 export default api;

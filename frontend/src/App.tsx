@@ -25,6 +25,8 @@ import {
   Monitor,
   Calculator,
   Wallet,
+  Briefcase,
+  BarChart3,
 } from 'lucide-react'
 
 // Auth (loaded eagerly - needed immediately)
@@ -62,6 +64,8 @@ const Subscriptions = lazy(() => import('./pages/Subscriptions'))
 const CashFlowPage = lazy(() => import('./pages/CashFlow'))
 const PaycheckRules = lazy(() => import('./pages/PaycheckRules'))
 const DebtPayoff = lazy(() => import('./pages/DebtPayoff'))
+const NetWorthPage = lazy(() => import('./pages/NetWorth'))
+const InvestmentsPage = lazy(() => import('./pages/Investments'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
 const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
@@ -127,6 +131,8 @@ const navItems = [
   { path: '/goals', icon: Target, label: 'Savings Goals' },
   { path: '/cash-flow', icon: TrendingUp, label: 'Cash Flow' },
   { path: '/debt', icon: CreditCard, label: 'Debt Payoff' },
+  { path: '/investments', icon: Briefcase, label: 'Investments' },
+  { path: '/net-worth', icon: BarChart3, label: 'Net Worth' },
   { path: '/reports', icon: TrendingUp, label: 'Reports' },
   { path: '/planning', icon: Calculator, label: 'Financial Planning' },
   { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
@@ -434,6 +440,8 @@ function AuthenticatedLayout() {
               <Route path="/cash-flow" element={<CashFlowPage />} />
               <Route path="/paycheck-rules" element={<PaycheckRules />} />
               <Route path="/debt" element={<DebtPayoff />} />
+              <Route path="/investments" element={<InvestmentsPage />} />
+              <Route path="/net-worth" element={<NetWorthPage />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/planning" element={<FinancialPlanning />} />
               <Route path="/link-account" element={<LinkAccount />} />

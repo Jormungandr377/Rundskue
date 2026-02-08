@@ -437,3 +437,45 @@ export interface CreditScoreHistory {
   total_entries: number;
   entries: CreditScoreEntry[];
 }
+
+// Investment Holdings
+export interface InvestmentHolding {
+  id: number;
+  account_id: number;
+  account_name?: string;
+  symbol: string;
+  name?: string;
+  quantity: number;
+  price: number;
+  value: number;
+  cost_basis?: number;
+  gain_loss?: number;
+  asset_class: string;
+  last_updated?: string;
+}
+
+export interface AssetAllocation {
+  asset_class: string;
+  total_value: number;
+  percentage: number;
+  holding_count: number;
+}
+
+export interface DividendMonth {
+  year: number;
+  month: number;
+  total: number;
+}
+
+export interface DividendSummary {
+  months: DividendMonth[];
+  grand_total: number;
+}
+
+export interface PortfolioSummary {
+  total_value: number;
+  total_cost_basis: number;
+  total_gain_loss: number;
+  gain_loss_pct: number;
+  holding_count: number;
+}

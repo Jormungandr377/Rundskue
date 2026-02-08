@@ -244,6 +244,9 @@ class Transaction(Base):
     # Envelope budgeting
     envelope_id = Column(Integer, ForeignKey("envelopes.id"), nullable=True)
 
+    # Dividend tracking
+    is_dividend = Column(Boolean, default=False)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -714,4 +717,32 @@ class CreditScore(Base):
 
     __table_args__ = (
         Index("ix_credit_scores_user_date", "user_id", "date"),
+    )
+
+
+# ============================================================================
+# Phase 5: Investing & Net Worth
+# ============================================================================
+
+class InvestmentHolding(Base):
+    """Investment portfolio holding."""
+    __tablename__ = "investment_holdings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False, index=True)
+    symbol = Column(String(20), nullable=False)
+    name = Column(String(255), nullable=True)
+    quantity = Column(Numeric(14, 6), nullable=False)
+    price = Column(Numeric(14, 4), nullable=False)
+    value = Column(Numeric(14, 2), nullable=False)
+    cost_basis = Column(Numeric(14, 2), nullable=True)
+    gain_loss = Column(Numeric(14, 2), nullable=True)
+    asset_class = Column(String(30), default="stocks")  # stocks, bonds, cash, real_estate, crypto, other
+    last_updated = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    account = relationship("Account")
+
+    __table_args__ = (
+        Index("ix_investment_holdings_account", "account_id"),
     )
