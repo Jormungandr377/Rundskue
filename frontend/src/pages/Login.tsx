@@ -39,6 +39,10 @@ export default function Login() {
         navigate(from, { replace: true })
       }
     } catch (err: any) {
+      if (err.response?.status === 403 && err.response?.data?.detail === 'Email not verified') {
+        navigate('/verify-email')
+        return
+      }
       const message = err.response?.data?.detail || 'Invalid email or password'
       setError(message)
     } finally {

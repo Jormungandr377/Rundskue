@@ -9,12 +9,12 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from ..database import get_db
-from ..models import User, RefreshToken, PasswordResetToken, Profile
+from ..models import User, RefreshToken, PasswordResetToken, EmailVerificationToken, Profile
 from ..schemas.auth import (
     UserRegister, UserLogin, Token, UserResponse, TwoFactorSetup,
     TwoFactorSetupResponse, TwoFactorVerify, TwoFactorDisable,
     ForgotPassword, ResetPassword, PasswordResetResponse, MessageResponse,
-    ChangePassword, UpdateTheme
+    ChangePassword, UpdateTheme, VerifyEmail, ResendVerification
 )
 from ..core.security import (
     hash_password, verify_password, create_access_token, create_refresh_token,
@@ -22,7 +22,7 @@ from ..core.security import (
     verify_totp, generate_backup_codes, generate_reset_token
 )
 from ..dependencies import get_current_active_user
-from ..services.email import send_password_reset_email, send_welcome_email
+from ..services.email import send_password_reset_email, send_welcome_email, send_verification_email
 from ..services import audit
 from ..config import get_settings
 
@@ -35,19 +35,18 @@ limiter = Limiter(key_func=get_remote_address)
 # Registration & Login
 # ============================================================================
 
-@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
 async def register(
     request: Request,
     user_data: UserRegister,
-    response: Response,
     db: Session = Depends(get_db)
 ):
     """
     Register a new user account.
 
     Creates a new user with email/password and a default profile.
-    Returns JWT access token and sets refresh token cookie.
+    Sends a verification email. User must verify before logging in.
     """
     # Check if registration is enabled
     if not settings.registration_enabled:
@@ -66,7 +65,7 @@ async def register(
             detail="Email already registered"
         )
 
-    # Create user
+    # Create user (is_verified defaults to False)
     user = User(
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
@@ -85,43 +84,26 @@ async def register(
     db.add(profile)
     db.commit()
 
-    # Generate tokens
-    access_token = create_access_token({"sub": str(user.id)})
-    refresh_token = create_refresh_token()
-
-    # Store refresh token
-    expires_days = (
-        settings.refresh_token_remember_me_days if user_data.remember_me
-        else settings.refresh_token_expire_days
-    )
-    refresh_token_obj = RefreshToken(
-        token=refresh_token,
+    # Generate verification token (24 hour expiration)
+    verification_token = generate_reset_token()
+    token_obj = EmailVerificationToken(
+        token=verification_token,
         user_id=user.id,
-        expires_at=datetime.utcnow() + timedelta(days=expires_days)
+        expires_at=datetime.utcnow() + timedelta(hours=24)
     )
-    db.add(refresh_token_obj)
+    db.add(token_obj)
     db.commit()
-
-    # Set refresh token cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="lax",
-        max_age=expires_days * 24 * 60 * 60
-    )
 
     # Audit log
     audit.log_from_request(db, request, audit.REGISTER, user_id=user.id)
 
-    # Send welcome email (don't wait for it)
+    # Send verification email (don't fail registration if email fails)
     try:
-        await send_welcome_email(user.email)
+        await send_verification_email(user.email, verification_token)
     except Exception:
-        pass  # Don't fail registration if email fails
+        pass
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"message": "Account created. Please check your email to verify your account."}
 
 
 @router.post("/login", response_model=Token)
@@ -157,6 +139,13 @@ async def login(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is inactive"
+        )
+
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Email not verified",
+            headers={"X-Require-Verification": "true"}
         )
 
     # Enforce 2FA for admin users
@@ -236,6 +225,102 @@ async def login(
     audit.log_from_request(db, request, audit.LOGIN, user_id=user.id)
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+# ============================================================================
+# Email Verification
+# ============================================================================
+
+@router.post("/verify-email", response_model=MessageResponse)
+async def verify_email(
+    verify_data: VerifyEmail,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Verify user's email address using token from verification email.
+
+    Marks user as verified and invalidates the token.
+    """
+    # Validate verification token
+    token_obj = db.query(EmailVerificationToken).filter(
+        EmailVerificationToken.token == verify_data.token,
+        EmailVerificationToken.is_used == False,
+        EmailVerificationToken.expires_at > datetime.utcnow()
+    ).first()
+
+    if not token_obj:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired verification token"
+        )
+
+    # Get user
+    user = db.query(User).filter(User.id == token_obj.user_id).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="User not found")
+
+    # Mark user as verified
+    user.is_verified = True
+    token_obj.is_used = True
+    db.commit()
+
+    # Invalidate all other verification tokens for this user
+    db.query(EmailVerificationToken).filter(
+        EmailVerificationToken.user_id == user.id,
+        EmailVerificationToken.is_used == False
+    ).update({"is_used": True})
+    db.commit()
+
+    # Audit log
+    audit.log_from_request(db, request, audit.EMAIL_VERIFIED, user_id=user.id)
+
+    return {"message": "Email verified successfully. You can now sign in."}
+
+
+@router.post("/resend-verification", response_model=MessageResponse)
+@limiter.limit("3/minute")
+async def resend_verification(
+    request: Request,
+    resend_data: ResendVerification,
+    db: Session = Depends(get_db)
+):
+    """
+    Resend verification email.
+
+    Always returns success to prevent email enumeration.
+    """
+    user = db.query(User).filter(User.email == resend_data.email).first()
+
+    if user and user.is_active and not user.is_verified:
+        # Invalidate existing tokens
+        db.query(EmailVerificationToken).filter(
+            EmailVerificationToken.user_id == user.id,
+            EmailVerificationToken.is_used == False
+        ).update({"is_used": True})
+        db.commit()
+
+        # Generate new verification token
+        verification_token = generate_reset_token()
+        token_obj = EmailVerificationToken(
+            token=verification_token,
+            user_id=user.id,
+            expires_at=datetime.utcnow() + timedelta(hours=24)
+        )
+        db.add(token_obj)
+        db.commit()
+
+        # Send verification email
+        try:
+            await send_verification_email(user.email, verification_token)
+        except Exception:
+            pass
+
+        # Audit log
+        audit.log_from_request(db, request, audit.VERIFICATION_RESENT, user_id=user.id)
+
+    # Always return success (don't reveal if email exists)
+    return {"message": "If the email exists and is unverified, a new verification link has been sent."}
 
 
 @router.post("/refresh", response_model=Token)

@@ -25,6 +25,8 @@ USER_REACTIVATED = "user_reactivated"
 ROLE_CHANGED = "role_changed"
 ACCESS_REVIEW = "access_review"
 DATA_EXPORT = "data_export"
+EMAIL_VERIFIED = "email_verified"
+VERIFICATION_RESENT = "verification_resent"
 
 
 def log_audit_event(

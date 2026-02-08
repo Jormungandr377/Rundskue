@@ -47,7 +47,7 @@ export default function Signup() {
 
     try {
       await register(email, password)
-      navigate('/onboarding', { replace: true })
+      navigate('/verify-email', { replace: true })
     } catch (err: any) {
       const message = err.response?.data?.detail || 'Registration failed. Please try again.'
       setError(message)

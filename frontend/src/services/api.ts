@@ -50,6 +50,13 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // Handle unverified email on any request
+    if (error.response?.status === 403 && error.response?.data?.detail === 'Email not verified') {
+      setAccessToken(null)
+      window.location.href = '/verify-email'
+      return Promise.reject(error)
+    }
+
     // Don't intercept login, register, or refresh requests
     const isAuthRequest = originalRequest?.url?.includes('/auth/login') ||
       originalRequest?.url?.includes('/auth/register') ||
@@ -102,6 +109,7 @@ export interface AuthUser {
   id: number
   email: string
   is_active: boolean
+  is_verified: boolean
   totp_enabled: boolean
   theme: 'light' | 'dark' | 'system'
   created_at?: string
@@ -115,10 +123,14 @@ export interface TwoFactorSetupResponse {
 
 // --- Auth API ---
 export const authApi = {
-  register: (data: { email: string; password: string; remember_me?: boolean }) =>
-    api.post<AuthTokens>('/auth/register', data).then(r => r.data),
+  register: (data: { email: string; password: string }) =>
+    api.post<{ message: string }>('/auth/register', data).then(r => r.data),
   login: (data: { email: string; password: string; remember_me?: boolean; totp_code?: string }) =>
     api.post<AuthTokens>('/auth/login', data).then(r => r.data),
+  verifyEmail: (token: string) =>
+    api.post<{ message: string }>('/auth/verify-email', { token }).then(r => r.data),
+  resendVerification: (email: string) =>
+    api.post<{ message: string }>('/auth/resend-verification', { email }).then(r => r.data),
   refresh: () =>
     api.post<AuthTokens>('/auth/refresh').then(r => r.data),
   logout: () =>

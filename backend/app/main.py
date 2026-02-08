@@ -196,7 +196,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 class CSRFMiddleware(BaseHTTPMiddleware):
     SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
     EXEMPT_PATHS = ("/api/auth/login", "/api/auth/register", "/api/auth/refresh",
-                    "/api/auth/forgot-password", "/api/auth/reset-password", "/api/health")
+                    "/api/auth/forgot-password", "/api/auth/reset-password",
+                    "/api/auth/verify-email", "/api/auth/resend-verification",
+                    "/api/health")
 
     async def dispatch(self, request: Request, call_next):
         if (

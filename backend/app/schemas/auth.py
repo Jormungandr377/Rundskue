@@ -110,6 +110,7 @@ class UserResponse(BaseModel):
     id: int = Field(..., description="User ID")
     email: str = Field(..., description="User email address")
     is_active: bool = Field(..., description="Whether user account is active")
+    is_verified: bool = Field(..., description="Whether user email is verified")
     role: str = Field(default="user", description="User role (admin or user)")
     totp_enabled: bool = Field(..., description="Whether 2FA is enabled")
     theme: str = Field(default="light", description="UI theme preference (light, dark, system)")
@@ -122,6 +123,16 @@ class UserResponse(BaseModel):
 class MessageResponse(BaseModel):
     """Generic message response."""
     message: str = Field(..., description="Response message")
+
+
+class VerifyEmail(BaseModel):
+    """Schema for verifying email with token."""
+    token: str = Field(..., description="Email verification token from email")
+
+
+class ResendVerification(BaseModel):
+    """Schema for requesting a new verification email."""
+    email: EmailStr = Field(..., description="User email address")
 
 
 class PasswordResetResponse(BaseModel):

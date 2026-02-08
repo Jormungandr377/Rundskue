@@ -49,6 +49,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Signup = lazy(() => import('./pages/Signup'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
 const TwoFactorSetup = lazy(() => import('./pages/TwoFactorSetup'))
 const ChangePassword = lazy(() => import('./pages/ChangePassword'))
 const Goals = lazy(() => import('./pages/Goals'))
@@ -450,6 +451,7 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/security" element={<SecurityPolicy />} />
                 <Route path="/data-retention" element={<DataRetentionPolicy />} />

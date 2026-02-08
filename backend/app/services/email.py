@@ -217,3 +217,77 @@ Finance Tracker - Secure Personal Finance Management
     """
 
     return await send_email(email, subject, html_content, text_content)
+
+
+async def send_verification_email(email: str, verification_token: str) -> bool:
+    """
+    Send email verification link to new users.
+
+    Args:
+        email: User's email address
+        verification_token: Email verification token
+
+    Returns:
+        True if email sent successfully, False otherwise
+    """
+    verify_url = f"{settings.frontend_url}/verify-email?token={verification_token}"
+
+    subject = "Verify Your Email - Finance Tracker"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #f8f9fa; border-radius: 8px; padding: 30px; margin: 20px 0;">
+            <h1 style="color: #0d9488; margin-top: 0;">Verify Your Email</h1>
+
+            <p>Thank you for creating a Finance Tracker account! Please verify your email address to get started.</p>
+
+            <p>Click the button below to verify your email. This link will expire in 24 hours.</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{verify_url}"
+                   style="background-color: #0d9488; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    Verify Email
+                </a>
+            </div>
+
+            <p style="color: #6b7280; font-size: 14px;">
+                If you didn't create this account, you can safely ignore this email.
+            </p>
+
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+            <p style="color: #6b7280; font-size: 12px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <a href="{verify_url}" style="color: #0d9488; word-break: break-all;">{verify_url}</a>
+            </p>
+        </div>
+
+        <div style="text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px;">
+            <p>Finance Tracker - Secure Personal Finance Management</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+Verify Your Email
+
+Thank you for creating a Finance Tracker account! Please verify your email address to get started.
+
+Click the link below to verify your email. This link will expire in 24 hours.
+
+{verify_url}
+
+If you didn't create this account, you can safely ignore this email.
+
+---
+Finance Tracker - Secure Personal Finance Management
+    """
+
+    return await send_email(email, subject, html_content, text_content)
