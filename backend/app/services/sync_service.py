@@ -51,8 +51,8 @@ def sync_all_items():
                         error_code="SYNC_ERROR",
                         error_message=str(e)
                     )
-                except:
-                    pass
+                except Exception as inner_e:
+                    logger.error(f"Error handling plaid error for item {item.id}: {inner_e}")
                 
                 error_count += 1
         

@@ -1,4 +1,5 @@
 """Admin router - user management, audit logs, access reviews."""
+import logging
 from datetime import datetime, timedelta
 from typing import List, Optional
 
@@ -11,6 +12,8 @@ from ..database import get_db
 from ..models import User, AuditLog, RefreshToken, PlaidItem, Notification
 from ..dependencies import get_current_admin_user
 from ..services import audit
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Admin"])
 
@@ -78,31 +81,59 @@ async def list_users(
 ):
     """List all users with security metadata."""
     users = db.query(User).all()
+    user_ids = [u.id for u in users]
+
+    if not user_ids:
+        return []
+
+    # Batch: last login per user (single query instead of N)
+    from sqlalchemy.orm import aliased
+    last_login_subq = db.query(
+        AuditLog.user_id,
+        func.max(AuditLog.timestamp).label("last_login")
+    ).filter(
+        AuditLog.user_id.in_(user_ids),
+        AuditLog.action == audit.LOGIN,
+        AuditLog.status == "success",
+    ).group_by(AuditLog.user_id).all()
+    last_logins = {row.user_id: row.last_login for row in last_login_subq}
+
+    # Batch: active sessions per user (single query instead of N)
+    now = datetime.utcnow()
+    session_counts = db.query(
+        RefreshToken.user_id,
+        func.count(RefreshToken.id).label("cnt")
+    ).filter(
+        RefreshToken.user_id.in_(user_ids),
+        RefreshToken.is_revoked == False,
+        RefreshToken.expires_at > now,
+    ).group_by(RefreshToken.user_id).all()
+    sessions_map = {row.user_id: row.cnt for row in session_counts}
+
+    # Batch: linked Plaid items per user (via profiles)
+    all_profile_ids = []
+    user_profile_map = {}  # profile_id -> user_id
+    for user in users:
+        for p in user.profiles:
+            all_profile_ids.append(p.id)
+            user_profile_map[p.id] = user.id
+
+    items_per_user = {}
+    if all_profile_ids:
+        item_counts = db.query(
+            PlaidItem.profile_id,
+            func.count(PlaidItem.id).label("cnt")
+        ).filter(
+            PlaidItem.profile_id.in_(all_profile_ids),
+            PlaidItem.is_active == True,
+        ).group_by(PlaidItem.profile_id).all()
+        for row in item_counts:
+            uid = user_profile_map.get(row.profile_id)
+            if uid:
+                items_per_user[uid] = items_per_user.get(uid, 0) + row.cnt
+
     result = []
     for user in users:
-        # Get last login from audit logs
-        last_login_entry = db.query(AuditLog).filter(
-            AuditLog.user_id == user.id,
-            AuditLog.action == audit.LOGIN,
-            AuditLog.status == "success",
-        ).order_by(desc(AuditLog.timestamp)).first()
-
-        # Count active sessions
-        active_sessions = db.query(RefreshToken).filter(
-            RefreshToken.user_id == user.id,
-            RefreshToken.is_revoked == False,
-            RefreshToken.expires_at > datetime.utcnow(),
-        ).count()
-
-        # Count linked Plaid items
-        profile_ids = [p.id for p in user.profiles]
-        linked_items = 0
-        if profile_ids:
-            linked_items = db.query(PlaidItem).filter(
-                PlaidItem.profile_id.in_(profile_ids),
-                PlaidItem.is_active == True,
-            ).count()
-
         result.append(AdminUserResponse(
             id=user.id,
             email=user.email,
@@ -110,9 +141,9 @@ async def list_users(
             is_active=user.is_active,
             totp_enabled=user.totp_enabled,
             created_at=user.created_at,
-            last_login=last_login_entry.timestamp if last_login_entry else None,
-            active_sessions=active_sessions,
-            linked_items=linked_items,
+            last_login=last_logins.get(user.id),
+            active_sessions=sessions_map.get(user.id, 0),
+            linked_items=items_per_user.get(user.id, 0),
         ))
     return result
 
@@ -251,29 +282,60 @@ async def generate_access_review(
 ):
     """Generate an access review report."""
     users = db.query(User).all()
-    user_responses = []
+    user_ids = [u.id for u in users]
 
-    for user in users:
-        last_login_entry = db.query(AuditLog).filter(
-            AuditLog.user_id == user.id,
+    # Reuse batch query pattern from list_users
+    last_logins = {}
+    sessions_map = {}
+    items_per_user = {}
+
+    if user_ids:
+        # Batch: last login per user
+        last_login_rows = db.query(
+            AuditLog.user_id,
+            func.max(AuditLog.timestamp).label("last_login")
+        ).filter(
+            AuditLog.user_id.in_(user_ids),
             AuditLog.action == audit.LOGIN,
             AuditLog.status == "success",
-        ).order_by(desc(AuditLog.timestamp)).first()
+        ).group_by(AuditLog.user_id).all()
+        last_logins = {row.user_id: row.last_login for row in last_login_rows}
 
-        active_sessions = db.query(RefreshToken).filter(
-            RefreshToken.user_id == user.id,
+        # Batch: active sessions per user
+        now = datetime.utcnow()
+        session_rows = db.query(
+            RefreshToken.user_id,
+            func.count(RefreshToken.id).label("cnt")
+        ).filter(
+            RefreshToken.user_id.in_(user_ids),
             RefreshToken.is_revoked == False,
-            RefreshToken.expires_at > datetime.utcnow(),
-        ).count()
+            RefreshToken.expires_at > now,
+        ).group_by(RefreshToken.user_id).all()
+        sessions_map = {row.user_id: row.cnt for row in session_rows}
 
-        profile_ids = [p.id for p in user.profiles]
-        linked_items = 0
-        if profile_ids:
-            linked_items = db.query(PlaidItem).filter(
-                PlaidItem.profile_id.in_(profile_ids),
+        # Batch: linked Plaid items per user
+        user_profile_map = {}
+        all_profile_ids = []
+        for user in users:
+            for p in user.profiles:
+                all_profile_ids.append(p.id)
+                user_profile_map[p.id] = user.id
+
+        if all_profile_ids:
+            item_rows = db.query(
+                PlaidItem.profile_id,
+                func.count(PlaidItem.id).label("cnt")
+            ).filter(
+                PlaidItem.profile_id.in_(all_profile_ids),
                 PlaidItem.is_active == True,
-            ).count()
+            ).group_by(PlaidItem.profile_id).all()
+            for row in item_rows:
+                uid = user_profile_map.get(row.profile_id)
+                if uid:
+                    items_per_user[uid] = items_per_user.get(uid, 0) + row.cnt
 
+    user_responses = []
+    for user in users:
         user_responses.append(AdminUserResponse(
             id=user.id,
             email=user.email,
@@ -281,9 +343,9 @@ async def generate_access_review(
             is_active=user.is_active,
             totp_enabled=user.totp_enabled,
             created_at=user.created_at,
-            last_login=last_login_entry.timestamp if last_login_entry else None,
-            active_sessions=active_sessions,
-            linked_items=linked_items,
+            last_login=last_logins.get(user.id),
+            active_sessions=sessions_map.get(user.id, 0),
+            linked_items=items_per_user.get(user.id, 0),
         ))
 
     return AccessReviewReport(

@@ -10,15 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../../utils/format';
 
 type CompoundingFrequency = 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
 

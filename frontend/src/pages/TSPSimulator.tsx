@@ -13,17 +13,9 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
-import { tsp } from '../api';
+import { tsp, profiles } from '../api';
 import type { TSPScenario, TSPProjectionResult, TSPFundHistory } from '../types';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../utils/format';
 
 const FUND_COLORS = {
   G: '#78716c',
@@ -35,7 +27,13 @@ const FUND_COLORS = {
 
 export default function TSPSimulator() {
   const queryClient = useQueryClient();
-  const profileId = 1; // In real app, get from context
+
+  // Get user's first profile dynamically
+  const { data: profileList } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: profiles.list,
+  });
+  const profileId = profileList?.[0]?.id ?? 0;
   
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);

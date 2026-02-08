@@ -16,13 +16,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { accounts, plaid } from '../api';
 import type { Account, PlaidItem } from '../types';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
-}
+import { formatCurrency } from '../utils/format';
 
 const accountTypeIcons: Record<string, React.ReactNode> = {
   checking: <Landmark className="w-5 h-5" />,

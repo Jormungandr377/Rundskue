@@ -54,16 +54,9 @@ const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
   { value: '403b', label: '403(b)' },
 ];
 
-const TAX_BRACKETS = [10, 12, 22, 24, 32, 35, 37];
+import { formatCurrency } from '../../utils/format';
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+const TAX_BRACKETS = [10, 12, 22, 24, 32, 35, 37];
 
 function getContributionLimit(accountType: AccountType, age: number): number {
   const is50Plus = age >= 50;

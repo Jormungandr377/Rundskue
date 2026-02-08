@@ -20,17 +20,8 @@ import {
   Area,
 } from 'recharts';
 import { analytics } from '../api';
-
-const COLORS = ['#14b8a6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../utils/format';
+import { CHART_COLORS } from '../constants/colors';
 
 type ReportType = 'spending' | 'income-expense' | 'trends' | 'net-worth';
 
@@ -144,7 +135,7 @@ export default function Reports() {
                       labelLine={false}
                     >
                       {spending.slice(0, 10).map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => formatCurrency(value)} />
@@ -159,7 +150,7 @@ export default function Reports() {
                     <div className="flex items-center gap-3">
                       <div
                         className="w-4 h-4 rounded"
-                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                       />
                       <span className="text-stone-700">{cat.category_name}</span>
                     </div>

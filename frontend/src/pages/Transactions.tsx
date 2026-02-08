@@ -4,13 +4,7 @@ import { Search, Download, X, ArrowLeftRight } from 'lucide-react';
 import { format, parseISO, subMonths } from 'date-fns';
 import { transactions, categories, accounts as accountsApi, dataExport } from '../api';
 import type { Transaction, Category, Account } from '../types';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Math.abs(amount));
-}
+import { formatCurrency } from '../utils/format';
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);

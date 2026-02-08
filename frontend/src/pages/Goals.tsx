@@ -5,15 +5,7 @@ import { format, parseISO, differenceInMonths } from 'date-fns';
 import { goals } from '../api';
 import type { SavingsGoal } from '../types';
 import { useToast } from '../contexts/ToastContext';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../utils/format';
 
 const GOAL_COLORS = [
   '#14b8a6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',

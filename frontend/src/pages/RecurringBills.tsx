@@ -4,13 +4,7 @@ import { Plus, Trash2, Calendar, DollarSign, RefreshCw, AlertCircle } from 'luci
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { recurring, categories as categoriesApi } from '../api'
 import type { RecurringTransaction, Category } from '../types'
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Math.abs(amount))
-}
+import { formatCurrency } from '../utils/format'
 
 const FREQUENCY_LABELS: Record<string, string> = {
   weekly: 'Weekly',

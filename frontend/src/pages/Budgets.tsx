@@ -2,26 +2,22 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import { format, addMonths, subMonths, parseISO } from 'date-fns';
-import { budgets, categories } from '../api';
+import { budgets, categories, profiles } from '../api';
 import type { Budget, BudgetItem, Category } from '../types';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../utils/format';
 
 export default function Budgets() {
   const queryClient = useQueryClient();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
-  
-  // For simplicity, using profile_id = 1. In real app, get from context
-  const profileId = 1;
+
+  // Get user's first profile dynamically
+  const { data: profileList } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: profiles.list,
+  });
+  const profileId = profileList?.[0]?.id ?? 0;
   const monthStr = format(currentMonth, 'yyyy-MM-dd');
 
   const { data: budgetList, isLoading } = useQuery({

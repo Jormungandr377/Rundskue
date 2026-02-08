@@ -27,17 +27,8 @@ import {
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { accounts, analytics, transactions, recurring, goals } from '../api';
 import type { SpendingByCategory, MonthlyTrend, Transaction } from '../types';
-
-const COLORS = ['#14b8a6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../utils/format';
+import { CHART_COLORS } from '../constants/colors';
 
 export default function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
@@ -213,7 +204,7 @@ export default function Dashboard() {
                     nameKey="category_name"
                   >
                     {spending?.slice(0, 8).map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value: number) => formatCurrency(value)} />
@@ -225,7 +216,7 @@ export default function Dashboard() {
                 <div key={cat.category_id} className="flex items-center text-sm">
                   <div
                     className="w-3 h-3 rounded-full mr-2"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                   />
                   <span className="text-stone-600 dark:text-stone-400 truncate flex-1">{cat.category_name}</span>
                   <span className="font-medium text-stone-900 dark:text-white">{cat.percentage}%</span>

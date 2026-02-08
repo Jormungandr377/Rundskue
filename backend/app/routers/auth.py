@@ -1,7 +1,10 @@
 """Authentication routes for user registration, login, 2FA, and password reset."""
+import logging
 from datetime import datetime, timedelta
 from typing import Optional
 import json
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
@@ -100,8 +103,8 @@ async def register(
     # Send verification email (don't fail registration if email fails)
     try:
         await send_verification_email(user.email, verification_token)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"Failed to send verification email to {user.email}: {e}")
 
     return {"message": "Account created. Please check your email to verify your account."}
 
@@ -313,8 +316,8 @@ async def resend_verification(
         # Send verification email
         try:
             await send_verification_email(user.email, verification_token)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to send verification email to {user.email}: {e}")
 
         # Audit log
         audit.log_from_request(db, request, audit.VERIFICATION_RESENT, user_id=user.id)
@@ -587,8 +590,8 @@ async def forgot_password(
         # Send reset email (don't wait for it)
         try:
             await send_password_reset_email(user.email, reset_token)
-        except Exception:
-            pass  # Don't reveal if email failed
+        except Exception as e:
+            logger.warning(f"Failed to send password reset email to {user.email}: {e}")
 
     # Always return success (don't reveal if email exists)
     return PasswordResetResponse()

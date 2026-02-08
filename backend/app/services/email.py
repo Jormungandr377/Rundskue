@@ -50,7 +50,7 @@ async def send_email(
         message.attach(html_part)
 
         # Connect to SMTP server and send
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=10) as server:
             server.starttls()
             server.login(settings.smtp_user, settings.smtp_password)
             server.send_message(message)

@@ -19,15 +19,7 @@ import {
   TrendingDown,
   Clock,
 } from 'lucide-react';
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from '../../utils/format';
 
 type LoanPreset = 'mortgage' | 'auto' | 'personal' | 'student';
 
