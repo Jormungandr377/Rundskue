@@ -672,6 +672,57 @@ class SavingsRule(Base):
     )
 
 
+class SpendingControl(Base):
+    """Unified spending control system (replaces Budgets, Envelopes, and Savings Rules)."""
+    __tablename__ = "spending_controls"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    methodology = Column(String(20), nullable=False)  # budget, envelope, savings_rule
+
+    # Common fields
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    amount = Column(Numeric(14, 2), nullable=False)
+    period = Column(String(20), default="monthly")  # monthly, weekly, one_time
+    is_active = Column(Boolean, default=True)
+
+    # Budget-specific
+    month = Column(Date, nullable=True)  # First day of month
+    is_template = Column(Boolean, default=False)
+    rollover_amount = Column(Numeric(14, 2), default=0)
+    alert_threshold_pct = Column(Integer, default=80)
+
+    # Envelope-specific
+    color = Column(String(7), default="#3b82f6")
+    icon = Column(String(50), default="wallet")
+
+    # Savings Rule-specific
+    goal_id = Column(Integer, ForeignKey("savings_goals.id"), nullable=True)
+    rule_type = Column(String(20), nullable=True)  # round_up, percentage, fixed_schedule
+    round_up_to = Column(Integer, nullable=True)
+    percentage = Column(Numeric(5, 2), nullable=True)
+    frequency = Column(String(20), nullable=True)
+    total_saved = Column(Numeric(14, 2), default=0)
+
+    # Metadata
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    profile = relationship("Profile")
+    category = relationship("Category")
+    goal = relationship("SavingsGoal")
+
+    __table_args__ = (
+        Index("ix_spending_controls_profile_active", "profile_id", "is_active"),
+        Index("ix_spending_controls_methodology", "methodology"),
+        Index("ix_spending_controls_category", "category_id"),
+        Index("ix_spending_controls_goal", "goal_id"),
+    )
+
+
 # ============================================================================
 # Phase 4: Debt Management
 # ============================================================================

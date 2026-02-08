@@ -305,6 +305,56 @@ export interface EnvelopeSummary {
   envelope_count: number;
 }
 
+// Unified Spending Control
+export interface SpendingControl {
+  id: number;
+  profile_id: number;
+  name: string;
+  methodology: 'budget' | 'envelope' | 'savings_rule';
+
+  // Common fields
+  category_id?: number;
+  amount: number;
+  period: 'monthly' | 'weekly' | 'one_time';
+  is_active: boolean;
+
+  // Budget-specific
+  month?: string;
+  is_template: boolean;
+  rollover_amount: number;
+  alert_threshold_pct: number;
+
+  // Envelope-specific
+  color: string;
+  icon: string;
+
+  // Savings Rule-specific
+  goal_id?: number;
+  rule_type?: 'round_up' | 'percentage' | 'fixed_schedule';
+  round_up_to?: number;
+  percentage?: number;
+  frequency?: 'weekly' | 'monthly';
+  total_saved: number;
+
+  // Metadata
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+
+  // Computed fields (when include_stats=true)
+  spent?: number;
+  remaining?: number;
+  utilization?: number;
+}
+
+export interface SpendingControlSummary {
+  total_allocated: number;
+  total_spent: number;
+  total_remaining: number;
+  active_count: number;
+  over_budget_count: number;
+}
+
 // Subscriptions
 export interface SubscriptionItem {
   id: number;

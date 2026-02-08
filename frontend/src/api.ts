@@ -42,6 +42,8 @@ import type {
   AssetAllocation,
   DividendSummary,
   PortfolioSummary,
+  SpendingControl,
+  SpendingControlSummary,
 } from './types';
 
 const client = authenticatedApi;
@@ -448,6 +450,23 @@ export const api = {
   investmentsApi,
   webhooksApi,
   scheduledReports,
+};
+
+// Unified Spending Controls
+export const spendingControls = {
+  list: (params?: { profile_id?: number; methodology?: string; is_active?: boolean; include_stats?: boolean }) =>
+    client.get<SpendingControl[]>('/spending-controls', { params }).then(r => r.data),
+  get: (id: number, includeStats = true) =>
+    client.get<SpendingControl>(`/spending-controls/${id}`, { params: { include_stats: includeStats } }).then(r => r.data),
+  create: (data: Partial<SpendingControl>) =>
+    client.post<SpendingControl>('/spending-controls', data).then(r => r.data),
+  update: (id: number, data: Partial<SpendingControl>) =>
+    client.put<SpendingControl>(`/spending-controls/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/spending-controls/${id}`),
+  summary: (params?: { profile_id?: number; methodology?: string }) =>
+    client.get<SpendingControlSummary>('/spending-controls/summary', { params }).then(r => r.data),
+  migrate: (sourceType: 'budget' | 'envelope' | 'savings_rule', profileId?: number) =>
+    client.post<{ message: string; count: number }>(`/spending-controls/migrate/${sourceType}`, null, { params: profileId ? { profile_id: profileId } : {} }).then(r => r.data),
 };
 
 export default api;
