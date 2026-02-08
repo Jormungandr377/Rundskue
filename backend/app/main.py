@@ -17,6 +17,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
+import uuid
 from pathlib import Path
 import sentry_sdk
 
@@ -129,9 +130,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Rate limiting
+# Rate limiting with custom handler for better UX
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.exception_handler(RateLimitExceeded)
+async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom rate limit handler that includes Retry-After header."""
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": "Rate limit exceeded. Please try again later.",
+            "retry_after": 60
+        },
+        headers={"Retry-After": "60"}
+    )
 
 # GZip compression - compress responses > 500 bytes (huge win for JS/CSS bundles)
 app.add_middleware(GZipMiddleware, minimum_size=500)
@@ -233,6 +245,27 @@ class CSRFMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(CSRFMiddleware)
 
+
+# Request ID middleware - adds unique ID to each request for tracing
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Generate unique request ID or use existing from header
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        request.state.request_id = request_id
+
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+
+        # Add to Sentry context if available
+        if settings.sentry_dsn:
+            import sentry_sdk
+            sentry_sdk.set_tag("request_id", request_id)
+
+        return response
+
+
+app.add_middleware(RequestIDMiddleware)
+
 # Include routers
 app.include_router(auth.router, prefix="/api")  # Auth routes (no additional prefix)
 app.include_router(profiles.router, prefix="/api/profiles", tags=["Profiles"])
@@ -277,8 +310,35 @@ async def root():
 
 @app.get("/api/health")
 async def health_check():
-    """Minimal health check – internal details hidden from unauthenticated callers."""
-    return {"status": "ok"}
+    """
+    Health check endpoint that verifies database connectivity.
+
+    Returns:
+        200 OK if database is accessible
+        503 Service Unavailable if database is down
+    """
+    from sqlalchemy import text
+    from .database import SessionLocal
+
+    health_status = {
+        "status": "ok",
+        "database": "unknown"
+    }
+
+    try:
+        # Check database connectivity with a simple query
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        health_status["database"] = "connected"
+        return health_status
+    except Exception as e:
+        health_status["status"] = "unhealthy"
+        health_status["database"] = "disconnected"
+        return JSONResponse(
+            status_code=503,
+            content=health_status
+        )
 
 
 # Serve static files from the React build

@@ -41,9 +41,10 @@ jobs:
           SECRET_KEY: test-secret-key-for-ci
           PLAID_CLIENT_ID: test
           PLAID_SECRET: test
+          ENCRYPTION_KEY: dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItY2k=
         run: |
           cd backend
-          python -m pytest tests/ -v --tb=short || echo "Tests completed (some may need DB fixtures)"
+          python -m pytest tests/ -v --tb=short
 
   frontend-build:
     name: Frontend Build
@@ -61,7 +62,7 @@ jobs:
 
       - name: Type check
         working-directory: frontend
-        run: npx tsc --noEmit || true
+        run: npx tsc --noEmit
 
       - name: Build
         working-directory: frontend
@@ -69,4 +70,4 @@ jobs:
 
       - name: Run tests
         working-directory: frontend
-        run: npm test -- --run || true
+        run: npm test -- --run

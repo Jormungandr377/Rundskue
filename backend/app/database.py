@@ -3,19 +3,15 @@ Database configuration for Finance Tracker
 Uses PostgreSQL with SQLAlchemy ORM
 """
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
-import os
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-load_dotenv()
+from .config import get_settings
 
-# PostgreSQL connection string
-DATABASE_URL = os.getenv("DATABASE_URL") or "postgresql://finance_user:finance_password@localhost:5432/finance_tracker"
+settings = get_settings()
 
 # Create engine with connection pooling
 engine = create_engine(
-    DATABASE_URL,
+    settings.database_url,
     pool_size=5,
     max_overflow=10,
     pool_pre_ping=True,

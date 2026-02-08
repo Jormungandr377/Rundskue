@@ -136,12 +136,25 @@ def get_envelope_summary(
         total_spent += spent
 
     # Calculate unallocated: total income that hasn't been assigned to envelopes
-    # (simplified: just show total_allocated - total_spent as remaining)
+    # Get total income transactions for this profile (negative amounts = income in Plaid)
+    total_income = db.query(
+        func.coalesce(func.sum(func.abs(Transaction.amount)), 0)
+    ).join(
+        Account, Transaction.account_id == Account.id
+    ).filter(
+        Account.profile_id == profile_id,
+        Transaction.amount < 0,  # Income is negative in Plaid
+        Transaction.is_excluded == False,
+        Transaction.is_transfer == False,
+    ).scalar() or 0.0
+
+    unallocated_income = float(total_income) - total_allocated
+
     return EnvelopeSummary(
         total_allocated=total_allocated,
         total_spent=total_spent,
         total_remaining=total_allocated - total_spent,
-        unallocated_income=0,  # TODO: calculate from income - total_allocated
+        unallocated_income=unallocated_income,
         envelope_count=len(envelopes),
     )
 

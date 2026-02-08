@@ -9,16 +9,44 @@ echo "=== Finance Tracker Startup ==="
 echo "Running database migrations..."
 cd /app/backend
 
-# Check if we can connect to the database
-if python3 -c "
+# Check if we can connect to the database (with retry logic)
+MAX_RETRIES=5
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if python3 -c "
 from app.database import engine
 from sqlalchemy import text
 with engine.connect() as conn:
     conn.execute(text('SELECT 1'))
     print('Database connection OK')
 " 2>&1; then
-    echo "Running Alembic migrations..."
-    python3 -m alembic upgrade head 2>&1 || echo "Warning: Alembic migration had issues (may already be applied)"
+        echo "Database connection successful!"
+
+        # Run Alembic migrations with proper error capture
+        echo "Running Alembic migrations..."
+        if python3 -m alembic upgrade head 2>&1; then
+            echo "✓ Migrations completed successfully"
+        else
+            MIGRATION_EXIT_CODE=$?
+            echo "⚠ Warning: Alembic migration exited with code $MIGRATION_EXIT_CODE"
+            echo "  This may be expected if migrations are already applied"
+        fi
+        break
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Database connection failed (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in 2 seconds..."
+            sleep 2
+        else
+            echo "⚠ ERROR: Could not connect to database after $MAX_RETRIES attempts"
+            echo "  The application will start but may not function correctly"
+        fi
+    fi
+done
+
+# Only proceed with data setup if database is connected
+if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
 
     # Run data migration if users table is empty (first-time setup only)
     USER_CHECK=$(python3 -c "
@@ -54,8 +82,6 @@ else:
     print('Admin email fix not needed')
 db.close()
 " 2>&1 || true
-else
-    echo "Warning: Could not connect to database. Skipping migrations."
 fi
 
 cd /app

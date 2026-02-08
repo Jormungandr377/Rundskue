@@ -145,12 +145,61 @@ def _get_user_webhook(
 
 
 def _generate_signature(payload: bytes, secret: str) -> str:
-    """Generate an HMAC-SHA256 hex digest for the given payload and secret."""
+    """
+    Generate an HMAC-SHA256 hex digest for the given payload and secret.
+
+    Used when sending webhooks to sign the payload.
+    Recipients should verify this signature using verify_webhook_signature().
+
+    Args:
+        payload: Raw JSON payload as bytes
+        secret: Webhook secret key
+
+    Returns:
+        Hex-encoded HMAC-SHA256 signature
+    """
     return hmac.new(
         secret.encode("utf-8"),
         payload,
         hashlib.sha256,
     ).hexdigest()
+
+
+def verify_webhook_signature(payload: bytes, signature: str, secret: str) -> bool:
+    """
+    Verify a webhook signature using constant-time comparison.
+
+    Webhook recipients should call this function to verify that incoming
+    webhook requests are authentic and haven't been tampered with.
+
+    Example usage (in your webhook receiver):
+        ```python
+        from fastapi import Request, HTTPException
+
+        @app.post("/webhook")
+        async def receive_webhook(request: Request):
+            payload = await request.body()
+            signature = request.headers.get("X-Webhook-Signature")
+
+            if not verify_webhook_signature(payload, signature, YOUR_SECRET):
+                raise HTTPException(403, "Invalid signature")
+
+            # Process webhook...
+        ```
+
+    Args:
+        payload: Raw JSON payload as bytes (request.body())
+        signature: Signature from X-Webhook-Signature header
+        secret: Your webhook secret key
+
+    Returns:
+        True if signature is valid, False otherwise
+    """
+    if not signature:
+        return False
+
+    expected_signature = _generate_signature(payload, secret)
+    return hmac.compare_digest(expected_signature, signature)
 
 
 # Private / reserved IP ranges (SSRF protection)

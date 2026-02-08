@@ -76,13 +76,11 @@ async def get_current_active_user(
         User: Current active and verified user
 
     Raises:
-        HTTPException: If user is not active or not verified
+        HTTPException: If user is not verified
+
+    Note:
+        The is_active check is already performed in get_current_user
     """
-    if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
-        )
     if not current_user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
