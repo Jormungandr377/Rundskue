@@ -150,8 +150,8 @@ export default function DebtPayoff() {
     queryKey: ['credit-score-history'],
     queryFn: () =>
       authenticatedApi
-        .get<CreditScore[]>('/credit-score/history', { params: { limit: 50 } })
-        .then(r => r.data),
+        .get<{ entries: CreditScore[] }>('/credit-score/history', { params: { limit: 50 } })
+        .then(r => r.data.entries),
   });
 
   // --- Mutations ---
@@ -816,9 +816,9 @@ export default function DebtPayoff() {
                 <Line
                   type="monotone"
                   dataKey="score"
-                  stroke="#0d9488"
+                  stroke="#6366f1"
                   strokeWidth={2}
-                  dot={{ fill: '#0d9488', r: 4 }}
+                  dot={{ fill: '#6366f1', r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
