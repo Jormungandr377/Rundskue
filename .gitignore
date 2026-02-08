@@ -3,6 +3,13 @@
 .env.local
 .env.*.local
 
+# Secrets folder (credentials, keys, sensitive data)
+../.secrets/
+.secrets/
+**/secrets/
+credentials.md
+keys.txt
+
 # Python
 __pycache__/
 *.py[cod]
