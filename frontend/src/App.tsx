@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, NavLink, useNavigate, useLocation } from 
 import {
   LayoutDashboard,
   CreditCard,
-  PiggyBank,
   TrendingUp,
   Receipt,
   Link2,
@@ -63,6 +62,7 @@ const CategoryRules = lazy(() => import('./pages/CategoryRules'))
 const NotificationsPage = lazy(() => import('./pages/Notifications'))
 const Onboarding = lazy(() => import('./pages/Onboarding'))
 const Envelopes = lazy(() => import('./pages/Envelopes'))
+const SpendingControlPage = lazy(() => import('./pages/SpendingControl'))
 const Subscriptions = lazy(() => import('./pages/Subscriptions'))
 const CashFlowPage = lazy(() => import('./pages/CashFlow'))
 const PaycheckRules = lazy(() => import('./pages/PaycheckRules'))
@@ -103,8 +103,7 @@ const navGroups: NavGroup[] = [
   {
     title: 'Budgeting',
     items: [
-      { path: '/budgets', icon: PiggyBank, label: 'Budgets' },
-      { path: '/envelopes', icon: Wallet, label: 'Envelopes' },
+      { path: '/spending-control', icon: Wallet, label: 'Spending Control' },
       { path: '/recurring', icon: RefreshCw, label: 'Bills & Subs' },
       { path: '/subscriptions', icon: CreditCard, label: 'Subscriptions' },
       { path: '/goals', icon: Target, label: 'Savings Goals' },
@@ -550,6 +549,7 @@ function AuthenticatedLayout() {
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/budgets" element={<Budgets />} />
               <Route path="/envelopes" element={<Envelopes />} />
+              <Route path="/spending-control" element={<SpendingControlPage />} />
               <Route path="/recurring" element={<RecurringBills />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/cash-flow" element={<CashFlowPage />} />
