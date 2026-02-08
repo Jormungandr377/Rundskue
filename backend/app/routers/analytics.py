@@ -1,5 +1,5 @@
 """Analytics API router - spending reports, trends, and insights."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_, extract, case
 from pydantic import BaseModel
@@ -229,7 +229,7 @@ def get_cash_flow(
 @router.get("/monthly-trends", response_model=List[MonthlyTrend])
 def get_monthly_trends(
     profile_id: Optional[int] = None,
-    months: int = 12,
+    months: int = Query(12, ge=1, le=120),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -293,7 +293,7 @@ def get_monthly_trends(
 @router.get("/net-worth-history", response_model=List[NetWorthResponse])
 def get_net_worth_history(
     profile_id: Optional[int] = None,
-    months: int = 12,
+    months: int = Query(12, ge=1, le=120),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -516,7 +516,7 @@ class IncomeExpenseComparison(BaseModel):
 @router.get("/income-expense-comparison", response_model=List[IncomeExpenseComparison])
 def get_income_expense_comparison(
     profile_id: Optional[int] = None,
-    months: int = 12,
+    months: int = Query(12, ge=1, le=120),
     comparison: Optional[str] = None,  # "yoy" for year-over-year
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -722,7 +722,7 @@ def get_spending_heatmap(
 @router.get("/merchant-analysis", response_model=List[MerchantAnalysisItem])
 def get_merchant_analysis(
     profile_id: Optional[int] = None,
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=500),
     sort_by: str = "total_spent",
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),

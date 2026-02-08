@@ -50,7 +50,7 @@ async def export_transactions_csv(
     if end_date:
         query = query.filter(Transaction.date <= end_date)
 
-    transactions = query.order_by(Transaction.date.desc()).all()
+    transactions = query.order_by(Transaction.date.desc()).limit(50000).all()
 
     # Build CSV
     output = BytesIO()
@@ -119,7 +119,7 @@ async def export_transactions_excel(
     if end_date:
         query = query.filter(Transaction.date <= end_date)
 
-    transactions = query.order_by(Transaction.date.desc()).all()
+    transactions = query.order_by(Transaction.date.desc()).limit(50000).all()
 
     wb = Workbook()
     ws = wb.active

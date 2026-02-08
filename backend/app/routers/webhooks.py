@@ -3,8 +3,12 @@ import secrets
 import hmac
 import hashlib
 import json
+import ipaddress
+import socket
+import logging
 from datetime import datetime
 from typing import List, Optional
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -14,6 +18,8 @@ from pydantic import BaseModel, Field, field_validator
 from ..database import get_db
 from ..models import Webhook, User
 from ..dependencies import get_current_active_user
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Webhooks"])
 
@@ -146,6 +152,46 @@ def _generate_signature(payload: bytes, secret: str) -> str:
     ).hexdigest()
 
 
+# Private / reserved IP ranges (SSRF protection)
+_BLOCKED_NETWORKS = [
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("169.254.0.0/16"),   # Link-local / cloud metadata
+    ipaddress.ip_network("0.0.0.0/8"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),          # IPv6 ULA
+    ipaddress.ip_network("fe80::/10"),         # IPv6 link-local
+]
+
+
+def _validate_webhook_url(url: str) -> None:
+    """
+    Prevent SSRF by resolving the URL hostname and rejecting private/internal IPs.
+    Raises HTTPException(400) if the URL targets an internal network.
+    """
+    parsed = urlparse(url)
+    hostname = parsed.hostname
+    if not hostname:
+        raise HTTPException(status_code=400, detail="Invalid webhook URL")
+
+    try:
+        # Resolve hostname to IP(s)
+        addr_infos = socket.getaddrinfo(hostname, parsed.port or 443, proto=socket.IPPROTO_TCP)
+    except socket.gaierror:
+        raise HTTPException(status_code=400, detail="Could not resolve webhook hostname")
+
+    for family, _, _, _, sockaddr in addr_infos:
+        ip = ipaddress.ip_address(sockaddr[0])
+        for net in _BLOCKED_NETWORKS:
+            if ip in net:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Webhook URL must not point to a private or internal network address",
+                )
+
+
 # ============================================================================
 # Endpoints
 # ============================================================================
@@ -230,6 +276,9 @@ async def test_webhook(
     """Send a test payload to the webhook URL and return the result."""
     webhook = _get_user_webhook(webhook_id, current_user.id, db)
 
+    # SSRF protection: validate the URL doesn't target internal networks
+    _validate_webhook_url(webhook.url)
+
     test_payload = {
         "event": "test",
         "webhook_id": webhook.id,
@@ -284,8 +333,9 @@ async def test_webhook(
     except httpx.RequestError as exc:
         webhook.failure_count += 1
         db.commit()
+        logger.warning(f"Webhook test failed for webhook {webhook.id}: {exc}")
         return WebhookTestResponse(
             success=False,
             status_code=None,
-            detail=f"Failed to reach webhook URL: {str(exc)}",
+            detail="Failed to reach webhook URL",
         )

@@ -68,6 +68,11 @@ def get_user_profile(db: Session, user) -> Profile:
     return profile
 
 
+def _escape_like(value: str) -> str:
+    """Escape SQL LIKE wildcard characters."""
+    return value.replace("%", r"\%").replace("_", r"\_")
+
+
 def matches_rule(rule: CategoryRule, txn: Transaction) -> bool:
     """Check if a transaction matches a categorization rule."""
     if rule.match_field == "merchant_name":
@@ -429,7 +434,7 @@ async def learn_from_categorization(
         # Count how many transactions have this merchant
         merchant_count = db.query(func.count(Transaction.id)).join(Account).filter(
             Account.profile_id.in_(profile_ids),
-            func.lower(func.coalesce(Transaction.merchant_name, Transaction.name)).like(f"%{merchant_lower}%"),
+            func.lower(func.coalesce(Transaction.merchant_name, Transaction.name)).like(f"%{_escape_like(merchant_lower)}%"),
         ).scalar() or 0
 
         if merchant_count >= 3:

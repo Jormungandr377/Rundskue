@@ -1,23 +1,27 @@
 """Application configuration using Pydantic Settings."""
+import logging
 from pydantic_settings import BaseSettings
 from cryptography.fernet import Fernet
 from functools import lru_cache
 from typing import Optional
 
-# Generate a default Fernet key for development
-_default_fernet_key = Fernet.generate_key().decode()
+logger = logging.getLogger(__name__)
+
+# Placeholder sentinel – never a valid key
+_INSECURE_SECRET_KEY = "change-this-in-production-use-a-real-secret-key"
+_INSECURE_DB_URL = "postgresql://finance_user:finance_password@localhost:5432/finance_tracker"
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
-    
+
     # Application
     app_name: str = "Finance Tracker"
     debug: bool = False
-    secret_key: str = "change-this-in-production-use-a-real-secret-key"
-    
+    secret_key: str = _INSECURE_SECRET_KEY
+
     # Database
-    database_url: str = "postgresql://finance_user:finance_password@localhost:5432/finance_tracker"
+    database_url: str = _INSECURE_DB_URL
     
     # Plaid API
     plaid_client_id: str = ""
@@ -28,8 +32,8 @@ class Settings(BaseSettings):
     plaid_redirect_uri: Optional[str] = None
     plaid_webhook_url: Optional[str] = None
 
-    # Security
-    encryption_key: str = _default_fernet_key
+    # Security  (ENCRYPTION_KEY must be set in env – the app warns loudly if not)
+    encryption_key: str = ""
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
@@ -72,5 +76,43 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings() -> Settings:
-    """Get cached settings instance."""
-    return Settings()
+    """Get cached settings instance with startup security checks."""
+    s = Settings()
+
+    # ── Security gate: hard-fail if critical secrets are missing/insecure ──
+    if s.secret_key == _INSECURE_SECRET_KEY:
+        if s.debug:
+            logger.warning(
+                "⚠️  SECRET_KEY is the insecure default! Set a strong random key "
+                "via the SECRET_KEY environment variable before deploying to production."
+            )
+        else:
+            raise RuntimeError(
+                "SECRET_KEY is still the insecure default. "
+                "Generate a strong key: python -c \"import secrets; print(secrets.token_hex(32))\" "
+                "and set it as the SECRET_KEY environment variable."
+            )
+
+    if not s.encryption_key:
+        if s.debug:
+            # Auto-generate for dev convenience but warn
+            s.encryption_key = Fernet.generate_key().decode()
+            logger.warning(
+                "⚠️  ENCRYPTION_KEY is not set – using a one-time generated key. "
+                "Data encrypted with this key will be LOST on restart. "
+                "Set ENCRYPTION_KEY in your environment for persistence."
+            )
+        else:
+            raise RuntimeError(
+                "ENCRYPTION_KEY is not set. Generate one: "
+                "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\" "
+                "and set it as the ENCRYPTION_KEY environment variable."
+            )
+
+    if s.database_url == _INSECURE_DB_URL and not s.debug:
+        raise RuntimeError(
+            "DATABASE_URL is still the insecure default. "
+            "Set a proper DATABASE_URL environment variable."
+        )
+
+    return s

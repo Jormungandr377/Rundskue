@@ -1,5 +1,9 @@
 """Plaid API router - handle account linking and syncing."""
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional
@@ -78,7 +82,8 @@ def get_link_token(
             expiration=result["expiration"]
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create link token: {str(e)}")
+        logger.exception(f"Failed to create link token for profile {request.profile_id}")
+        raise HTTPException(status_code=500, detail="Failed to create link token")
 
 
 @router.post("/exchange-token")
@@ -125,7 +130,8 @@ def exchange_token(
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to exchange token: {str(e)}")
+        logger.exception(f"Failed to exchange token for profile {request.profile_id}")
+        raise HTTPException(status_code=500, detail="Failed to exchange token")
 
 
 @router.get("/items", response_model=List[PlaidItemResponse])
@@ -200,7 +206,8 @@ async def trigger_sync(
             total_modified += result.get("modified", 0)
             total_removed += result.get("removed", 0)
         except Exception as e:
-            errors.append(f"Item {item.id} ({item.institution_name}): {str(e)}")
+            logger.exception(f"Sync failed for item {item.id} ({item.institution_name})")
+            errors.append(f"Sync failed for item {item.id}")
     
     return SyncResponse(
         items_synced=len(items),
@@ -272,4 +279,5 @@ def update_link(
             "expiration": result["expiration"]
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create update link token: {str(e)}")
+        logger.exception(f"Failed to create update link token for item {item_id}")
+        raise HTTPException(status_code=500, detail="Failed to create update link token")

@@ -1,7 +1,7 @@
 # Finance Tracker - Project Status
 
 **Last Updated:** 2026-02-07
-**Status:** Full-Stack Auth + Performance + Dark Mode + PWA + Notifications + Goals + Testing, Deployed to Coolify + Cloudflare Tunnel
+**Status:** Full-Stack Auth + Performance + Dark Mode + PWA + Notifications + Goals + Testing + Plaid Attestations + Security Hardening, Deployed to Coolify + Cloudflare Tunnel
 
 ## Overview
 
@@ -18,19 +18,14 @@ Self-hosted personal finance tracker with Plaid bank linking, TSP retirement sim
 
 ### Server Details
 - **Host:** SER8 (Ubuntu 24.04.3 LTS, WSL2)
-- **IP:** 172.27.30.17
-- **User:** luke_mini
-- **Kernel:** 6.6.87.2-microsoft-standard-WSL2
 - **RAM:** ~32GB, **Storage:** ~1TB
 
 ### Cloudflare Tunnel (RUNNING as systemd service)
 - **Tunnel Name:** coolify-tunnel
-- **Tunnel ID:** 91882f6d-8f81-4fd6-835d-a213393076d3
 - **cloudflared Version:** 2026.2.0
 - **Service:** `systemctl status cloudflared` (enabled, auto-starts on boot)
 - **Config:** `/etc/cloudflared/config.yml`
-- **Credentials:** `/etc/cloudflared/91882f6d-8f81-4fd6-835d-a213393076d3.json`
-- **User config backup:** `~/.cloudflared/config.yml` (original, points to home dir)
+- **Credentials:** `/etc/cloudflared/<tunnel-id>.json`
 
 **Tunnel Routes:**
 | Hostname | Service |
@@ -72,23 +67,23 @@ net.core.wmem_max=7500000  # For QUIC performance
 - SMTP env vars configured in Coolify dashboard
 
 ### SMTP Configuration (Configured in Coolify)
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=sillyluke123437733@gmail.com
-SMTP_PASSWORD=injq dlal pohz bwfn (Gmail App Password)
-SMTP_FROM=noreply@financetracker.com
-```
+- SMTP settings are stored as environment variables in Coolify dashboard
+- See `.env.example` for required variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM)
 
 ---
 
-## Key Credentials
+## Credentials
 
-```
-Admin: admin@financetracker.app / ChangeMe123!
-Gmail SMTP: sillyluke123437733@gmail.com / App Password: injq dlal pohz bwfn
-Server SSH: luke_mini@172.27.30.17
-```
+> **IMPORTANT:** All credentials are stored in `.env` files (which are git-ignored) and
+> Coolify environment variables. **Never commit credentials to this file or any tracked file.**
+>
+> Rotate any credential that was previously exposed in git history.
+
+- **Admin account:** See Coolify env vars
+- **SMTP:** Configured in Coolify dashboard
+- **Plaid API:** Sandbox credentials in `.env` file (see `.env.example`)
+- **Plaid sandbox test login:** user_good / pass_good / any MFA code
+- Switch to development/production requires Plaid dashboard approval
 
 ---
 
@@ -97,14 +92,22 @@ Server SSH: luke_mini@172.27.30.17
 ### Backend (FastAPI + PostgreSQL)
 - **Auth:** JWT access tokens (15min) + httpOnly secure refresh token cookies (7-30 days)
 - **2FA:** Optional TOTP with Google Authenticator + backup codes
+- **Admin 2FA Enforcement:** Admin users MUST have 2FA enabled to login (blocked otherwise)
+- **RBAC:** User/Admin roles; admin dependency (`get_current_admin_user`) for admin endpoints
 - **CSRF Protection:** Custom header middleware (X-Requested-With) on all state-changing API requests
+- **Security Headers:** X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, CSP (API only)
 - **Rate Limiting:** SlowAPI on login (10/min), register (5/min), forgot-password (3/min)
 - **All routes protected** - every API endpoint requires authentication
+- **Audit Logging:** Immutable audit log for all security-relevant actions (login, register, 2FA, role changes, deactivation, data export, etc.)
+- **Admin Panel:** User management, role changes, audit log queries, access review reports
+- **Quarterly Access Reviews:** APScheduler job creates notifications for admin users on Jan/Apr/Jul/Oct 1st
+- **De-provisioning:** Admin deactivate endpoint immediately sets is_active=False + revokes all tokens
+- **Registration Gate:** `REGISTRATION_ENABLED=false` env var to disable new signups
 - **Session Management:** Track active sessions per user, revoke individual or all other sessions
 - **User-Profile model:** 1:N (household/multi-profile support)
 - **Recurring transactions:** Track subscriptions, bills, income with due date forecasting
 - **Savings Goals:** Track financial goals with progress, contributions, deadlines
-- **Notifications:** Budget threshold alerts (80%+), bill due date reminders (3-day)
+- **Notifications:** Budget threshold alerts (80%+), bill due date reminders (3-day), access review reminders
 - **Auto-Categorization:** Rule-based transaction categorization (contains/exact/starts_with matching)
 - **Data export:** CSV and Excel export with styled headers
 - **Theme persistence:** User theme preference saved server-side
@@ -140,30 +143,63 @@ Server SSH: luke_mini@172.27.30.17
 backend/app/
 ├── core/security.py          # Password, JWT, TOTP, QR code utilities
 ├── routers/
-│   ├── auth.py               # Auth endpoints (login, register, 2FA, change-password, reset, theme)
+│   ├── auth.py               # Auth endpoints (login, register, 2FA, change-password, reset, theme) + audit logging + admin 2FA enforcement + registration gate
+│   ├── admin.py              # Admin endpoints: user mgmt, role changes, audit logs, access review
 │   ├── profiles.py           # User profiles (protected)
 │   ├── accounts.py           # Bank accounts (protected)
 │   ├── transactions.py       # Transactions (protected)
 │   ├── budgets.py            # Budget management (protected)
 │   ├── analytics.py          # Spending analytics (protected)
 │   ├── tsp.py                # TSP simulator (protected)
-│   ├── plaid.py              # Plaid bank linking (protected)
+│   ├── plaid.py              # Plaid bank linking (protected) + audit logging
 │   ├── recurring.py          # Recurring bills & subscriptions (protected)
 │   ├── goals.py              # Savings goals CRUD + contributions (protected)
-│   ├── notifications.py      # Budget alerts, bill reminders (protected)
+│   ├── notifications.py      # Budget alerts, bill reminders, access review reminders (protected)
 │   ├── categorization.py     # Auto-categorization rules + apply (protected)
-│   ├── sessions.py           # Active session management (protected)
-│   └── export.py             # CSV/Excel data export (protected)
-├── schemas/auth.py           # Auth Pydantic schemas
+│   ├── sessions.py           # Active session management (protected) + audit logging
+│   └── export.py             # CSV/Excel data export (protected) + audit logging
+├── schemas/auth.py           # Auth Pydantic schemas (includes role in UserResponse)
 ├── services/
+│   ├── audit.py              # Audit logging service (log_audit_event, log_from_request)
 │   ├── email.py              # SMTP email service (password reset, welcome emails)
 │   └── sync_service.py       # Plaid sync scheduler
-├── dependencies.py           # Auth middleware (get_current_active_user)
-├── models.py                 # SQLAlchemy models (User, Profile, Account, Transaction, RecurringTransaction, SavingsGoal, CategoryRule, Notification)
-├── config.py                 # Settings
+├── dependencies.py           # Auth middleware (get_current_active_user, get_current_admin_user)
+├── models.py                 # SQLAlchemy models (User, Profile, Account, Transaction, RecurringTransaction, SavingsGoal, CategoryRule, Notification, AuditLog) + role field on User
+├── config.py                 # Settings (includes registration_enabled)
 ├── database.py               # DB session
 ├── init_db.py                # DB initialization
-└── main.py                   # App entry + rate limiter + GZip + cache headers + CORS + CSRF + Sentry + PWA routes
+└── main.py                   # App entry + rate limiter + GZip + cache headers + CORS + CSRF + SecurityHeaders + Sentry + PWA routes + APScheduler (quarterly review reminder) + admin 2FA startup check
+```
+
+### Database Migrations
+```
+backend/alembic/versions/
+├── ...-001_initial.py
+├── ...-002_*.py
+├── ...-003_*.py
+├── ...-004_goals_rules_notifications.py
+└── 20260207_2200-005_add_audit_log_and_role.py  # audit_logs table + user.role column
+```
+
+### GitHub Actions
+```
+.github/workflows/
+├── security.yml              # Vulnerability scanning: pip-audit, npm audit, Bandit SAST, Trivy Docker scan (weekly Monday + on push/PR to main)
+└── ci.yml                    # CI pipeline: backend pytest (with PostgreSQL), frontend build + tests (on push/PR to main)
+```
+
+### Policy Documents
+```
+docs/
+├── SECURITY_POLICY.md                # Security policy (includes security headers, vuln scanning, audit logging, access reviews, de-provisioning)
+├── ACCESS_CONTROL_POLICY.md          # Roles, auth, authorization, provisioning/de-provisioning, access reviews
+├── ACCESS_REVIEW_PROCEDURE.md        # Quarterly access review procedure
+├── VULNERABILITY_MANAGEMENT.md       # Scanning cadence, severity classification, patch SLAs
+├── generate_docx.py                  # Generates .docx versions of all policy docs
+├── Security_Policy_Rundskue.docx
+├── Privacy_Policy_Rundskue.docx
+├── Data_Retention_Policy_Rundskue.docx
+└── Access_Control_Policy_Rundskue.docx
 ```
 
 ### Frontend
@@ -243,6 +279,17 @@ frontend/public/
 - `/api/categorization/` - Auto-categorization rules CRUD + apply
 - `/api/sessions/` - List active sessions, revoke individual/all
 - `/api/export/` - CSV and Excel transaction exports
+
+### Admin APIs (require admin role)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/admin/users | List all users with role, is_active, totp_enabled, last login |
+| PUT | /api/admin/users/{id}/role | Change user role (audit logged) |
+| PUT | /api/admin/users/{id}/deactivate | Deactivate user + revoke all tokens (audit logged) |
+| PUT | /api/admin/users/{id}/reactivate | Reactivate user (audit logged) |
+| GET | /api/admin/audit-logs | Query audit logs with filters (action, user_id, date range, status) |
+| GET | /api/admin/access-review | Generate access review report (user count, 2FA adoption, per-user details) |
+| POST | /api/admin/access-review/complete | Record review completion with notes (audit logged) |
 
 ---
 
@@ -351,6 +398,47 @@ frontend/public/
 - Backend: pytest with SQLite, fixtures for User/Profile/Auth, test files for goals, sessions, notifications, auth, categorization
 - Frontend: Vitest + React Testing Library + MSW mock server, tests for API client, App component, Goals, Notifications, Sessions, CategoryRules pages
 
+### 21. Plaid Required Attestations (All 9 Complete)
+All 9 Plaid security attestations can be answered "Yes" as of 2026-02-07. Due date: 08/08/2026.
+
+| # | Attestation | Implementation |
+|---|-------------|----------------|
+| 1 | Centralized IAM | User model + role field as single identity store; `get_current_admin_user` dependency; audit logging on all security events |
+| 2 | MFA on internal systems | Admin users blocked from login if `totp_enabled=False`; enforced in `auth.py` login endpoint |
+| 3 | Periodic access reviews | APScheduler quarterly job (Jan/Apr/Jul/Oct); `/api/admin/access-review` report; completion audit log |
+| 4 | Zero trust architecture | SecurityHeadersMiddleware (HSTS, X-Frame-Options, CSP, etc.); per-request JWT auth; per-resource ownership checks; deny-by-default |
+| 5 | Consumer-facing MFA | TOTP 2FA available to all users (already built) |
+| 6 | Vulnerability scanning | GitHub Actions: pip-audit, npm audit, Trivy, Bandit; weekly + on push/PR |
+| 7 | Documented access control | `docs/ACCESS_CONTROL_POLICY.md` covering roles, auth, authorization, provisioning |
+| 8 | Patch within SLA | `docs/VULNERABILITY_MANAGEMENT.md` with SLAs: Critical 72h, High 7d, Medium 30d |
+| 9 | Automated de-provisioning | `PUT /api/admin/users/{id}/deactivate` sets is_active=False + revokes all tokens immediately |
+
+### 22. Audit Logging
+- Immutable `AuditLog` model: id, timestamp, user_id, action, resource_type, resource_id, details (JSON), ip_address, user_agent, status
+- Actions tracked: LOGIN, LOGIN_FAILED, LOGOUT, REGISTER, PASSWORD_CHANGE, PASSWORD_RESET, 2FA_ENABLED, 2FA_DISABLED, SESSION_REVOKED, PLAID_LINK, PLAID_UNLINK, USER_DEACTIVATED, USER_REACTIVATED, ROLE_CHANGED, ACCESS_REVIEW, DATA_EXPORT
+- Service: `backend/app/services/audit.py` with `log_audit_event()` and `log_from_request()` helpers
+- Admin queryable via `GET /api/admin/audit-logs` with filters
+
+### 23. Admin Role & User Management
+- `role` column on User model (default: "user", admin: "admin")
+- `get_current_admin_user` dependency checks `role == "admin"`
+- Admin endpoints for user listing, role changes, deactivation/reactivation
+- All admin actions audit logged
+- Registration can be disabled via `REGISTRATION_ENABLED=false` env var
+
+### 24. Security Headers
+- `SecurityHeadersMiddleware` in main.py adds to all responses:
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+  - `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` (API endpoints only)
+
+### 25. CI/CD Pipelines (GitHub Actions)
+- **security.yml:** pip-audit, npm audit, Bandit SAST, Trivy Docker scan (weekly Monday + on push/PR to main)
+- **ci.yml:** Backend pytest with PostgreSQL service container, frontend npm build + tests (on push/PR to main)
+
 ---
 
 ## Progress
@@ -359,8 +447,8 @@ frontend/public/
 |------|--------|
 | Backend Auth | 100% |
 | CSRF Protection | 100% (custom header middleware) |
-| Route Protection | 100% (all 14 routers) |
-| Database Migrations | 100% (004 - goals + rules + notifications) |
+| Route Protection | 100% (all 15 routers including admin) |
+| Database Migrations | 100% (005 - audit_logs table + user.role column) |
 | Frontend Auth | 100% (login, signup, 2FA, reset, change password) |
 | Toast Notifications | 100% |
 | Mobile Responsive | 100% (hamburger menu sidebar) |
@@ -370,10 +458,10 @@ frontend/public/
 | Dark Mode | 100% (all pages, server-persisted) |
 | Recurring Bills | 100% (backend + frontend + dashboard widget) |
 | Savings Goals | 100% (CRUD + contribute + dashboard widget) |
-| Notifications | 100% (budget alerts + bill reminders + bell badge) |
+| Notifications | 100% (budget alerts + bill reminders + access review reminders + bell badge) |
 | Auto-Categorization | 100% (rules CRUD + apply) |
-| Session Management | 100% (list + revoke) |
-| Data Export | 100% (CSV + Excel) |
+| Session Management | 100% (list + revoke + audit logged) |
+| Data Export | 100% (CSV + Excel + audit logged) |
 | PWA | 100% (manifest + service worker) |
 | Secure Cookies | 100% |
 | Database Indexes | 100% |
@@ -385,7 +473,15 @@ frontend/public/
 | Frontend Tests | 100% (Vitest + RTL + MSW + 6 test files) |
 | Cloudflare Tunnel | 100% (systemd service, 4 subdomains) |
 | SMTP Email | 100% (configured in Coolify) |
-| Plaid Integration | Built, needs real bank testing |
+| Plaid Integration | 100% (sandbox mode, attestations complete) |
+| Admin RBAC | 100% (admin role, user management, deactivation) |
+| Audit Logging | 100% (immutable log, all security events, admin queryable) |
+| Security Headers | 100% (HSTS, X-Frame-Options, CSP, Referrer-Policy, Permissions-Policy) |
+| Plaid Attestations | 100% (all 9 attestations implementable, due 08/08/2026) |
+| Vulnerability Scanning | 100% (GitHub Actions: pip-audit, npm audit, Bandit, Trivy) |
+| CI Pipeline | 100% (GitHub Actions: pytest + frontend build) |
+| Access Reviews | 100% (quarterly scheduler + admin report + completion audit) |
+| Policy Documentation | 100% (Security, Access Control, Access Review, Vulnerability Management) |
 
 ---
 
@@ -411,8 +507,8 @@ cd backend && python -m pytest tests/ -v
 git log --oneline -5
 git status
 
-# Server SSH
-ssh luke_mini@172.27.30.17
+# Server SSH (use your configured user@host)
+# ssh <user>@<server-ip>
 
 # Server - check tunnel
 sudo systemctl status cloudflared
@@ -431,8 +527,45 @@ curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloud
 
 ## Known Issues / Notes
 
-1. **Plaid:** Uses sandbox credentials, needs real keys for production bank linking
+1. **Plaid:** Uses sandbox credentials (user_good / pass_good), needs Plaid dashboard approval + production keys for real bank linking
 2. **Browser cache:** Hashed assets cached 1yr (immutable), HTML set to no-cache so deploys auto-refresh
 3. **QUIC timeouts:** Periodic "timeout: no recent network activity" in cloudflared logs are normal - idle connection recycling, auto-reconnects in seconds
 4. **ws.rundskue.com:** May show connection errors if Coolify's Pusher/websocket service (port 6001) isn't running - cosmetic, doesn't affect finance app
 5. **Cloudflare tunnel config:** System config at `/etc/cloudflared/config.yml`, user backup at `~/.cloudflared/config.yml` - edit the `/etc/` one for the systemd service
+6. **Old admin account (admin@financetracker.app):** Blocked from login because admin 2FA enforcement requires TOTP to be enabled before login. Either enable 2FA directly in DB or use the new admin account (rundskue@outlook.com)
+7. **Admin 2FA chicken-and-egg:** If creating a new admin without 2FA, you must set TOTP secret directly in the database via Coolify terminal (Python one-liner with pyotp) since the login blocks without 2FA
+8. **Transaction data not encrypted at rest:** Financial data stored in plaintext in PostgreSQL, protected by network isolation only (documented in SECURITY_POLICY.md as known limitation)
+9. **No WAF:** No Web Application Firewall beyond Cloudflare tunnel and reverse proxy
+10. **No admin frontend:** Admin endpoints exist but there is no admin panel UI yet — use API directly or build a frontend admin panel
+11. **Credential rotation needed:** If any credentials were previously committed to git history, they must be rotated immediately
+
+---
+
+## Bootstrapping an Admin Account
+
+If you need to create a new admin account (e.g., from scratch):
+
+1. Register via API: `POST /api/auth/register` with email/password
+2. Promote to admin via Coolify terminal:
+   ```python
+   python -c "from backend.app.database import SessionLocal; from backend.app.models import User; db=SessionLocal(); u=db.query(User).filter(User.email=='EMAIL').first(); u.role='admin'; db.commit(); print(f'Promoted {u.email}'); db.close()"
+   ```
+3. Generate TOTP secret (required for admin login):
+   ```python
+   python -c "
+   import pyotp
+   from backend.app.database import SessionLocal
+   from backend.app.models import User
+   db = SessionLocal()
+   u = db.query(User).filter(User.email=='EMAIL').first()
+   secret = pyotp.random_base32()
+   u.totp_secret = secret
+   u.totp_enabled = True
+   db.commit()
+   uri = pyotp.totp.TOTP(secret).provisioning_uri(name=u.email, issuer_name='Finance Tracker')
+   print(f'TOTP Secret: {secret}')
+   print(f'URI: {uri}')
+   db.close()
+   "
+   ```
+4. Scan the QR URI in Google Authenticator (or enter the secret manually)

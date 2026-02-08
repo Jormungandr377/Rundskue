@@ -164,6 +164,20 @@ async def change_user_role(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Prevent admin from demoting themselves
+    if user_id == current_user.id and body.role != "admin":
+        raise HTTPException(status_code=400, detail="Cannot change your own role")
+
+    # Prevent demoting the last active admin
+    if user.role == "admin" and body.role == "user":
+        remaining_admins = db.query(User).filter(
+            User.role == "admin",
+            User.is_active == True,
+            User.id != user_id,
+        ).count()
+        if remaining_admins == 0:
+            raise HTTPException(status_code=400, detail="Cannot demote the last admin")
+
     old_role = user.role
     user.role = body.role
     db.commit()

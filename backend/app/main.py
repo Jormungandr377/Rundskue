@@ -136,13 +136,18 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # GZip compression - compress responses > 500 bytes (huge win for JS/CSS bundles)
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
-# CORS middleware
+# CORS middleware - restrict origins, methods, and headers
+_cors_origins = [settings.frontend_url, "https://finance.rundskue.com"]
+if settings.debug:
+    # Allow localhost origins only in debug mode
+    _cors_origins += ["http://localhost:3000", "http://127.0.0.1:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "https://finance.rundskue.com", "http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
 
 
@@ -186,6 +191,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         if request.url.path.startswith("/api/"):
             response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+        else:
+            # Frontend SPA – allow self-hosted scripts/styles + inline styles (Tailwind)
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data:; "
+                "font-src 'self'; "
+                "connect-src 'self'; "
+                "frame-ancestors 'none'"
+            )
         return response
 
 
@@ -261,12 +277,8 @@ async def root():
 
 @app.get("/api/health")
 async def health_check():
-    """Detailed health check."""
-    return {
-        "status": "healthy",
-        "database": "connected",
-        "scheduler": "running" if scheduler.running else "stopped"
-    }
+    """Minimal health check – internal details hidden from unauthenticated callers."""
+    return {"status": "ok"}
 
 
 # Serve static files from the React build

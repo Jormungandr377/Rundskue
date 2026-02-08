@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 from typing import List, Optional
 from calendar import monthrange
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from pydantic import BaseModel
@@ -42,7 +42,7 @@ class NotificationResponse(BaseModel):
 @router.get("/", response_model=List[NotificationResponse])
 async def list_notifications(
     unread_only: bool = False,
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=500),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):

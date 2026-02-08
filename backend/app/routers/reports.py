@@ -63,20 +63,19 @@ def _get_report_or_404(
     user: User,
     db: Session,
 ) -> ScheduledReport:
+    # Single query with both ID and user_id to prevent resource enumeration
     report = (
         db.query(ScheduledReport)
-        .filter(ScheduledReport.id == report_id)
+        .filter(
+            ScheduledReport.id == report_id,
+            ScheduledReport.user_id == user.id,
+        )
         .first()
     )
     if report is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Scheduled report not found",
-        )
-    if report.user_id != user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to access this report",
         )
     return report
 

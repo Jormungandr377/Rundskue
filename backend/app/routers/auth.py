@@ -214,14 +214,15 @@ async def login(
     db.add(refresh_token_obj)
     db.commit()
 
-    # Set refresh token cookie
+    # Set refresh token cookie (restricted path = only sent with auth requests)
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
         secure=True,
         samesite="lax",
-        max_age=expires_days * 24 * 60 * 60
+        max_age=expires_days * 24 * 60 * 60,
+        path="/api/auth",
     )
 
     # Audit log
@@ -329,12 +330,15 @@ async def resend_verification(
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
     request: Request,
+    response: Response,
     db: Session = Depends(get_db)
 ):
     """
     Refresh access token using refresh token from cookie.
 
-    Returns new JWT access token.
+    Implements refresh token rotation: the old token is revoked and a new one
+    is issued. If a revoked token is reused, ALL tokens for the user are
+    revoked (potential theft indicator).
     """
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
@@ -343,17 +347,39 @@ async def refresh_token(
             detail="Refresh token not found"
         )
 
-    # Validate refresh token
+    # Look up the token regardless of revocation status
     token_obj = db.query(RefreshToken).filter(
         RefreshToken.token == refresh_token,
-        RefreshToken.is_revoked == False,
-        RefreshToken.expires_at > datetime.utcnow()
     ).first()
 
     if not token_obj:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token"
+            detail="Invalid refresh token"
+        )
+
+    # If the token was already revoked, this may indicate theft – revoke ALL
+    if token_obj.is_revoked:
+        logger.warning(
+            f"Revoked refresh token reused for user {token_obj.user_id}. "
+            "Revoking all tokens for this user."
+        )
+        db.query(RefreshToken).filter(
+            RefreshToken.user_id == token_obj.user_id,
+            RefreshToken.is_revoked == False,
+        ).update({"is_revoked": True})
+        db.commit()
+        response.delete_cookie(key="refresh_token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token reuse detected – all sessions have been revoked"
+        )
+
+    # Check expiration
+    if token_obj.expires_at <= datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Expired refresh token"
         )
 
     # Verify user is still active
@@ -364,8 +390,34 @@ async def refresh_token(
             detail="User not found or inactive"
         )
 
+    # ── Rotate: revoke old token, issue new one ──
+    token_obj.is_revoked = True
+
+    new_refresh = create_refresh_token()
+    remaining_seconds = (token_obj.expires_at - datetime.utcnow()).total_seconds()
+    new_token_obj = RefreshToken(
+        token=new_refresh,
+        user_id=user.id,
+        expires_at=token_obj.expires_at,  # keep original expiry window
+        user_agent=request.headers.get("user-agent"),
+        ip_address=request.client.host if request.client else None,
+    )
+    db.add(new_token_obj)
+    db.commit()
+
+    # Set new cookie
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=int(max(remaining_seconds, 0)),
+        path="/api/auth",
+    )
+
     # Generate new access token
-    access_token = create_access_token({"sub": str(token_obj.user_id)})
+    access_token = create_access_token({"sub": str(user.id)})
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -412,7 +464,9 @@ async def get_current_user_info(
 
 
 @router.post("/change-password", response_model=MessageResponse)
+@limiter.limit("5/minute")
 async def change_password(
+    request: Request,
     password_data: ChangePassword,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -575,6 +629,12 @@ async def forgot_password(
     user = db.query(User).filter(User.email == forgot_data.email).first()
 
     if user and user.is_active:
+        # Invalidate any existing unused reset tokens for this user
+        db.query(PasswordResetToken).filter(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.is_used == False,
+        ).update({"is_used": True})
+
         # Generate reset token
         reset_token = generate_reset_token()
 
@@ -598,7 +658,9 @@ async def forgot_password(
 
 
 @router.post("/reset-password", response_model=MessageResponse)
+@limiter.limit("5/minute")
 async def reset_password(
+    request: Request,
     reset_data: ResetPassword,
     db: Session = Depends(get_db)
 ):

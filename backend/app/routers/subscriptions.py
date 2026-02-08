@@ -1,6 +1,6 @@
 """Subscriptions router - detect and manage recurring subscriptions."""
 import logging
-from typing import List, Optional
+from typing import List, Literal, Optional
 from datetime import datetime, date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -23,7 +23,7 @@ class SubscriptionCreate(BaseModel):
     name: str
     merchant_name: Optional[str] = None
     amount: float
-    frequency: str = "monthly"
+    frequency: Literal["weekly", "biweekly", "monthly", "quarterly", "yearly"] = "monthly"
     category_id: Optional[int] = None
     notes: Optional[str] = None
 
