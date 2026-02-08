@@ -3,9 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, X, TrendingDown, DollarSign, Percent, CreditCard, BarChart3 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import authenticatedApi from '../services/api';
-import { profiles } from '../api';
+import { profiles, debt as debtApi, creditScore as creditScoreApi } from '../api';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/format';
+import CreditHealthCard from '../components/CreditHealthCard';
+import CreditProjectionChart from '../components/CreditProjectionChart';
 
 // --- Types ---
 
@@ -152,6 +154,19 @@ export default function DebtPayoff() {
       authenticatedApi
         .get<{ entries: CreditScore[] }>('/credit-score/history', { params: { limit: 50 } })
         .then(r => r.data.entries),
+  });
+
+  // Unified dashboard with credit health
+  const { data: dashboard } = useQuery({
+    queryKey: ['debt-credit-dashboard', extraPayment, strategy],
+    queryFn: () => debtApi.dashboard({ extra_payment: extraPayment, strategy }),
+    enabled: debts.length > 0,
+  });
+
+  // Credit health metrics (standalone, works even without debts)
+  const { data: creditHealth } = useQuery({
+    queryKey: ['credit-health'],
+    queryFn: () => creditScoreApi.health(),
   });
 
   // --- Mutations ---
@@ -339,6 +354,19 @@ export default function DebtPayoff() {
           </div>
         </div>
       </div>
+
+      {/* Credit Health & Projection */}
+      {creditHealth && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CreditHealthCard metrics={creditHealth} />
+          {dashboard?.credit_projection && dashboard.credit_projection.projections.length > 0 && (
+            <CreditProjectionChart
+              projections={dashboard.credit_projection.projections}
+              currentScore={dashboard.credit_projection.current_score}
+            />
+          )}
+        </div>
+      )}
 
       {/* Debt Form */}
       {showForm && (

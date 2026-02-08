@@ -35,6 +35,9 @@ import type {
   StrategyComparison,
   CreditScoreEntry,
   CreditScoreHistory,
+  CreditHealthMetrics,
+  CreditProjection,
+  DebtCreditDashboard,
   InvestmentHolding,
   AssetAllocation,
   DividendSummary,
@@ -359,6 +362,8 @@ export const debt = {
     client.get<{ total_balance: number; total_minimum_payments: number; total_interest_if_minimum_only: number; estimated_payoff_months: number }>('/debt/total-interest').then(r => r.data),
   amortization: (id: number) =>
     client.get<{ month_number: number; payment: number; principal: number; interest: number; remaining_balance: number }[]>(`/debt/${id}/amortization`).then(r => r.data),
+  dashboard: (params?: { extra_payment?: number; strategy?: string }) =>
+    client.get<DebtCreditDashboard>('/debt/dashboard', { params }).then(r => r.data),
 };
 
 // Credit Score
@@ -370,6 +375,10 @@ export const creditScore = {
   latest: () =>
     client.get<CreditScoreEntry>('/credit-score/latest').then(r => r.data),
   delete: (id: number) => client.delete(`/credit-score/${id}`),
+  health: (monthlyIncome?: number) =>
+    client.get<CreditHealthMetrics>('/credit-score/health', { params: monthlyIncome ? { monthly_income: monthlyIncome } : {} }).then(r => r.data),
+  project: (payoffPlan: Record<number, number>) =>
+    client.post<CreditProjection>('/credit-score/project', { payoff_plan: payoffPlan }).then(r => r.data),
 };
 
 // Investments

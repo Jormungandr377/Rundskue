@@ -389,6 +389,8 @@ export interface Debt {
   start_date?: string;
   original_balance?: number;
   extra_info?: Record<string, unknown>;
+  payoff_impact?: number;
+  priority?: number;
 }
 
 export interface PayoffScheduleMonth {
@@ -436,6 +438,76 @@ export interface CreditScoreHistory {
   lowest_score?: number;
   total_entries: number;
   entries: CreditScoreEntry[];
+}
+
+export interface CreditHealthMetrics {
+  credit_score?: number;
+  credit_score_date?: string;
+  credit_utilization: number;
+  total_credit_limit: number;
+  total_credit_used: number;
+  debt_to_income_ratio: number;
+  monthly_debt_payment: number;
+  monthly_income: number;
+  total_debt: number;
+  debt_count: number;
+  health_score: number;
+  health_rating: string;
+}
+
+export interface CreditProjectionPoint {
+  month: number;
+  estimated_score: number;
+  remaining_debt: number;
+  debts_paid_off: number;
+}
+
+export interface CreditProjection {
+  current_score: number;
+  current_utilization: number;
+  current_dti: number;
+  projections: CreditProjectionPoint[];
+  total_months: number;
+  total_debts: number;
+}
+
+export interface DebtCreditDashboard {
+  // Debt summary
+  total_debt: number;
+  debt_count: number;
+  total_minimum_payment: number;
+  debts: Debt[];
+
+  // Credit health
+  credit_score?: number;
+  credit_score_date?: string;
+  credit_utilization: number;
+  debt_to_income_ratio: number;
+  health_score: number;
+  health_rating: string;
+
+  // Payoff projections
+  payoff_plan_snowball?: {
+    strategy: string;
+    total_months: number;
+    total_interest: number;
+    total_paid: number;
+    payoff_date: string;
+  };
+  payoff_plan_avalanche?: {
+    strategy: string;
+    total_months: number;
+    total_interest: number;
+    total_paid: number;
+    payoff_date: string;
+  };
+  credit_projection?: {
+    current_score: number;
+    current_utilization: number;
+    current_dti: number;
+    projections: CreditProjectionPoint[];
+    total_months: number;
+  };
 }
 
 // Investment Holdings
