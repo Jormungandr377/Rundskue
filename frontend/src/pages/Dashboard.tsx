@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   TrendingUp,
-  TrendingDown,
   Wallet,
   CreditCard,
   ArrowUpRight,
@@ -26,7 +25,6 @@ import {
 } from 'recharts';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { accounts, analytics, transactions, recurring, goals } from '../api';
-import type { SpendingByCategory, MonthlyTrend, Transaction } from '../types';
 import { formatCurrency } from '../utils/format';
 import { CHART_COLORS } from '../constants/colors';
 
@@ -81,76 +79,79 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        <div className="relative">
+          <div className="w-10 h-10 border-3 border-primary-200 dark:border-primary-900/40 rounded-full" />
+          <div className="absolute inset-0 w-10 h-10 border-3 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Dashboard</h1>
-        <p className="text-stone-500 dark:text-stone-400">Your financial overview</p>
+        <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Dashboard</h1>
+        <p className="text-surface-500 dark:text-surface-400 text-sm mt-0.5">Your financial overview</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card p-6">
+        <div className="card p-6 group">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Net Worth</p>
-              <p className="text-2xl font-bold text-stone-900 dark:text-white">
+              <p className="text-sm text-surface-500 dark:text-surface-400 font-medium">Net Worth</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white mt-1">
                 {formatCurrency(summary?.net_worth || 0)}
               </p>
             </div>
-            <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-full">
-              <Wallet className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-sm shadow-primary-500/20 group-hover:shadow-md group-hover:shadow-primary-500/25 transition-shadow">
+              <Wallet className="w-5 h-5 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-6 group">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Assets</p>
-              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <p className="text-sm text-surface-500 dark:text-surface-400 font-medium">Total Assets</p>
+              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
                 {formatCurrency(summary?.total_assets || 0)}
               </p>
             </div>
-            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
-              <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-6 group">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Liabilities</p>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              <p className="text-sm text-surface-500 dark:text-surface-400 font-medium">Total Liabilities</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
                 {formatCurrency(summary?.total_liabilities || 0)}
               </p>
             </div>
-            <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
-              <CreditCard className="w-6 h-6 text-red-600 dark:text-red-400" />
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-red-600 dark:text-red-400" />
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
+        <div className="card p-6 group">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">This Month's Cash Flow</p>
-              <p className={`text-2xl font-bold ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+              <p className="text-sm text-surface-500 dark:text-surface-400 font-medium">This Month</p>
+              <p className={`text-2xl font-bold mt-1 ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {formatCurrency(cashFlow?.net_cash_flow || 0)}
               </p>
             </div>
-            <div className={`p-3 rounded-full ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${(cashFlow?.net_cash_flow || 0) >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/20' : 'bg-red-100 dark:bg-red-900/20'}`}>
               {(cashFlow?.net_cash_flow || 0) >= 0 ? (
-                <ArrowUpRight className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                <ArrowUpRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <ArrowDownRight className="w-6 h-6 text-red-600 dark:text-red-400" />
+                <ArrowDownRight className="w-5 h-5 text-red-600 dark:text-red-400" />
               )}
             </div>
           </div>
@@ -161,26 +162,26 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expenses - Bar Chart */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Income vs Expenses</h3>
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Income vs Expenses</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trends || []} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.15} />
                 <XAxis
                   dataKey="month"
                   tickFormatter={(value) => format(parseISO(value + '-01'), 'MMM')}
-                  stroke="#a8a29e"
+                  stroke="#94a3b8"
                   fontSize={12}
                 />
-                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" fontSize={12} />
+                <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#94a3b8" fontSize={12} />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                   labelFormatter={(label) => format(parseISO(label + '-01'), 'MMMM yyyy')}
-                  contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e7e5e4', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}
                 />
                 <Legend />
-                <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="income" name="Income" fill="#10b981" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="expenses" name="Expenses" fill="#ef4444" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -188,7 +189,7 @@ export default function Dashboard() {
 
         {/* Spending by Category */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Spending by Category</h3>
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Spending by Category</h3>
           <div className="h-64 flex">
             <div className="w-1/2">
               <ResponsiveContainer width="100%" height="100%">
@@ -211,15 +212,15 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="w-1/2 flex flex-col justify-center space-y-2">
+            <div className="w-1/2 flex flex-col justify-center space-y-2.5">
               {spending?.slice(0, 6).map((cat, index) => (
                 <div key={cat.category_id} className="flex items-center text-sm">
                   <div
-                    className="w-3 h-3 rounded-full mr-2"
+                    className="w-3 h-3 rounded-full mr-2.5 flex-shrink-0"
                     style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                   />
-                  <span className="text-stone-600 dark:text-stone-400 truncate flex-1">{cat.category_name}</span>
-                  <span className="font-medium text-stone-900 dark:text-white">{cat.percentage}%</span>
+                  <span className="text-surface-600 dark:text-surface-400 truncate flex-1">{cat.category_name}</span>
+                  <span className="font-semibold text-surface-900 dark:text-white ml-2">{cat.percentage}%</span>
                 </div>
               ))}
             </div>
@@ -232,24 +233,24 @@ export default function Dashboard() {
         {/* Net Worth Trend */}
         {netWorthHistory && netWorthHistory.length > 1 && (
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Net Worth Trend</h3>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Net Worth Trend</h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={netWorthHistory}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.15} />
                   <XAxis
                     dataKey="date"
                     tickFormatter={(value) => format(parseISO(value), 'MMM')}
-                    stroke="#a8a29e"
+                    stroke="#94a3b8"
                     fontSize={12}
                   />
-                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" fontSize={12} />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#94a3b8" fontSize={12} />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => format(parseISO(label), 'MMM d, yyyy')}
-                    contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e7e5e4', borderRadius: '8px' }}
+                    contentStyle={{ backgroundColor: 'var(--tooltip-bg, #fff)', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}
                   />
-                  <Area type="monotone" dataKey="net_worth" stroke="#14b8a6" fill="#14b8a6" fillOpacity={0.15} name="Net Worth" />
+                  <Area type="monotone" dataKey="net_worth" stroke="#6366f1" fill="#6366f1" fillOpacity={0.12} name="Net Worth" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -259,23 +260,23 @@ export default function Dashboard() {
         {/* Savings Goals Progress */}
         {savingsGoals && savingsGoals.length > 0 && (
           <div className="card p-6">
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Savings Goals</h3>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Savings Goals</h3>
             <div className="space-y-4">
               {savingsGoals.filter(g => !g.is_completed).slice(0, 4).map((goal) => (
                 <div key={goal.id}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium text-stone-900 dark:text-white">{goal.name}</span>
-                    <span className="text-stone-500 dark:text-stone-400">
+                  <div className="flex justify-between text-sm mb-1.5">
+                    <span className="font-medium text-surface-900 dark:text-white">{goal.name}</span>
+                    <span className="text-surface-500 dark:text-surface-400">
                       {formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}
                     </span>
                   </div>
-                  <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2.5">
+                  <div className="w-full bg-surface-200 dark:bg-surface-700 rounded-full h-2.5">
                     <div
                       className="h-2.5 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(goal.progress_pct, 100)}%`, backgroundColor: goal.color || '#14b8a6' }}
+                      style={{ width: `${Math.min(goal.progress_pct, 100)}%`, backgroundColor: goal.color || '#6366f1' }}
                     />
                   </div>
-                  <p className="text-right text-xs text-stone-400 dark:text-stone-500 mt-0.5">{goal.progress_pct}%</p>
+                  <p className="text-right text-xs text-surface-400 dark:text-surface-500 mt-0.5">{goal.progress_pct}%</p>
                 </div>
               ))}
             </div>
@@ -287,83 +288,83 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Transactions */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Recent Transactions</h3>
-          <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Recent Transactions</h3>
+          <div className="space-y-1">
             {recentTxns?.transactions?.slice(0, 6).map((txn) => (
-              <div key={txn.id} className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700 last:border-0">
+              <div key={txn.id} className="flex items-center justify-between py-2.5 border-b border-surface-100 dark:border-surface-700/50 last:border-0">
                 <div>
-                  <p className="font-medium text-stone-900 dark:text-white text-sm">{txn.custom_name || txn.merchant_name || txn.name}</p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">{format(parseISO(txn.date), 'MMM d')}</p>
+                  <p className="font-medium text-surface-900 dark:text-white text-sm">{txn.custom_name || txn.merchant_name || txn.name}</p>
+                  <p className="text-xs text-surface-500 dark:text-surface-400 mt-0.5">{format(parseISO(txn.date), 'MMM d')}</p>
                 </div>
-                <p className={`font-semibold text-sm ${txn.amount < 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-white'}`}>
+                <p className={`font-semibold text-sm ${txn.amount < 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-surface-900 dark:text-white'}`}>
                   {txn.amount < 0 ? '+' : '-'}{formatCurrency(Math.abs(txn.amount))}
                 </p>
               </div>
             ))}
             {(!recentTxns?.transactions || recentTxns.transactions.length === 0) && (
-              <p className="text-stone-500 dark:text-stone-400 text-center py-4">No transactions yet</p>
+              <p className="text-surface-500 dark:text-surface-400 text-center py-8 text-sm">No transactions yet</p>
             )}
           </div>
         </div>
 
         {/* Upcoming Bills */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-orange-500" />
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-amber-500" />
             Upcoming Bills
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-1">
             {upcomingBills?.slice(0, 6).map((bill) => {
               const daysUntil = differenceInDays(parseISO(bill.next_due_date), new Date())
               return (
-                <div key={bill.id} className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-700 last:border-0">
-                  <div className="flex items-center gap-2">
+                <div key={bill.id} className="flex items-center justify-between py-2.5 border-b border-surface-100 dark:border-surface-700/50 last:border-0">
+                  <div className="flex items-center gap-2.5">
                     <div className={`w-2 h-2 rounded-full ${
-                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-orange-500' : 'bg-emerald-500'
+                      daysUntil <= 3 ? 'bg-red-500' : daysUntil <= 7 ? 'bg-amber-500' : 'bg-emerald-500'
                     }`} />
                     <div>
-                      <p className="font-medium text-stone-900 dark:text-white text-sm">{bill.name}</p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400">
+                      <p className="font-medium text-surface-900 dark:text-white text-sm">{bill.name}</p>
+                      <p className="text-xs text-surface-500 dark:text-surface-400">
                         {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil}d`}
                       </p>
                     </div>
                   </div>
-                  <p className="font-semibold text-sm text-stone-900 dark:text-white">
+                  <p className="font-semibold text-sm text-surface-900 dark:text-white">
                     {formatCurrency(bill.amount)}
                   </p>
                 </div>
               )
             })}
             {(!upcomingBills || upcomingBills.length === 0) && (
-              <p className="text-stone-500 dark:text-stone-400 text-center py-4">No upcoming bills</p>
+              <p className="text-surface-500 dark:text-surface-400 text-center py-8 text-sm">No upcoming bills</p>
             )}
           </div>
         </div>
 
         {/* Insights */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Spending Insights</h3>
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Spending Insights</h3>
           <div className="space-y-3">
             {insights?.slice(0, 5).map((insight, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg ${
-                  insight.type === 'increase' ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-emerald-50 dark:bg-emerald-900/20'
+                className={`p-3.5 rounded-xl ${
+                  insight.type === 'increase' ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-emerald-50 dark:bg-emerald-900/10'
                 }`}
               >
                 <div className="flex items-start">
-                  <AlertCircle className={`w-5 h-5 mr-2 mt-0.5 flex-shrink-0 ${
-                    insight.type === 'increase' ? 'text-orange-500' : 'text-emerald-500'
+                  <AlertCircle className={`w-4.5 h-4.5 mr-2.5 mt-0.5 flex-shrink-0 ${
+                    insight.type === 'increase' ? 'text-amber-500' : 'text-emerald-500'
                   }`} />
                   <div>
-                    <p className="text-sm font-medium text-stone-900 dark:text-white">{insight.category}</p>
-                    <p className="text-sm text-stone-600 dark:text-stone-400">{insight.message}</p>
+                    <p className="text-sm font-medium text-surface-900 dark:text-white">{insight.category}</p>
+                    <p className="text-xs text-surface-600 dark:text-surface-400 mt-0.5">{insight.message}</p>
                   </div>
                 </div>
               </div>
             ))}
             {(!insights || insights.length === 0) && (
-              <p className="text-stone-500 dark:text-stone-400 text-center py-4">No insights available yet</p>
+              <p className="text-surface-500 dark:text-surface-400 text-center py-8 text-sm">No insights available yet</p>
             )}
           </div>
         </div>

@@ -140,7 +140,7 @@ async def get_optional_current_user(
         if user and user.is_active:
             return user
 
-    except (ValueError, JWTError):
+    except (ValueError, pyjwt.PyJWTError):
         return None
 
     return None

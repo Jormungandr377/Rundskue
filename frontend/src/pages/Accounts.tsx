@@ -28,7 +28,7 @@ const accountTypeIcons: Record<string, React.ReactNode> = {
 };
 
 const accountTypeColors: Record<string, string> = {
-  checking: 'bg-teal-100 text-teal-600',
+  checking: 'bg-primary-100 text-primary-600',
   savings: 'bg-emerald-100 text-emerald-600',
   credit: 'bg-orange-100 text-orange-600',
   investment: 'bg-purple-100 text-purple-600',
@@ -97,7 +97,7 @@ export default function Accounts() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -106,27 +106,27 @@ export default function Accounts() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Accounts</h1>
-        <p className="text-stone-500">Manage your linked bank accounts</p>
+        <h1 className="text-2xl font-bold text-surface-900">Accounts</h1>
+        <p className="text-surface-500">Manage your linked bank accounts</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card p-6">
-          <p className="text-sm text-stone-500">Total Assets</p>
+          <p className="text-sm text-surface-500">Total Assets</p>
           <p className="text-2xl font-bold text-emerald-600">
             {formatCurrency(summary?.total_assets || 0)}
           </p>
         </div>
         <div className="card p-6">
-          <p className="text-sm text-stone-500">Total Liabilities</p>
+          <p className="text-sm text-surface-500">Total Liabilities</p>
           <p className="text-2xl font-bold text-red-600">
             {formatCurrency(summary?.total_liabilities || 0)}
           </p>
         </div>
         <div className="card p-6">
-          <p className="text-sm text-stone-500">Net Worth</p>
-          <p className="text-2xl font-bold text-stone-900">
+          <p className="text-sm text-surface-500">Net Worth</p>
+          <p className="text-2xl font-bold text-surface-900">
             {formatCurrency(summary?.net_worth || 0)}
           </p>
         </div>
@@ -135,17 +135,17 @@ export default function Accounts() {
       {/* Accounts by Type */}
       {Object.entries(groupedAccounts).map(([type, accs]) => (
         <div key={type} className="card">
-          <div className="px-6 py-4 border-b border-stone-200">
-            <h3 className="text-lg font-semibold text-stone-900 capitalize">{type} Accounts</h3>
+          <div className="px-6 py-4 border-b border-surface-200">
+            <h3 className="text-lg font-semibold text-surface-900 capitalize">{type} Accounts</h3>
           </div>
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-surface-100">
             {accs.map((acc) => (
               <div 
                 key={acc.id} 
                 className={`p-4 flex items-center justify-between ${acc.is_hidden ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-full ${accountTypeColors[type] || 'bg-stone-100 text-stone-600'}`}>
+                  <div className={`p-3 rounded-full ${accountTypeColors[type] || 'bg-surface-100 text-surface-600'}`}>
                     {accountTypeIcons[type] || <CreditCard className="w-5 h-5" />}
                   </div>
                   <div>
@@ -155,7 +155,7 @@ export default function Accounts() {
                           type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="px-2 py-1 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                          className="px-2 py-1 border border-surface-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
                           autoFocus
                         />
                         <button
@@ -166,17 +166,17 @@ export default function Accounts() {
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="p-1 text-stone-400 hover:bg-stone-50 rounded"
+                          className="p-1 text-surface-400 hover:bg-surface-50 rounded"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     ) : (
                       <>
-                        <p className="font-medium text-stone-900">
+                        <p className="font-medium text-surface-900">
                           {acc.display_name || acc.name}
                         </p>
-                        <p className="text-sm text-stone-500">
+                        <p className="text-sm text-surface-500">
                           {acc.official_name && acc.official_name !== acc.name && (
                             <span>{acc.official_name} • </span>
                           )}
@@ -192,18 +192,18 @@ export default function Accounts() {
                     <p className={`text-lg font-semibold ${
                       type === 'credit' || type === 'loan' || type === 'mortgage'
                         ? 'text-red-600'
-                        : 'text-stone-900'
+                        : 'text-surface-900'
                     }`}>
                       {type === 'credit' || type === 'loan' || type === 'mortgage' ? '-' : ''}
                       {formatCurrency(Math.abs(acc.balance_current))}
                     </p>
                     {acc.balance_available !== null && acc.balance_available !== acc.balance_current && (
-                      <p className="text-sm text-stone-500">
+                      <p className="text-sm text-surface-500">
                         Available: {formatCurrency(acc.balance_available)}
                       </p>
                     )}
                     {acc.balance_limit && (
-                      <p className="text-sm text-stone-500">
+                      <p className="text-sm text-surface-500">
                         Limit: {formatCurrency(acc.balance_limit)}
                       </p>
                     )}
@@ -212,14 +212,14 @@ export default function Accounts() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleStartEdit(acc)}
-                      className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg"
+                      className="p-2 text-surface-400 hover:text-surface-600 hover:bg-surface-100 rounded-lg"
                       title="Rename account"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleToggleHidden(acc)}
-                      className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg"
+                      className="p-2 text-surface-400 hover:text-surface-600 hover:bg-surface-100 rounded-lg"
                       title={acc.is_hidden ? 'Show account' : 'Hide account'}
                     >
                       {acc.is_hidden ? (
@@ -238,14 +238,14 @@ export default function Accounts() {
 
       {(!accountList || accountList.length === 0) && (
         <div className="card p-12 text-center">
-          <CreditCard className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-stone-900 mb-2">No accounts linked</h3>
-          <p className="text-stone-500 mb-4">
+          <CreditCard className="w-12 h-12 text-surface-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-surface-900 mb-2">No accounts linked</h3>
+          <p className="text-surface-500 mb-4">
             Connect your bank accounts to start tracking your finances.
           </p>
           <a
             href="/link-account"
-            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700"
           >
             Link Account
           </a>

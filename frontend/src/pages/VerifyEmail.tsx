@@ -47,31 +47,31 @@ export default function VerifyEmail() {
   // Token verification flow
   if (token) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-surface-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-stone-900">Finance Tracker</h1>
-            <p className="text-stone-500 mt-2">Email verification</p>
+            <h1 className="text-3xl font-bold text-surface-900">Finance Tracker</h1>
+            <p className="text-surface-500 mt-2">Email verification</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8">
+          <div className="bg-white rounded-xl shadow-sm border border-surface-100 p-8">
             {status === 'verifying' && (
               <div className="text-center py-4">
-                <Loader2 className="w-12 h-12 text-teal-500 animate-spin mx-auto mb-4" />
-                <p className="text-stone-500">Verifying your email...</p>
+                <Loader2 className="w-12 h-12 text-primary-500 animate-spin mx-auto mb-4" />
+                <p className="text-surface-500">Verifying your email...</p>
               </div>
             )}
 
             {status === 'success' && (
               <div className="text-center py-4">
                 <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
-                <h2 className="text-lg font-semibold text-stone-900 mb-2">Email verified!</h2>
-                <p className="text-stone-500 text-sm mb-6">
+                <h2 className="text-lg font-semibold text-surface-900 mb-2">Email verified!</h2>
+                <p className="text-surface-500 text-sm mb-6">
                   Your email has been verified successfully. You can now sign in.
                 </p>
                 <button
                   onClick={() => navigate('/login')}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium text-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium text-sm"
                 >
                   Sign in
                 </button>
@@ -81,17 +81,17 @@ export default function VerifyEmail() {
             {status === 'error' && (
               <div className="text-center py-4">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-lg font-semibold text-stone-900 mb-2">Verification failed</h2>
-                <p className="text-stone-500 text-sm mb-6">{error}</p>
+                <h2 className="text-lg font-semibold text-surface-900 mb-2">Verification failed</h2>
+                <p className="text-surface-500 text-sm mb-6">{error}</p>
                 {/* Resend form */}
                 <div className="text-left mt-6">
-                  <p className="text-sm text-stone-500 mb-3">Request a new verification link:</p>
+                  <p className="text-sm text-surface-500 mb-3">Request a new verification link:</p>
                   <input
                     type="email"
                     value={resendEmail}
                     onChange={(e) => setResendEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors mb-3"
+                    className="w-full px-4 py-2.5 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors mb-3"
                   />
                   {resendStatus === 'sent' ? (
                     <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-sm">
@@ -101,7 +101,7 @@ export default function VerifyEmail() {
                     <button
                       onClick={handleResend}
                       disabled={!resendEmail || resendStatus === 'sending'}
-                      className="w-full px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 font-medium text-sm"
+                      className="w-full px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium text-sm"
                     >
                       {resendStatus === 'sending' ? 'Sending...' : 'Resend verification email'}
                     </button>
@@ -111,8 +111,8 @@ export default function VerifyEmail() {
             )}
           </div>
 
-          <p className="text-center text-sm text-stone-500 mt-6">
-            <Link to="/login" className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 font-medium">
+          <p className="text-center text-sm text-surface-500 mt-6">
+            <Link to="/login" className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium">
               <ArrowLeft className="w-4 h-4" />
               Back to sign in
             </Link>
@@ -124,18 +124,18 @@ export default function VerifyEmail() {
 
   // No token -- "Check your email" page (shown after signup redirect)
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-surface-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-stone-900">Finance Tracker</h1>
-          <p className="text-stone-500 mt-2">Verify your email</p>
+          <h1 className="text-3xl font-bold text-surface-900">Finance Tracker</h1>
+          <p className="text-surface-500 mt-2">Verify your email</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-surface-100 p-8">
           <div className="text-center py-4">
-            <Mail className="w-12 h-12 text-teal-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-stone-900 mb-2">Check your email</h2>
-            <p className="text-stone-500 text-sm mb-6">
+            <Mail className="w-12 h-12 text-primary-500 mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-surface-900 mb-2">Check your email</h2>
+            <p className="text-surface-500 text-sm mb-6">
               We sent a verification link to your email address. Click the link to verify your account.
             </p>
 
@@ -146,18 +146,18 @@ export default function VerifyEmail() {
               </div>
             ) : (
               <div className="mt-6">
-                <p className="text-sm text-stone-500 mb-3">Didn't receive the email?</p>
+                <p className="text-sm text-surface-500 mb-3">Didn't receive the email?</p>
                 <input
                   type="email"
                   value={resendEmail}
                   onChange={(e) => setResendEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors mb-3"
+                  className="w-full px-4 py-2.5 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors mb-3"
                 />
                 <button
                   onClick={handleResend}
                   disabled={!resendEmail || resendStatus === 'sending'}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 font-medium text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium text-sm"
                 >
                   {resendStatus === 'sending' ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -171,19 +171,19 @@ export default function VerifyEmail() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-stone-500 mt-6">
-          <Link to="/login" className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 font-medium">
+        <p className="text-center text-sm text-surface-500 mt-6">
+          <Link to="/login" className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium">
             <ArrowLeft className="w-4 h-4" />
             Back to sign in
           </Link>
         </p>
 
-        <div className="flex justify-center gap-3 mt-8 text-xs text-stone-400">
-          <Link to="/privacy" className="hover:text-stone-600 transition-colors">Privacy</Link>
+        <div className="flex justify-center gap-3 mt-8 text-xs text-surface-400">
+          <Link to="/privacy" className="hover:text-surface-600 transition-colors">Privacy</Link>
           <span>&middot;</span>
-          <Link to="/security" className="hover:text-stone-600 transition-colors">Security</Link>
+          <Link to="/security" className="hover:text-surface-600 transition-colors">Security</Link>
           <span>&middot;</span>
-          <Link to="/data-retention" className="hover:text-stone-600 transition-colors">Data Retention</Link>
+          <Link to="/data-retention" className="hover:text-surface-600 transition-colors">Data Retention</Link>
         </div>
       </div>
     </div>

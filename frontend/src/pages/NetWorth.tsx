@@ -35,8 +35,8 @@ const DATE_RANGES = [
 ] as const;
 
 const MILESTONES = [
-  { threshold: 10_000, label: '$10K', color: 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300' },
-  { threshold: 25_000, label: '$25K', color: 'bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300' },
+  { threshold: 10_000, label: '$10K', color: 'bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300' },
+  { threshold: 25_000, label: '$25K', color: 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300' },
   { threshold: 50_000, label: '$50K', color: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' },
   { threshold: 100_000, label: '$100K', color: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' },
   { threshold: 250_000, label: '$250K', color: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' },
@@ -45,7 +45,7 @@ const MILESTONES = [
 ];
 
 const BREAKDOWN_COLORS: Record<string, string> = {
-  checking: '#14b8a6',
+  checking: '#6366f1',
   savings: '#10b981',
   investment: '#8b5cf6',
   credit: '#ef4444',
@@ -142,7 +142,7 @@ export default function NetWorth() {
         type,
         balance: data.balance,
         count: data.count,
-        color: BREAKDOWN_COLORS[type] || '#a8a29e',
+        color: BREAKDOWN_COLORS[type] || '#94a3b8',
         isLiability: ['credit', 'loan', 'mortgage'].includes(type),
       }))
       .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
@@ -158,7 +158,7 @@ export default function NetWorth() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -168,13 +168,13 @@ export default function NetWorth() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Net Worth</h1>
-          <p className="text-stone-500 dark:text-stone-400">Track your wealth over time</p>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Net Worth</h1>
+          <p className="text-surface-500 dark:text-surface-400">Track your wealth over time</p>
         </div>
         <button
           onClick={() => snapshotMutation.mutate()}
           disabled={snapshotMutation.isPending}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
           aria-label="Take net worth snapshot"
         >
           {snapshotMutation.isPending ? (
@@ -191,7 +191,7 @@ export default function NetWorth() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Assets</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Assets</p>
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(totalAssets)}
               </p>
@@ -205,7 +205,7 @@ export default function NetWorth() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Liabilities</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Liabilities</p>
               <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(totalLiabilities)}
               </p>
@@ -219,13 +219,13 @@ export default function NetWorth() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Net Worth</p>
-              <p className={`text-2xl font-bold ${netWorth >= 0 ? 'text-stone-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Net Worth</p>
+              <p className={`text-2xl font-bold ${netWorth >= 0 ? 'text-surface-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
                 {formatCurrency(netWorth)}
               </p>
             </div>
-            <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-full">
-              <Wallet className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+            <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-full">
+              <Wallet className="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function NetWorth() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Change</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Change</p>
               <p className={`text-2xl font-bold ${changeFromPrevious >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {changeFromPrevious >= 0 ? '+' : ''}{formatCurrency(changeFromPrevious)}
               </p>
@@ -252,18 +252,18 @@ export default function NetWorth() {
       {/* Net Worth History Chart */}
       <div className="card p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
             Net Worth History
           </h3>
-          <div className="flex gap-1 bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
+          <div className="flex gap-1 bg-surface-100 dark:bg-surface-800 rounded-lg p-1">
             {DATE_RANGES.map((range) => (
               <button
                 key={range.value}
                 onClick={() => setMonths(range.value)}
                 className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   months === range.value
-                    ? 'bg-white dark:bg-stone-700 text-teal-600 dark:text-teal-400 shadow-sm'
-                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                    ? 'bg-white dark:bg-surface-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                    : 'text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300'
                 }`}
               >
                 {range.label}
@@ -286,7 +286,7 @@ export default function NetWorth() {
                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.2} />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(value) => {
@@ -296,12 +296,12 @@ export default function NetWorth() {
                       return value;
                     }
                   }}
-                  stroke="#a8a29e"
+                  stroke="#94a3b8"
                   fontSize={12}
                 />
                 <YAxis
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                  stroke="#a8a29e"
+                  stroke="#94a3b8"
                   fontSize={12}
                 />
                 <Tooltip
@@ -318,7 +318,7 @@ export default function NetWorth() {
                   }}
                   contentStyle={{
                     backgroundColor: 'var(--tooltip-bg, #fff)',
-                    border: '1px solid #e7e5e4',
+                    border: '1px solid #e2e8f0',
                     borderRadius: '8px',
                   }}
                 />
@@ -342,7 +342,7 @@ export default function NetWorth() {
                 <Area
                   type="monotone"
                   dataKey="net_worth"
-                  stroke="#14b8a6"
+                  stroke="#6366f1"
                   fill="none"
                   strokeWidth={2}
                   strokeDasharray="5 5"
@@ -352,7 +352,7 @@ export default function NetWorth() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-80 flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+          <div className="h-80 flex flex-col items-center justify-center text-surface-400 dark:text-surface-500">
             <Wallet className="w-12 h-12 mb-3" />
             <p className="text-lg font-medium">Not enough data yet</p>
             <p className="text-sm mt-1">Take snapshots regularly to track your net worth over time.</p>
@@ -364,43 +364,43 @@ export default function NetWorth() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Account Breakdown */}
         <div className="lg:col-span-2 card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
             Breakdown by Account Type
           </h3>
           {accountBreakdown.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-stone-200 dark:border-stone-700">
-                    <th className="text-left text-sm font-medium text-stone-500 dark:text-stone-400 pb-3">
+                  <tr className="border-b border-surface-200 dark:border-surface-700">
+                    <th className="text-left text-sm font-medium text-surface-500 dark:text-surface-400 pb-3">
                       Type
                     </th>
-                    <th className="text-left text-sm font-medium text-stone-500 dark:text-stone-400 pb-3 hidden sm:table-cell">
+                    <th className="text-left text-sm font-medium text-surface-500 dark:text-surface-400 pb-3 hidden sm:table-cell">
                       Accounts
                     </th>
-                    <th className="text-left text-sm font-medium text-stone-500 dark:text-stone-400 pb-3 w-1/3">
+                    <th className="text-left text-sm font-medium text-surface-500 dark:text-surface-400 pb-3 w-1/3">
                       &nbsp;
                     </th>
-                    <th className="text-right text-sm font-medium text-stone-500 dark:text-stone-400 pb-3">
+                    <th className="text-right text-sm font-medium text-surface-500 dark:text-surface-400 pb-3">
                       Balance
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+                <tbody className="divide-y divide-surface-100 dark:divide-surface-800">
                   {accountBreakdown.map((item) => (
                     <tr key={item.type}>
                       <td className="py-3">
-                        <span className="font-medium text-stone-900 dark:text-white capitalize">
+                        <span className="font-medium text-surface-900 dark:text-white capitalize">
                           {item.type}
                         </span>
                       </td>
                       <td className="py-3 hidden sm:table-cell">
-                        <span className="text-sm text-stone-500 dark:text-stone-400">
+                        <span className="text-sm text-surface-500 dark:text-surface-400">
                           {item.count}
                         </span>
                       </td>
                       <td className="py-3">
-                        <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2.5">
+                        <div className="w-full bg-surface-100 dark:bg-surface-800 rounded-full h-2.5">
                           <div
                             className="h-2.5 rounded-full transition-all duration-500"
                             style={{
@@ -415,7 +415,7 @@ export default function NetWorth() {
                           className={`font-semibold ${
                             item.isLiability
                               ? 'text-red-600 dark:text-red-400'
-                              : 'text-stone-900 dark:text-white'
+                              : 'text-surface-900 dark:text-white'
                           }`}
                         >
                           {item.isLiability ? '-' : ''}
@@ -426,8 +426,8 @@ export default function NetWorth() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-stone-300 dark:border-stone-600">
-                    <td className="pt-3 font-semibold text-stone-900 dark:text-white">
+                  <tr className="border-t-2 border-surface-300 dark:border-surface-600">
+                    <td className="pt-3 font-semibold text-surface-900 dark:text-white">
                       Net Worth
                     </td>
                     <td className="pt-3 hidden sm:table-cell" />
@@ -436,7 +436,7 @@ export default function NetWorth() {
                       <span
                         className={`font-bold text-lg ${
                           netWorth >= 0
-                            ? 'text-teal-600 dark:text-teal-400'
+                            ? 'text-primary-600 dark:text-primary-400'
                             : 'text-red-600 dark:text-red-400'
                         }`}
                       >
@@ -448,7 +448,7 @@ export default function NetWorth() {
               </table>
             </div>
           ) : (
-            <p className="text-stone-500 dark:text-stone-400 text-center py-8">
+            <p className="text-surface-500 dark:text-surface-400 text-center py-8">
               No account data available. Link your accounts to see a breakdown.
             </p>
           )}
@@ -456,7 +456,7 @@ export default function NetWorth() {
 
         {/* Milestones */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
             <Award className="w-5 h-5 text-amber-500" />
             Milestones
           </h3>
@@ -477,21 +477,21 @@ export default function NetWorth() {
                       isAchieved
                         ? milestone.color
                         : isNext
-                        ? 'bg-stone-50 dark:bg-stone-800 border border-dashed border-stone-300 dark:border-stone-600'
-                        : 'bg-stone-50 dark:bg-stone-800/50 opacity-50'
+                        ? 'bg-surface-50 dark:bg-surface-800 border border-dashed border-surface-300 dark:border-surface-600'
+                        : 'bg-surface-50 dark:bg-surface-800/50 opacity-50'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       {isAchieved ? (
                         <Award className="w-4 h-4 flex-shrink-0" />
                       ) : (
-                        <div className="w-4 h-4 rounded-full border-2 border-stone-300 dark:border-stone-600 flex-shrink-0" />
+                        <div className="w-4 h-4 rounded-full border-2 border-surface-300 dark:border-surface-600 flex-shrink-0" />
                       )}
                       <span
                         className={`font-medium text-sm ${
                           isAchieved
                             ? ''
-                            : 'text-stone-500 dark:text-stone-400'
+                            : 'text-surface-500 dark:text-surface-400'
                         }`}
                       >
                         {milestone.label}
@@ -501,15 +501,15 @@ export default function NetWorth() {
                       <span className="text-xs font-medium">Reached</span>
                     )}
                     {isNext && (
-                      <span className="text-xs text-stone-500 dark:text-stone-400">
+                      <span className="text-xs text-surface-500 dark:text-surface-400">
                         {formatCurrency(milestone.threshold - netWorth)} to go
                       </span>
                     )}
                   </div>
                   {isNext && (
-                    <div className="mt-1 w-full bg-stone-200 dark:bg-stone-700 rounded-full h-1">
+                    <div className="mt-1 w-full bg-surface-200 dark:bg-surface-700 rounded-full h-1">
                       <div
-                        className="h-1 rounded-full bg-teal-500 transition-all duration-500"
+                        className="h-1 rounded-full bg-primary-500 transition-all duration-500"
                         style={{ width: `${progress}%` }}
                       />
                     </div>

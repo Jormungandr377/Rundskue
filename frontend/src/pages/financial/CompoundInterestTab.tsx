@@ -128,10 +128,10 @@ export default function CompoundInterestTab() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-surface-900 dark:text-white">
           Compound Interest Calculator
         </h1>
-        <p className="text-stone-500 dark:text-stone-400">
+        <p className="text-surface-500 dark:text-surface-400">
           See how your investments grow over time with the power of compound interest
         </p>
       </div>
@@ -140,7 +140,7 @@ export default function CompoundInterestTab() {
       <div className="card p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
               Initial Investment ($)
             </label>
             <input
@@ -149,11 +149,11 @@ export default function CompoundInterestTab() {
               step="100"
               value={initialInvestment}
               onChange={(e) => setInitialInvestment(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg dark:bg-surface-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
               Monthly Contribution ($)
             </label>
             <input
@@ -162,11 +162,11 @@ export default function CompoundInterestTab() {
               step="50"
               value={monthlyContribution}
               onChange={(e) => setMonthlyContribution(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg dark:bg-surface-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
               Annual Interest Rate (%)
             </label>
             <input
@@ -176,17 +176,17 @@ export default function CompoundInterestTab() {
               step="0.1"
               value={annualRate}
               onChange={(e) => setAnnualRate(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg dark:bg-surface-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
               Compounding Frequency
             </label>
             <select
               value={compoundingFrequency}
               onChange={(e) => setCompoundingFrequency(e.target.value as CompoundingFrequency)}
-              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg dark:bg-surface-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               {COMPOUNDING_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -196,7 +196,7 @@ export default function CompoundInterestTab() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
               Time Period (years)
             </label>
             <input
@@ -206,7 +206,7 @@ export default function CompoundInterestTab() {
               step="1"
               value={timePeriod}
               onChange={(e) => setTimePeriod(Math.max(1, Number(e.target.value)))}
-              className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg dark:bg-surface-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>
@@ -214,29 +214,29 @@ export default function CompoundInterestTab() {
 
       {/* Contribution vs Interest Bar */}
       <div className="card p-6">
-        <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">
+        <h3 className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-3">
           Balance Breakdown
         </h3>
         <div className="flex items-center gap-4 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#14b8a6' }} />
-            <span className="text-sm text-stone-600 dark:text-stone-400">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#6366f1' }} />
+            <span className="text-sm text-surface-600 dark:text-surface-400">
               Contributions {contributionPercent.toFixed(1)}%
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#8b5cf6' }} />
-            <span className="text-sm text-stone-600 dark:text-stone-400">
+            <span className="text-sm text-surface-600 dark:text-surface-400">
               Interest {interestPercent.toFixed(1)}%
             </span>
           </div>
         </div>
-        <div className="w-full h-6 rounded-full overflow-hidden bg-stone-200 dark:bg-stone-700 flex">
+        <div className="w-full h-6 rounded-full overflow-hidden bg-surface-200 dark:bg-surface-700 flex">
           <div
             className="h-full transition-all duration-500"
             style={{
               width: `${contributionPercent}%`,
-              backgroundColor: '#14b8a6',
+              backgroundColor: '#6366f1',
             }}
           />
           <div
@@ -248,7 +248,7 @@ export default function CompoundInterestTab() {
           />
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-sm font-medium text-teal-600 dark:text-teal-400">
+          <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
             {formatCurrency(results.totalContributions)}
           </span>
           <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
@@ -267,7 +267,7 @@ export default function CompoundInterestTab() {
             >
               <TrendingUp className="w-5 h-5" style={{ color: '#10b981' }} />
             </div>
-            <p className="text-sm text-stone-500 dark:text-stone-400">Final Balance</p>
+            <p className="text-sm text-surface-500 dark:text-surface-400">Final Balance</p>
           </div>
           <p className="text-2xl font-bold" style={{ color: '#10b981' }}>
             {formatCurrency(results.finalBalance)}
@@ -280,11 +280,11 @@ export default function CompoundInterestTab() {
               className="w-10 h-10 rounded-lg flex items-center justify-center"
               style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
             >
-              <DollarSign className="w-5 h-5" style={{ color: '#14b8a6' }} />
+              <DollarSign className="w-5 h-5" style={{ color: '#6366f1' }} />
             </div>
-            <p className="text-sm text-stone-500 dark:text-stone-400">Total Contributions</p>
+            <p className="text-sm text-surface-500 dark:text-surface-400">Total Contributions</p>
           </div>
-          <p className="text-2xl font-bold" style={{ color: '#14b8a6' }}>
+          <p className="text-2xl font-bold" style={{ color: '#6366f1' }}>
             {formatCurrency(results.totalContributions)}
           </p>
         </div>
@@ -297,7 +297,7 @@ export default function CompoundInterestTab() {
             >
               <Calculator className="w-5 h-5" style={{ color: '#8b5cf6' }} />
             </div>
-            <p className="text-sm text-stone-500 dark:text-stone-400">Total Interest Earned</p>
+            <p className="text-sm text-surface-500 dark:text-surface-400">Total Interest Earned</p>
           </div>
           <p className="text-2xl font-bold" style={{ color: '#8b5cf6' }}>
             {formatCurrency(results.totalInterest)}
@@ -313,7 +313,7 @@ export default function CompoundInterestTab() {
               >
                 <Percent className="w-5 h-5" style={{ color: '#f59e0b' }} />
               </div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Effective Annual Rate</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Effective Annual Rate</p>
             </div>
             <p className="text-2xl font-bold" style={{ color: '#f59e0b' }}>
               {results.effectiveAnnualRate.toFixed(2)}%
@@ -330,7 +330,7 @@ export default function CompoundInterestTab() {
               >
                 <Percent className="w-5 h-5" style={{ color: '#f59e0b' }} />
               </div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Annual Rate</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Annual Rate</p>
             </div>
             <p className="text-2xl font-bold" style={{ color: '#f59e0b' }}>
               {annualRate.toFixed(2)}%
@@ -341,13 +341,13 @@ export default function CompoundInterestTab() {
 
       {/* Growth Chart */}
       <div className="card p-6">
-        <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
           Growth Over Time
         </h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={results.chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
                 dataKey="year"
                 tick={{ fill: '#78716c', fontSize: 12 }}
@@ -376,8 +376,8 @@ export default function CompoundInterestTab() {
                 type="monotone"
                 dataKey="Contributions"
                 stackId="1"
-                stroke="#14b8a6"
-                fill="#14b8a6"
+                stroke="#6366f1"
+                fill="#6366f1"
                 fillOpacity={0.6}
               />
               <Area
@@ -395,28 +395,28 @@ export default function CompoundInterestTab() {
 
       {/* Year-by-Year Breakdown Table */}
       <div className="card overflow-hidden">
-        <div className="p-4 border-b border-stone-200 dark:border-stone-700">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
+        <div className="p-4 border-b border-surface-200 dark:border-surface-700">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
             Year-by-Year Breakdown
           </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-stone-50 dark:bg-stone-800">
+            <thead className="bg-surface-50 dark:bg-surface-800">
               <tr>
-                <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
+                <th className="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">
                   Year
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
+                <th className="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">
                   Starting Balance
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
+                <th className="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">
                   Contributions
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
+                <th className="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">
                   Interest Earned
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-400">
+                <th className="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">
                   Ending Balance
                 </th>
               </tr>
@@ -427,23 +427,23 @@ export default function CompoundInterestTab() {
                   key={row.year}
                   className={
                     idx % 2 === 0
-                      ? 'bg-white dark:bg-stone-900'
-                      : 'bg-stone-50 dark:bg-stone-800'
+                      ? 'bg-white dark:bg-surface-900'
+                      : 'bg-surface-50 dark:bg-surface-800'
                   }
                 >
-                  <td className="py-3 px-4 text-stone-900 dark:text-white font-medium">
+                  <td className="py-3 px-4 text-surface-900 dark:text-white font-medium">
                     {row.year}
                   </td>
-                  <td className="py-3 px-4 text-right text-stone-600 dark:text-stone-400">
+                  <td className="py-3 px-4 text-right text-surface-600 dark:text-surface-400">
                     {formatCurrency(row.startingBalance)}
                   </td>
-                  <td className="py-3 px-4 text-right text-teal-600 dark:text-teal-400">
+                  <td className="py-3 px-4 text-right text-primary-600 dark:text-primary-400">
                     {formatCurrency(row.contributions)}
                   </td>
                   <td className="py-3 px-4 text-right text-purple-600 dark:text-purple-400">
                     {formatCurrency(row.interestEarned)}
                   </td>
-                  <td className="py-3 px-4 text-right font-semibold text-stone-900 dark:text-white">
+                  <td className="py-3 px-4 text-right font-semibold text-surface-900 dark:text-white">
                     {formatCurrency(row.endingBalance)}
                   </td>
                 </tr>

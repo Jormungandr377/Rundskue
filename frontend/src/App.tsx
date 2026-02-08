@@ -12,10 +12,9 @@ import {
   Shield,
   Lock,
   ChevronDown,
-  User,
+  ChevronRight,
   Menu,
   X,
-  Loader2,
   Moon,
   Sun,
   RefreshCw,
@@ -30,6 +29,7 @@ import {
   Split,
   Globe,
   Mail,
+  Sparkles,
 } from 'lucide-react'
 
 // Auth (loaded eagerly - needed immediately)
@@ -78,16 +78,81 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
 const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
 
-// Page loading spinner for lazy-loaded routes
+// ─── Types ───────────────────────────────────────────────────
+interface NavItem {
+  path: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+}
+
+interface NavGroup {
+  title: string
+  items: NavItem[]
+}
+
+// ─── Navigation Structure ────────────────────────────────────
+const navGroups: NavGroup[] = [
+  {
+    title: 'Overview',
+    items: [
+      { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+      { path: '/accounts', icon: CreditCard, label: 'Accounts' },
+      { path: '/transactions', icon: Receipt, label: 'Transactions' },
+    ],
+  },
+  {
+    title: 'Budgeting',
+    items: [
+      { path: '/budgets', icon: PiggyBank, label: 'Budgets' },
+      { path: '/envelopes', icon: Wallet, label: 'Envelopes' },
+      { path: '/recurring', icon: RefreshCw, label: 'Bills & Subs' },
+      { path: '/subscriptions', icon: CreditCard, label: 'Subscriptions' },
+      { path: '/goals', icon: Target, label: 'Savings Goals' },
+      { path: '/bill-splitting', icon: Split, label: 'Bill Splitting' },
+    ],
+  },
+  {
+    title: 'Wealth',
+    items: [
+      { path: '/cash-flow', icon: TrendingUp, label: 'Cash Flow' },
+      { path: '/debt', icon: CreditCard, label: 'Debt Payoff' },
+      { path: '/investments', icon: Briefcase, label: 'Investments' },
+      { path: '/net-worth', icon: BarChart3, label: 'Net Worth' },
+    ],
+  },
+  {
+    title: 'Insights',
+    items: [
+      { path: '/reports', icon: TrendingUp, label: 'Reports' },
+      { path: '/planning', icon: Calculator, label: 'Financial Planning' },
+    ],
+  },
+  {
+    title: 'Automation',
+    items: [
+      { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
+      { path: '/webhooks', icon: Globe, label: 'Webhooks' },
+      { path: '/email-reports', icon: Mail, label: 'Email Reports' },
+    ],
+  },
+]
+
+// ─── Page Loading Spinner ────────────────────────────────────
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-64">
-      <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
+          <div className="w-10 h-10 border-3 border-primary-200 dark:border-primary-900/40 rounded-full" />
+          <div className="absolute inset-0 w-10 h-10 border-3 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <span className="text-sm text-surface-400 dark:text-surface-500">Loading...</span>
+      </div>
     </div>
   )
 }
 
-// Error Boundary
+// ─── Error Boundary ──────────────────────────────────────────
 interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
@@ -112,11 +177,14 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
       return (
         <div className="flex items-center justify-center h-full p-8">
           <div className="text-center max-w-md">
-            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Something went wrong</h2>
-            <p className="text-stone-600 dark:text-stone-400 mb-4">{this.state.error?.message || 'An unexpected error occurred.'}</p>
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
+              <X className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-surface-900 dark:text-surface-100 mb-2">Something went wrong</h2>
+            <p className="text-surface-500 dark:text-surface-400 mb-6 text-sm">{this.state.error?.message || 'An unexpected error occurred.'}</p>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
-              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+              className="btn-primary"
             >
               Try Again
             </button>
@@ -128,61 +196,40 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
   }
 }
 
-const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/accounts', icon: CreditCard, label: 'Accounts' },
-  { path: '/transactions', icon: Receipt, label: 'Transactions' },
-  { path: '/budgets', icon: PiggyBank, label: 'Budgets' },
-  { path: '/envelopes', icon: Wallet, label: 'Envelopes' },
-  { path: '/recurring', icon: RefreshCw, label: 'Bills & Subs' },
-  { path: '/subscriptions', icon: CreditCard, label: 'Subscriptions' },
-  { path: '/goals', icon: Target, label: 'Savings Goals' },
-  { path: '/cash-flow', icon: TrendingUp, label: 'Cash Flow' },
-  { path: '/debt', icon: CreditCard, label: 'Debt Payoff' },
-  { path: '/investments', icon: Briefcase, label: 'Investments' },
-  { path: '/net-worth', icon: BarChart3, label: 'Net Worth' },
-  { path: '/bill-splitting', icon: Split, label: 'Bill Splitting' },
-  { path: '/reports', icon: TrendingUp, label: 'Reports' },
-  { path: '/planning', icon: Calculator, label: 'Financial Planning' },
-  { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
-  { path: '/webhooks', icon: Globe, label: 'Webhooks' },
-  { path: '/email-reports', icon: Mail, label: 'Email Reports' },
-]
-
-// Theme toggle button
-function ThemeToggle() {
+// ─── Theme Toggle ────────────────────────────────────────────
+function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { effectiveTheme, toggleTheme } = useTheme()
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+      className={`${compact ? 'p-2' : 'p-2.5'} rounded-xl text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-200`}
       aria-label="Toggle theme"
       title={`Switch to ${effectiveTheme === 'light' ? 'dark' : 'light'} mode`}
     >
-      {effectiveTheme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+      {effectiveTheme === 'light' ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
     </button>
   )
 }
 
-// Notification bell with unread count badge
-function NotificationBell() {
+// ─── Notification Bell ───────────────────────────────────────
+function NotificationBell({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate()
   const { data } = useQuery({
     queryKey: ['notifications', 'unread-count'],
     queryFn: notifications.unreadCount,
-    refetchInterval: 60000, // Poll every minute
+    refetchInterval: 60000,
   })
   const count = data?.count || 0
 
   return (
     <button
       onClick={() => navigate('/notifications')}
-      className="relative p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+      className={`relative ${compact ? 'p-2' : 'p-2.5'} rounded-xl text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-200`}
       aria-label="Notifications"
     >
-      <Bell className="w-5 h-5" />
+      <Bell className="w-[18px] h-[18px]" />
       {count > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-gradient-to-r from-primary-500 to-accent-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
           {count > 9 ? '9+' : count}
         </span>
       )}
@@ -190,14 +237,89 @@ function NotificationBell() {
   )
 }
 
-// User dropdown menu component
+// ─── Collapsible Nav Group ───────────────────────────────────
+function CollapsibleNavGroup({
+  group,
+  onNavigate,
+  defaultOpen = true,
+}: {
+  group: NavGroup
+  onNavigate?: () => void
+  defaultOpen?: boolean
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+  const location = useLocation()
+
+  // Auto-expand if any child is active
+  const hasActiveChild = group.items.some(
+    (item) => item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+  )
+
+  useEffect(() => {
+    if (hasActiveChild && !isOpen) {
+      setIsOpen(true)
+    }
+  }, [hasActiveChild]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="mb-1">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+      >
+        <span>{group.title}</span>
+        <ChevronRight
+          className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+        />
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-200 ease-in-out ${
+          isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        {group.items.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === '/'}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `group flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-xl mx-1 mb-0.5 transition-all duration-200 ${
+                isActive
+                  ? 'bg-gradient-to-r from-primary-50 to-primary-50/50 dark:from-primary-900/20 dark:to-primary-900/10 text-primary-700 dark:text-primary-300 shadow-sm'
+                  : 'text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800/60'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                    isActive
+                      ? 'bg-primary-500 text-white shadow-sm shadow-primary-500/25'
+                      : 'bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 group-hover:bg-surface-200 dark:group-hover:bg-surface-700'
+                  }`}
+                >
+                  <item.icon className="w-3.5 h-3.5" />
+                </div>
+                <span>{item.label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── User Menu ───────────────────────────────────────────────
 function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -217,30 +339,32 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   if (!user) return null
 
+  const initial = user.email?.charAt(0).toUpperCase() || 'U'
+
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 w-full px-4 py-3 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+        className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:bg-surface-50 dark:hover:bg-surface-800/60 transition-all duration-200"
       >
-        <div className="w-8 h-8 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-full flex items-center justify-center flex-shrink-0">
-          <User className="w-4 h-4" />
+        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-sm font-bold shadow-sm">
+          {initial}
         </div>
         <div className="flex-1 text-left min-w-0">
-          <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{user.email}</p>
+          <p className="text-sm font-medium text-surface-900 dark:text-surface-100 truncate">{user.email}</p>
         </div>
-        <ChevronDown className={`w-4 h-4 text-stone-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-surface-400 transition-transform duration-200 flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg overflow-hidden z-50">
+        <div className="absolute bottom-full left-2 right-2 mb-1 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl shadow-elevated overflow-hidden z-50 animate-scale-in">
           <button
             onClick={() => {
               setOpen(false)
               onNavigate?.()
               navigate('/change-password')
             }}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/60 transition-colors"
           >
             <Lock className="w-4 h-4" />
             Change Password
@@ -251,7 +375,7 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               onNavigate?.()
               navigate('/2fa-setup')
             }}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/60 transition-colors"
           >
             <Shield className="w-4 h-4" />
             {user.totp_enabled ? 'Manage 2FA' : 'Enable 2FA'}
@@ -262,15 +386,15 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               onNavigate?.()
               navigate('/sessions')
             }}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/60 transition-colors"
           >
             <Monitor className="w-4 h-4" />
             Active Sessions
           </button>
-          <div className="border-t border-stone-100 dark:border-stone-700" />
+          <div className="border-t border-surface-100 dark:border-surface-700" />
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Sign out
@@ -281,97 +405,79 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-// Sidebar content (shared between desktop and mobile)
+// ─── Sidebar Content ─────────────────────────────────────────
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
+      {/* Logo / Brand */}
       <div className="px-5 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
-            <Wallet className="w-4.5 h-4.5 text-white" />
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-sm shadow-primary-500/20">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-lg font-bold text-stone-900 dark:text-white tracking-tight">Finance</h1>
-        </div>
-        <div className="flex items-center gap-0.5">
-          <NotificationBell />
-          <ThemeToggle />
+          <div>
+            <h1 className="text-base font-bold text-surface-900 dark:text-white tracking-tight leading-none">Rundskue</h1>
+            <p className="text-[10px] text-surface-400 dark:text-surface-500 font-medium mt-0.5">Finance Tracker</p>
+          </div>
         </div>
       </div>
 
-      <nav className="mt-1 flex-1 px-3">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center px-3 py-2.5 text-sm font-medium rounded-lg mb-0.5 transition-colors ${
-                isActive
-                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-l-[3px] border-teal-600 dark:border-teal-500 -ml-px'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`
-            }
-          >
-            <item.icon className="w-[18px] h-[18px] mr-3 flex-shrink-0" />
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-
-      <div className="border-t border-stone-200 dark:border-stone-700/60 mx-3" />
-      <div className="px-3 py-1">
+      {/* Quick Actions Bar */}
+      <div className="px-4 pb-3 flex items-center gap-1">
+        <NotificationBell compact />
+        <ThemeToggle compact />
         <NavLink
           to="/link-account"
           onClick={onNavigate}
-          className={({ isActive }) =>
-            `flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-              isActive
-                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400'
-                : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`
-          }
+          className="p-2 rounded-xl text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-200"
+          title="Link Account"
         >
-          <Link2 className="w-[18px] h-[18px] mr-3 flex-shrink-0" />
-          Link Account
+          <Link2 className="w-[18px] h-[18px]" />
         </NavLink>
         <NavLink
           to="/profiles"
           onClick={onNavigate}
-          className={({ isActive }) =>
-            `flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-              isActive
-                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400'
-                : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`
-          }
+          className="p-2 rounded-xl text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-200"
+          title="Profiles"
         >
-          <Users className="w-[18px] h-[18px] mr-3 flex-shrink-0" />
-          Profiles
+          <Users className="w-[18px] h-[18px]" />
         </NavLink>
       </div>
-      <div className="border-t border-stone-200 dark:border-stone-700/60 mx-3" />
+
+      {/* Divider */}
+      <div className="mx-4 border-t border-surface-200/60 dark:border-surface-700/40" />
+
+      {/* Navigation Groups */}
+      <nav className="flex-1 px-3 py-3 overflow-y-auto scrollbar-thin" role="navigation" aria-label="Main navigation">
+        {navGroups.map((group) => (
+          <CollapsibleNavGroup key={group.title} group={group} onNavigate={onNavigate} />
+        ))}
+      </nav>
+
+      {/* Divider */}
+      <div className="mx-4 border-t border-surface-200/60 dark:border-surface-700/40" />
+
+      {/* User Menu */}
       <UserMenu onNavigate={onNavigate} />
 
-      {/* Policy links footer */}
-      <div className="mt-auto px-5 py-3 border-t border-stone-200 dark:border-stone-700/60">
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone-400 dark:text-stone-500">
-          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">Privacy</a>
-          <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">Security</a>
-          <a href="/data-retention" target="_blank" rel="noopener noreferrer" className="hover:text-stone-600 dark:hover:text-stone-300 transition-colors">Data Retention</a>
+      {/* Footer Links */}
+      <div className="mt-auto px-5 py-3 border-t border-surface-200/60 dark:border-surface-700/40">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-surface-400 dark:text-surface-500">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-surface-600 dark:hover:text-surface-300 transition-colors">Privacy</a>
+          <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-surface-600 dark:hover:text-surface-300 transition-colors">Security</a>
+          <a href="/data-retention" target="_blank" rel="noopener noreferrer" className="hover:text-surface-600 dark:hover:text-surface-300 transition-colors">Data Retention</a>
         </div>
-        <p className="text-[10px] text-stone-300 dark:text-stone-600 mt-1">&copy; {new Date().getFullYear()} Rundskue</p>
+        <p className="text-[10px] text-surface-300 dark:text-surface-600 mt-1">&copy; {new Date().getFullYear()} Rundskue</p>
       </div>
     </>
   )
 }
 
-// Main authenticated layout with responsive sidebar
+// ─── Authenticated Layout ────────────────────────────────────
 function AuthenticatedLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [location.pathname])
@@ -379,53 +485,51 @@ function AuthenticatedLayout() {
   const closeMobileMenu = () => setMobileMenuOpen(false)
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex transition-colors">
-      {/* Skip to main content link - visible only on keyboard focus */}
+    <div className="min-h-screen bg-surface-50 dark:bg-surface-950 flex transition-colors duration-300">
+      {/* Skip to main content */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-teal-600 focus:text-white focus:rounded-lg focus:outline-none"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-xl focus:outline-none"
       >
         Skip to main content
       </a>
 
-      {/* Desktop Sidebar - hidden on mobile */}
-      <aside className="hidden lg:flex w-56 bg-white dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 fixed h-full flex-col transition-colors" role="navigation" aria-label="Main navigation">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-60 bg-white/80 dark:bg-surface-900/80 backdrop-blur-xl border-r border-surface-200/60 dark:border-surface-700/40 fixed h-full flex-col transition-colors duration-300">
         <SidebarContent />
       </aside>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 px-4 py-3 flex items-center gap-3 transition-colors">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-surface-900/80 backdrop-blur-xl border-b border-surface-200/60 dark:border-surface-700/40 px-4 py-3 flex items-center gap-3 transition-colors duration-300">
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="p-1.5 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+          className="p-2 text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-colors"
           aria-label="Open menu"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2 flex-1">
-          <div className="w-7 h-7 bg-teal-600 rounded-lg flex items-center justify-center">
-            <Wallet className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-2.5 flex-1">
+          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-sm">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-lg font-bold text-stone-900 dark:text-white tracking-tight">Finance</h1>
+          <h1 className="text-base font-bold text-surface-900 dark:text-white tracking-tight">Rundskue</h1>
         </div>
-        <NotificationBell />
-        <ThemeToggle />
+        <NotificationBell compact />
+        <ThemeToggle compact />
       </div>
 
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
-          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 animate-fade-in"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
             onClick={closeMobileMenu}
           />
-          {/* Sidebar */}
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-stone-900 flex flex-col animate-slide-in-left shadow-xl transition-colors">
-            <div className="absolute top-4 right-4">
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-surface-900 flex flex-col animate-slide-in-left shadow-2xl transition-colors">
+            <div className="absolute top-4 right-4 z-10">
               <button
                 onClick={closeMobileMenu}
-                className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+                className="p-2 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-xl transition-colors"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
@@ -437,7 +541,7 @@ function AuthenticatedLayout() {
       )}
 
       {/* Main Content */}
-      <main id="main-content" className="lg:ml-56 flex-1 p-4 pt-16 lg:p-8 lg:pt-8">
+      <main id="main-content" className="lg:ml-60 flex-1 p-4 pt-16 lg:p-8 lg:pt-8">
         <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
@@ -476,6 +580,7 @@ function AuthenticatedLayout() {
   )
 }
 
+// ─── App Root ────────────────────────────────────────────────
 function App() {
   return (
     <BrowserRouter>

@@ -79,8 +79,8 @@ export default function Reports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Reports</h1>
-          <p className="text-stone-500 dark:text-stone-400">Analyze your financial data</p>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Reports</h1>
+          <p className="text-surface-500 dark:text-surface-400">Analyze your financial data</p>
         </div>
       </div>
 
@@ -88,39 +88,39 @@ export default function Reports() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <button
           onClick={() => navigate('/year-in-review')}
-          className="card p-4 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors group text-left"
+          className="card p-4 flex items-center justify-between hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
-              <Star className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+              <Star className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <p className="font-semibold text-stone-900 dark:text-white text-sm">Year in Review</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400">Annual financial infographic</p>
+              <p className="font-semibold text-surface-900 dark:text-white text-sm">Year in Review</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">Annual financial infographic</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-stone-400 dark:text-stone-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
+          <ArrowRight className="w-4 h-4 text-surface-400 dark:text-surface-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
         </button>
 
         <button
           onClick={() => navigate('/merchant-analysis')}
-          className="card p-4 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors group text-left"
+          className="card p-4 flex items-center justify-between hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group text-left"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
-              <Store className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+              <Store className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
-              <p className="font-semibold text-stone-900 dark:text-white text-sm">Merchant Analysis</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400">Top merchants, spending breakdown</p>
+              <p className="font-semibold text-surface-900 dark:text-white text-sm">Merchant Analysis</p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">Top merchants, spending breakdown</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-stone-400 dark:text-stone-500 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
+          <ArrowRight className="w-4 h-4 text-surface-400 dark:text-surface-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
         </button>
       </div>
 
       {/* Report Type Tabs */}
-      <div className="flex gap-2 border-b border-stone-200 dark:border-stone-700 overflow-x-auto">
+      <div className="flex gap-2 border-b border-surface-200 dark:border-surface-700 overflow-x-auto">
         {[
           { id: 'spending', label: 'Spending by Category' },
           { id: 'income-expense', label: 'Income vs Expenses' },
@@ -133,8 +133,8 @@ export default function Reports() {
             onClick={() => setReportType(tab.id as ReportType)}
             className={`px-4 py-3 font-medium text-sm transition-colors whitespace-nowrap ${
               reportType === tab.id
-                ? 'text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400'
-                : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                : 'text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-300'
             }`}
           >
             {tab.label}
@@ -145,19 +145,19 @@ export default function Reports() {
       {/* Date Range (for some reports) */}
       {(reportType === 'spending' || reportType === 'income-expense') && (
         <div className="card p-4 flex items-center gap-4">
-          <Calendar className="w-5 h-5 text-stone-400 dark:text-stone-500" />
+          <Calendar className="w-5 h-5 text-surface-400 dark:text-surface-500" />
           <input
             type="date"
             value={dateRange.start}
             onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-            className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-4 py-2 border border-surface-200 dark:border-surface-700 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-          <span className="text-stone-400 dark:text-stone-500">to</span>
+          <span className="text-surface-400 dark:text-surface-500">to</span>
           <input
             type="date"
             value={dateRange.end}
             onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-            className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-4 py-2 border border-surface-200 dark:border-surface-700 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
       )}
@@ -166,7 +166,7 @@ export default function Reports() {
       <div className="card p-6">
         {reportType === 'spending' && spending && (
           <div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Spending by Category</h3>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Spending by Category</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Pie Chart */}
               <div className="h-80">
@@ -200,17 +200,17 @@ export default function Reports() {
                         className="w-4 h-4 rounded"
                         style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
                       />
-                      <span className="text-stone-700 dark:text-stone-300">{cat.category_name}</span>
+                      <span className="text-surface-700 dark:text-surface-300">{cat.category_name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="font-semibold text-stone-900 dark:text-white">{formatCurrency(cat.amount)}</span>
-                      <span className="text-stone-500 dark:text-stone-400 text-sm ml-2">({cat.percentage}%)</span>
+                      <span className="font-semibold text-surface-900 dark:text-white">{formatCurrency(cat.amount)}</span>
+                      <span className="text-surface-500 dark:text-surface-400 text-sm ml-2">({cat.percentage}%)</span>
                     </div>
                   </div>
                 ))}
-                <div className="pt-3 border-t border-stone-200 dark:border-stone-700 flex items-center justify-between font-semibold">
-                  <span className="text-stone-900 dark:text-white">Total</span>
-                  <span className="text-stone-900 dark:text-white">{formatCurrency(spending.reduce((sum, cat) => sum + cat.amount, 0))}</span>
+                <div className="pt-3 border-t border-surface-200 dark:border-surface-700 flex items-center justify-between font-semibold">
+                  <span className="text-surface-900 dark:text-white">Total</span>
+                  <span className="text-surface-900 dark:text-white">{formatCurrency(spending.reduce((sum, cat) => sum + cat.amount, 0))}</span>
                 </div>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function Reports() {
 
         {reportType === 'income-expense' && cashFlow && (
           <div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Income vs Expenses</h3>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Income vs Expenses</h3>
 
             {/* Summary */}
             <div className="grid grid-cols-3 gap-4 mb-8">
@@ -231,9 +231,9 @@ export default function Reports() {
                 <p className="text-sm text-red-700 dark:text-red-400">Expenses</p>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">{formatCurrency(cashFlow.total_expenses)}</p>
               </div>
-              <div className={`p-4 rounded-lg ${cashFlow.net_cash_flow >= 0 ? 'bg-teal-50 dark:bg-teal-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
-                <p className={`text-sm ${cashFlow.net_cash_flow >= 0 ? 'text-teal-700 dark:text-teal-400' : 'text-orange-700 dark:text-orange-400'}`}>Net</p>
-                <p className={`text-2xl font-bold ${cashFlow.net_cash_flow >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              <div className={`p-4 rounded-lg ${cashFlow.net_cash_flow >= 0 ? 'bg-primary-50 dark:bg-primary-900/20' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
+                <p className={`text-sm ${cashFlow.net_cash_flow >= 0 ? 'text-primary-700 dark:text-primary-400' : 'text-orange-700 dark:text-orange-400'}`}>Net</p>
+                <p className={`text-2xl font-bold ${cashFlow.net_cash_flow >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-orange-600 dark:text-orange-400'}`}>
                   {formatCurrency(cashFlow.net_cash_flow)}
                 </p>
               </div>
@@ -248,11 +248,11 @@ export default function Reports() {
                     { name: 'Expenses', amount: cashFlow.total_expenses },
                   ]}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
-                  <XAxis dataKey="name" stroke="#a8a29e" />
-                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.2} />
+                  <XAxis dataKey="name" stroke="#94a3b8" />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#94a3b8" />
                   <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                  <Bar dataKey="amount" fill="#14b8a6" />
+                  <Bar dataKey="amount" fill="#6366f1" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -261,23 +261,23 @@ export default function Reports() {
 
         {reportType === 'trends' && trends && (
           <div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Monthly Trends (Past 12 Months)</h3>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Monthly Trends (Past 12 Months)</h3>
             <div className="h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trends}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.2} />
                   <XAxis
                     dataKey="month"
                     tickFormatter={(value) => format(parseISO(value + '-01'), 'MMM')}
-                    stroke="#a8a29e"
+                    stroke="#94a3b8"
                   />
-                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#94a3b8" />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => format(parseISO(label + '-01'), 'MMMM yyyy')}
                     contentStyle={{
                       backgroundColor: 'var(--tooltip-bg, #fff)',
-                      border: '1px solid #e7e5e4',
+                      border: '1px solid #e2e8f0',
                       borderRadius: '8px',
                     }}
                   />
@@ -302,7 +302,7 @@ export default function Reports() {
                     type="monotone"
                     dataKey="net"
                     name="Net"
-                    stroke="#14b8a6"
+                    stroke="#6366f1"
                     strokeWidth={2}
                   />
                 </AreaChart>
@@ -313,24 +313,24 @@ export default function Reports() {
 
         {reportType === 'net-worth' && netWorth && (
           <div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Net Worth Over Time</h3>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Net Worth Over Time</h3>
             {netWorth.length > 0 ? (
               <div className="h-96">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={netWorth}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.2} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(value) => format(parseISO(value), 'MMM yyyy')}
-                      stroke="#a8a29e"
+                      stroke="#94a3b8"
                     />
-                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#a8a29e" />
+                    <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} stroke="#94a3b8" />
                     <Tooltip
                       formatter={(value: number) => formatCurrency(value)}
                       labelFormatter={(label) => format(parseISO(label), 'MMMM d, yyyy')}
                       contentStyle={{
                         backgroundColor: 'var(--tooltip-bg, #fff)',
-                        border: '1px solid #e7e5e4',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                       }}
                     />
@@ -355,14 +355,14 @@ export default function Reports() {
                       type="monotone"
                       dataKey="net_worth"
                       name="Net Worth"
-                      stroke="#14b8a6"
+                      stroke="#6366f1"
                       strokeWidth={3}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="text-center py-12 text-stone-500 dark:text-stone-400">
+              <div className="text-center py-12 text-surface-500 dark:text-surface-400">
                 <p>No net worth history available.</p>
                 <p className="text-sm mt-2">Net worth snapshots are created automatically during daily syncs.</p>
               </div>
@@ -372,18 +372,18 @@ export default function Reports() {
 
         {reportType === 'heatmap' && (
           <div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Spending Heatmap</h3>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Spending Heatmap</h3>
+            <p className="text-sm text-surface-500 dark:text-surface-400 mb-6">
               Daily spending activity over the past year. Darker cells indicate higher spending.
             </p>
             {heatmapLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 dark:border-teal-400"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
               </div>
             ) : heatmapData && heatmapData.length > 0 ? (
               <SpendingHeatmap data={heatmapData} />
             ) : (
-              <div className="text-center py-12 text-stone-500 dark:text-stone-400">
+              <div className="text-center py-12 text-surface-500 dark:text-surface-400">
                 <p>No spending data available for the heatmap.</p>
                 <p className="text-sm mt-2">Spending data will appear here once transactions are synced.</p>
               </div>

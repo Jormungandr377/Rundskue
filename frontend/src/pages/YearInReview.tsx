@@ -101,7 +101,7 @@ export default function YearInReview() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
       </div>
     );
   }
@@ -112,15 +112,15 @@ export default function YearInReview() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/reports')}
-            className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            className="p-2 rounded-lg text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
             aria-label="Back to reports"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Year in Review</h1>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Year in Review</h1>
         </div>
         <div className="card p-6 text-center">
-          <p className="text-stone-500 dark:text-stone-400">Unable to load year in review data. Please try again later.</p>
+          <p className="text-surface-500 dark:text-surface-400">Unable to load year in review data. Please try again later.</p>
         </div>
       </div>
     );
@@ -141,20 +141,20 @@ export default function YearInReview() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/reports')}
-            className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            className="p-2 rounded-lg text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
             aria-label="Back to reports"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Year in Review</h1>
-            <p className="text-stone-500 dark:text-stone-400">Your financial summary for {selectedYear}</p>
+            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Year in Review</h1>
+            <p className="text-surface-500 dark:text-surface-400">Your financial summary for {selectedYear}</p>
           </div>
         </div>
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="px-4 py-2 border border-surface-200 dark:border-surface-700 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           aria-label="Select year"
         >
           {years.map((y) => (
@@ -170,7 +170,7 @@ export default function YearInReview() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Income</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Income</p>
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(data.total_income)}
               </p>
@@ -184,7 +184,7 @@ export default function YearInReview() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Expenses</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Expenses</p>
               <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(data.total_expenses)}
               </p>
@@ -198,14 +198,14 @@ export default function YearInReview() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Net Savings</p>
-              <p className={`text-2xl font-bold ${data.net_savings >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Net Savings</p>
+              <p className={`text-2xl font-bold ${data.net_savings >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-orange-600 dark:text-orange-400'}`}>
                 {formatCurrency(data.net_savings)}
               </p>
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">{savingsRate}% savings rate</p>
+              <p className="text-xs text-surface-400 dark:text-surface-500 mt-1">{savingsRate}% savings rate</p>
             </div>
-            <div className={`p-3 rounded-full ${data.net_savings >= 0 ? 'bg-teal-100 dark:bg-teal-900/30' : 'bg-orange-100 dark:bg-orange-900/30'}`}>
-              <DollarSign className={`w-6 h-6 ${data.net_savings >= 0 ? 'text-teal-600 dark:text-teal-400' : 'text-orange-600 dark:text-orange-400'}`} />
+            <div className={`p-3 rounded-full ${data.net_savings >= 0 ? 'bg-primary-100 dark:bg-primary-900/30' : 'bg-orange-100 dark:bg-orange-900/30'}`}>
+              <DollarSign className={`w-6 h-6 ${data.net_savings >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-orange-600 dark:text-orange-400'}`} />
             </div>
           </div>
         </div>
@@ -213,13 +213,13 @@ export default function YearInReview() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Avg Daily Spend</p>
-              <p className="text-2xl font-bold text-stone-900 dark:text-white">
+              <p className="text-sm text-surface-500 dark:text-surface-400">Avg Daily Spend</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">
                 {formatCurrency(data.average_daily_spend)}
               </p>
             </div>
-            <div className="p-3 bg-stone-100 dark:bg-stone-800 rounded-full">
-              <Calendar className="w-6 h-6 text-stone-600 dark:text-stone-400" />
+            <div className="p-3 bg-surface-100 dark:bg-surface-800 rounded-full">
+              <Calendar className="w-6 h-6 text-surface-600 dark:text-surface-400" />
             </div>
           </div>
         </div>
@@ -229,25 +229,25 @@ export default function YearInReview() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Categories Bar Chart */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Top Spending Categories</h3>
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Top Spending Categories</h3>
           {data.top_categories.length > 0 ? (
             <div className="space-y-3">
               {data.top_categories.slice(0, 5).map((cat, index) => (
                 <div key={cat.category_name} className="space-y-1">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-stone-700 dark:text-stone-300 font-medium">
+                    <span className="text-surface-700 dark:text-surface-300 font-medium">
                       {index + 1}. {cat.category_name}
                     </span>
-                    <span className="text-stone-900 dark:text-white font-semibold">
+                    <span className="text-surface-900 dark:text-white font-semibold">
                       {formatCurrency(cat.amount)}
-                      <span className="text-stone-400 dark:text-stone-500 font-normal ml-1">
+                      <span className="text-surface-400 dark:text-surface-500 font-normal ml-1">
                         ({cat.percentage}%)
                       </span>
                     </span>
                   </div>
-                  <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2.5">
+                  <div className="w-full bg-surface-100 dark:bg-surface-800 rounded-full h-2.5">
                     <div
-                      className="h-2.5 rounded-full bg-teal-500 dark:bg-teal-400 transition-all duration-500"
+                      className="h-2.5 rounded-full bg-primary-500 dark:bg-primary-400 transition-all duration-500"
                       style={{ width: `${(cat.amount / maxCategoryAmount) * 100}%` }}
                     />
                   </div>
@@ -255,43 +255,43 @@ export default function YearInReview() {
               ))}
             </div>
           ) : (
-            <p className="text-stone-500 dark:text-stone-400 text-center py-8">No category data available</p>
+            <p className="text-surface-500 dark:text-surface-400 text-center py-8">No category data available</p>
           )}
         </div>
 
         {/* Top Merchants */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Top Merchants</h3>
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Top Merchants</h3>
           {data.top_merchants.length > 0 ? (
             <div className="space-y-3">
               {data.top_merchants.slice(0, 8).map((merchant, index) => (
                 <div
                   key={merchant.merchant_name}
-                  className="flex items-center gap-3 py-2 border-b border-stone-100 dark:border-stone-700/50 last:border-0"
+                  className="flex items-center gap-3 py-2 border-b border-surface-100 dark:border-surface-700/50 last:border-0"
                 >
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                     index < 3
-                      ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'
-                      : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
+                      : 'bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400'
                   }`}>
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-stone-900 dark:text-white text-sm truncate">
+                    <p className="font-medium text-surface-900 dark:text-white text-sm truncate">
                       {merchant.merchant_name}
                     </p>
-                    <p className="text-xs text-stone-400 dark:text-stone-500">
+                    <p className="text-xs text-surface-400 dark:text-surface-500">
                       {merchant.transaction_count} transaction{merchant.transaction_count !== 1 ? 's' : ''}
                     </p>
                   </div>
-                  <p className="font-semibold text-stone-900 dark:text-white text-sm">
+                  <p className="font-semibold text-surface-900 dark:text-white text-sm">
                     {formatCurrency(merchant.total_spent)}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-stone-500 dark:text-stone-400 text-center py-8">No merchant data available</p>
+            <p className="text-surface-500 dark:text-surface-400 text-center py-8">No merchant data available</p>
           )}
         </div>
       </div>
@@ -304,18 +304,18 @@ export default function YearInReview() {
               <ShoppingCart className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-white">Biggest Single Expense</h3>
+              <h3 className="text-lg font-semibold text-surface-900 dark:text-white">Biggest Single Expense</h3>
               <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">
                 {formatCurrency(data.biggest_expense.amount)}
               </p>
-              <p className="text-stone-700 dark:text-stone-300 mt-1 font-medium">
+              <p className="text-surface-700 dark:text-surface-300 mt-1 font-medium">
                 {data.biggest_expense.merchant_name || data.biggest_expense.name}
               </p>
-              <div className="flex items-center gap-3 mt-1 text-sm text-stone-500 dark:text-stone-400">
+              <div className="flex items-center gap-3 mt-1 text-sm text-surface-500 dark:text-surface-400">
                 <span>{new Date(data.biggest_expense.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                 {data.biggest_expense.category_name && (
                   <>
-                    <span className="text-stone-300 dark:text-stone-600">|</span>
+                    <span className="text-surface-300 dark:text-surface-600">|</span>
                     <span>{data.biggest_expense.category_name}</span>
                   </>
                 )}
@@ -327,28 +327,28 @@ export default function YearInReview() {
 
       {/* Monthly Breakdown */}
       <div className="card p-6">
-        <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Monthly Breakdown</h3>
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Monthly Breakdown</h3>
         {data.monthly_breakdown.length > 0 ? (
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.monthly_breakdown} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.2} />
                 <XAxis
                   dataKey="month_name"
-                  stroke="#a8a29e"
+                  stroke="#94a3b8"
                   fontSize={12}
                   tickFormatter={(value) => value.slice(0, 3)}
                 />
                 <YAxis
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                  stroke="#a8a29e"
+                  stroke="#94a3b8"
                   fontSize={12}
                 />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                   contentStyle={{
                     backgroundColor: 'var(--tooltip-bg, #fff)',
-                    border: '1px solid #e7e5e4',
+                    border: '1px solid #e2e8f0',
                     borderRadius: '8px',
                   }}
                 />
@@ -359,7 +359,7 @@ export default function YearInReview() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <p className="text-stone-500 dark:text-stone-400 text-center py-8">No monthly data available</p>
+          <p className="text-surface-500 dark:text-surface-400 text-center py-8">No monthly data available</p>
         )}
       </div>
 
@@ -373,12 +373,12 @@ export default function YearInReview() {
                 <Trophy className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">Best Month</h3>
-                <p className="text-xl font-bold text-stone-900 dark:text-white mt-1">{data.best_month.month_name}</p>
+                <h3 className="text-sm font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wide">Best Month</h3>
+                <p className="text-xl font-bold text-surface-900 dark:text-white mt-1">{data.best_month.month_name}</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
                   {formatCurrency(data.best_month.net_savings)} saved
                 </p>
-                <div className="flex items-center gap-4 mt-2 text-sm text-stone-500 dark:text-stone-400">
+                <div className="flex items-center gap-4 mt-2 text-sm text-surface-500 dark:text-surface-400">
                   <span>Income: {formatCurrency(data.best_month.income)}</span>
                   <span>Expenses: {formatCurrency(data.best_month.expenses)}</span>
                 </div>
@@ -395,12 +395,12 @@ export default function YearInReview() {
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">Worst Month</h3>
-                <p className="text-xl font-bold text-stone-900 dark:text-white mt-1">{data.worst_month.month_name}</p>
+                <h3 className="text-sm font-medium text-surface-500 dark:text-surface-400 uppercase tracking-wide">Worst Month</h3>
+                <p className="text-xl font-bold text-surface-900 dark:text-white mt-1">{data.worst_month.month_name}</p>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
                   {formatCurrency(data.worst_month.net_savings)} net
                 </p>
-                <div className="flex items-center gap-4 mt-2 text-sm text-stone-500 dark:text-stone-400">
+                <div className="flex items-center gap-4 mt-2 text-sm text-surface-500 dark:text-surface-400">
                   <span>Income: {formatCurrency(data.worst_month.income)}</span>
                   <span>Expenses: {formatCurrency(data.worst_month.expenses)}</span>
                 </div>

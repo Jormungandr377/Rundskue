@@ -51,8 +51,8 @@ export default function Sessions() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Active Sessions</h1>
-          <p className="text-stone-500 dark:text-stone-400">Manage your logged-in devices</p>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Active Sessions</h1>
+          <p className="text-surface-500 dark:text-surface-400">Manage your logged-in devices</p>
         </div>
         {sessionList && sessionList.length > 1 && (
           <button
@@ -67,7 +67,7 @@ export default function Sessions() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
         </div>
       ) : (
         <div className="space-y-3">
@@ -78,24 +78,24 @@ export default function Sessions() {
             return (
               <div
                 key={session.id}
-                className={`card p-4 flex items-center gap-4 ${session.is_current ? 'ring-2 ring-teal-500' : ''}`}
+                className={`card p-4 flex items-center gap-4 ${session.is_current ? 'ring-2 ring-primary-500' : ''}`}
               >
-                <div className="p-3 bg-stone-100 dark:bg-stone-700 rounded-full">
-                  <DeviceIcon className="w-6 h-6 text-stone-600 dark:text-stone-400" />
+                <div className="p-3 bg-surface-100 dark:bg-surface-700 rounded-full">
+                  <DeviceIcon className="w-6 h-6 text-surface-600 dark:text-surface-400" />
                 </div>
 
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-stone-900 dark:text-white">
+                    <p className="font-medium text-surface-900 dark:text-white">
                       {browser} on {device}
                     </p>
                     {session.is_current && (
-                      <span className="px-2 py-0.5 text-xs bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 rounded-full">
+                      <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 rounded-full">
                         Current Session
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-stone-500 dark:text-stone-400">
+                  <div className="flex items-center gap-3 text-sm text-surface-500 dark:text-surface-400">
                     {session.ip_address && (
                       <span className="flex items-center gap-1">
                         <Globe className="w-3 h-3" />
@@ -109,7 +109,7 @@ export default function Sessions() {
                 {!session.is_current && (
                   <button
                     onClick={() => revokeMutation.mutate(session.id)}
-                    className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-surface-400 hover:text-red-500 transition-colors"
                     aria-label="Revoke session"
                   >
                     <Trash2 className="w-5 h-5" />

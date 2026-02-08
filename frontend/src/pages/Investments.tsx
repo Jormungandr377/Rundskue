@@ -267,7 +267,7 @@ export default function Investments() {
 
   const SortHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th
-      className="text-left text-sm font-medium text-stone-500 dark:text-stone-400 pb-3 cursor-pointer select-none hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
+      className="text-left text-sm font-medium text-surface-500 dark:text-surface-400 pb-3 cursor-pointer select-none hover:text-surface-700 dark:hover:text-surface-300 transition-colors"
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center gap-1">
@@ -292,7 +292,7 @@ export default function Investments() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -302,8 +302,8 @@ export default function Investments() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Investment Portfolio</h1>
-          <p className="text-stone-500 dark:text-stone-400">Manage your investment holdings</p>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Investment Portfolio</h1>
+          <p className="text-surface-500 dark:text-surface-400">Manage your investment holdings</p>
         </div>
         <button
           onClick={() => {
@@ -313,7 +313,7 @@ export default function Investments() {
               setShowForm(true);
             }
           }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           aria-label={showForm ? 'Cancel adding holding' : 'Add new holding'}
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
@@ -326,13 +326,13 @@ export default function Investments() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Value</p>
-              <p className="text-2xl font-bold text-stone-900 dark:text-white">
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Value</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">
                 {formatCurrency(summaryData?.total_value ?? 0)}
               </p>
             </div>
-            <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-full">
-              <Briefcase className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+            <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-full">
+              <Briefcase className="w-6 h-6 text-primary-600 dark:text-primary-400" />
             </div>
           </div>
         </div>
@@ -340,13 +340,13 @@ export default function Investments() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Cost Basis</p>
-              <p className="text-2xl font-bold text-stone-900 dark:text-white">
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Cost Basis</p>
+              <p className="text-2xl font-bold text-surface-900 dark:text-white">
                 {formatCurrency(summaryData?.total_cost_basis ?? 0)}
               </p>
             </div>
-            <div className="p-3 bg-stone-100 dark:bg-stone-800 rounded-full">
-              <DollarSign className="w-6 h-6 text-stone-600 dark:text-stone-400" />
+            <div className="p-3 bg-surface-100 dark:bg-surface-800 rounded-full">
+              <DollarSign className="w-6 h-6 text-surface-600 dark:text-surface-400" />
             </div>
           </div>
         </div>
@@ -354,7 +354,7 @@ export default function Investments() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Total Gain/Loss</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Total Gain/Loss</p>
               <p className={`text-2xl font-bold ${totalGainLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {totalGainLoss >= 0 ? '+' : ''}{formatCurrency(totalGainLoss)}
               </p>
@@ -372,7 +372,7 @@ export default function Investments() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Gain/Loss %</p>
+              <p className="text-sm text-surface-500 dark:text-surface-400">Gain/Loss %</p>
               <p className={`text-2xl font-bold ${totalGainLossPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {totalGainLossPct >= 0 ? '+' : ''}{totalGainLossPct.toFixed(2)}%
               </p>
@@ -391,19 +391,19 @@ export default function Investments() {
       {/* Add/Edit Holding Form */}
       {showForm && (
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">
             {editingId ? 'Edit Holding' : 'Add New Holding'}
           </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Account
               </label>
               <select
                 value={form.account_id}
                 onChange={(e) => setForm({ ...form, account_id: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">Select account...</option>
                 {investmentAccounts.map((acc) => (
@@ -421,7 +421,7 @@ export default function Investments() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Symbol
               </label>
               <input
@@ -430,12 +430,12 @@ export default function Investments() {
                 onChange={(e) => setForm({ ...form, symbol: e.target.value })}
                 placeholder="e.g. AAPL"
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Name
               </label>
               <input
@@ -444,19 +444,19 @@ export default function Investments() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Apple Inc."
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Asset Class
               </label>
               <select
                 value={form.asset_class}
                 onChange={(e) => setForm({ ...form, asset_class: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {ASSET_CLASSES.map((ac) => (
                   <option key={ac.value} value={ac.value}>
@@ -467,7 +467,7 @@ export default function Investments() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Quantity
               </label>
               <input
@@ -478,12 +478,12 @@ export default function Investments() {
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
                 placeholder="0"
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Current Price
               </label>
               <input
@@ -494,12 +494,12 @@ export default function Investments() {
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
                 placeholder="0.00"
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Total Cost Basis
               </label>
               <input
@@ -510,7 +510,7 @@ export default function Investments() {
                 onChange={(e) => setForm({ ...form, cost_basis: e.target.value })}
                 placeholder="0.00"
                 required
-                className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
@@ -518,7 +518,7 @@ export default function Investments() {
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {createMutation.isPending || updateMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin mx-auto" />
@@ -532,7 +532,7 @@ export default function Investments() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                  className="px-4 py-2 border border-surface-300 dark:border-surface-600 text-surface-700 dark:text-surface-300 rounded-lg hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
                 >
                   Cancel
                 </button>
@@ -544,12 +544,12 @@ export default function Investments() {
 
       {/* Holdings Table */}
       <div className="card p-6">
-        <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">Holdings</h3>
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Holdings</h3>
         {sortedHoldings.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead>
-                <tr className="border-b border-stone-200 dark:border-stone-700">
+                <tr className="border-b border-surface-200 dark:border-surface-700">
                   <SortHeader field="symbol">Symbol</SortHeader>
                   <SortHeader field="name">Name</SortHeader>
                   <SortHeader field="quantity">Qty</SortHeader>
@@ -558,29 +558,29 @@ export default function Investments() {
                   <SortHeader field="cost_basis">Cost Basis</SortHeader>
                   <SortHeader field="gain_loss">Gain/Loss</SortHeader>
                   <SortHeader field="asset_class">Class</SortHeader>
-                  <th className="text-right text-sm font-medium text-stone-500 dark:text-stone-400 pb-3">
+                  <th className="text-right text-sm font-medium text-surface-500 dark:text-surface-400 pb-3">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+              <tbody className="divide-y divide-surface-100 dark:divide-surface-800">
                 {sortedHoldings.map((holding) => (
                   <tr
                     key={holding.id}
-                    className="hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
+                    className="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
                   >
                     <td className="py-3">
-                      <span className="font-semibold text-teal-600 dark:text-teal-400">
+                      <span className="font-semibold text-primary-600 dark:text-primary-400">
                         {holding.symbol}
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className="text-stone-900 dark:text-white text-sm">
+                      <span className="text-surface-900 dark:text-white text-sm">
                         {holding.name}
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className="text-stone-700 dark:text-stone-300 text-sm">
+                      <span className="text-surface-700 dark:text-surface-300 text-sm">
                         {holding.quantity.toLocaleString(undefined, {
                           minimumFractionDigits: 0,
                           maximumFractionDigits: 4,
@@ -588,17 +588,17 @@ export default function Investments() {
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className="text-stone-700 dark:text-stone-300 text-sm">
+                      <span className="text-surface-700 dark:text-surface-300 text-sm">
                         {formatCurrency(holding.price)}
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className="font-medium text-stone-900 dark:text-white text-sm">
+                      <span className="font-medium text-surface-900 dark:text-white text-sm">
                         {formatCurrency(holding.value)}
                       </span>
                     </td>
                     <td className="py-3">
-                      <span className="text-stone-700 dark:text-stone-300 text-sm">
+                      <span className="text-surface-700 dark:text-surface-300 text-sm">
                         {formatCurrency(holding.cost_basis)}
                       </span>
                     </td>
@@ -627,7 +627,7 @@ export default function Investments() {
                       </div>
                     </td>
                     <td className="py-3">
-                      <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 capitalize">
+                      <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 capitalize">
                         {holding.asset_class.replace('_', ' ')}
                       </span>
                     </td>
@@ -635,14 +635,14 @@ export default function Investments() {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => handleEdit(holding)}
-                          className="p-1.5 text-stone-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+                          className="p-1.5 text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
                           aria-label={`Edit ${holding.symbol}`}
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => deleteMutation.mutate(holding.id)}
-                          className="p-1.5 text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
+                          className="p-1.5 text-surface-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-lg transition-colors"
                           aria-label={`Delete ${holding.symbol}`}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -656,17 +656,17 @@ export default function Investments() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <Briefcase className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-stone-900 dark:text-white mb-2">
+            <Briefcase className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-surface-900 dark:text-white mb-2">
               No holdings yet
             </h3>
-            <p className="text-stone-500 dark:text-stone-400 mb-4">
+            <p className="text-surface-500 dark:text-surface-400 mb-4">
               Add your investment holdings to start tracking your portfolio.
             </p>
             {!showForm && (
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Add Your First Holding
@@ -680,8 +680,8 @@ export default function Investments() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Asset Allocation Donut */}
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
-            <PieChartIcon className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
+            <PieChartIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             Asset Allocation
           </h3>
           {allocationData && allocationData.length > 0 ? (
@@ -710,7 +710,7 @@ export default function Investments() {
                       formatter={(value: number) => formatCurrency(value)}
                       contentStyle={{
                         backgroundColor: 'var(--tooltip-bg, #fff)',
-                        border: '1px solid #e7e5e4',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '8px',
                       }}
                     />
@@ -726,10 +726,10 @@ export default function Investments() {
                         backgroundColor: CHART_COLORS[index % CHART_COLORS.length],
                       }}
                     />
-                    <span className="text-stone-600 dark:text-stone-400 truncate flex-1 capitalize">
+                    <span className="text-surface-600 dark:text-surface-400 truncate flex-1 capitalize">
                       {item.asset_class.replace('_', ' ')}
                     </span>
-                    <span className="font-medium text-stone-900 dark:text-white ml-2">
+                    <span className="font-medium text-surface-900 dark:text-white ml-2">
                       {item.percentage.toFixed(1)}%
                     </span>
                   </div>
@@ -737,7 +737,7 @@ export default function Investments() {
               </div>
             </div>
           ) : (
-            <div className="h-72 flex items-center justify-center text-stone-400 dark:text-stone-500">
+            <div className="h-72 flex items-center justify-center text-surface-400 dark:text-surface-500">
               <div className="text-center">
                 <PieChartIcon className="w-10 h-10 mx-auto mb-2" />
                 <p>Add holdings to see allocation</p>
@@ -749,13 +749,13 @@ export default function Investments() {
         {/* Dividends */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               Dividends
             </h3>
             {dividendData && (
               <div className="text-right">
-                <p className="text-xs text-stone-500 dark:text-stone-400">Total Income</p>
+                <p className="text-xs text-surface-500 dark:text-surface-400">Total Income</p>
                 <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(dividendData.total_dividends)}
                 </p>
@@ -766,7 +766,7 @@ export default function Investments() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dividendData.monthly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#44403c" opacity={0.2} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#64748b" opacity={0.2} />
                   <XAxis
                     dataKey="month"
                     tickFormatter={(value) => {
@@ -779,19 +779,19 @@ export default function Investments() {
                         return value;
                       }
                     }}
-                    stroke="#a8a29e"
+                    stroke="#94a3b8"
                     fontSize={12}
                   />
                   <YAxis
                     tickFormatter={(value) => `$${value}`}
-                    stroke="#a8a29e"
+                    stroke="#94a3b8"
                     fontSize={12}
                   />
                   <Tooltip
                     formatter={(value: number) => [formatCurrency(value), 'Dividends']}
                     contentStyle={{
                       backgroundColor: 'var(--tooltip-bg, #fff)',
-                      border: '1px solid #e7e5e4',
+                      border: '1px solid #e2e8f0',
                       borderRadius: '8px',
                     }}
                   />
@@ -805,7 +805,7 @@ export default function Investments() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-stone-400 dark:text-stone-500">
+            <div className="h-64 flex items-center justify-center text-surface-400 dark:text-surface-500">
               <div className="text-center">
                 <DollarSign className="w-10 h-10 mx-auto mb-2" />
                 <p>No dividend data available</p>

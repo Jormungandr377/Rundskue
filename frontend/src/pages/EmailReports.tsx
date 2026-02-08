@@ -32,8 +32,8 @@ const REPORT_TYPES: Record<string, { label: string; icon: typeof Mail; color: st
   weekly_summary: {
     label: 'Weekly Summary',
     icon: Calendar,
-    color: 'text-teal-600 dark:text-teal-400',
-    bg: 'bg-teal-100 dark:bg-teal-900/30',
+    color: 'text-primary-600 dark:text-primary-400',
+    bg: 'bg-primary-100 dark:bg-primary-900/30',
     description: 'Overview of spending, income, and budget progress for the past week.',
   },
   monthly_summary: {
@@ -151,7 +151,7 @@ export default function EmailReports() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
       </div>
     );
   }
@@ -161,12 +161,12 @@ export default function EmailReports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Email Reports</h1>
-          <p className="text-stone-500 dark:text-stone-400">Schedule automated financial summaries</p>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Email Reports</h1>
+          <p className="text-surface-500 dark:text-surface-400">Schedule automated financial summaries</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Report
@@ -175,18 +175,18 @@ export default function EmailReports() {
 
       {/* Create Form */}
       {showForm && (
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">New Scheduled Report</h3>
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-6">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">New Scheduled Report</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                   Report Type
                 </label>
                 <select
                   value={formData.report_type}
                   onChange={e => setFormData({ ...formData, report_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                 >
                   <option value="weekly_summary">Weekly Summary</option>
                   <option value="monthly_summary">Monthly Summary</option>
@@ -194,13 +194,13 @@ export default function EmailReports() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                   Frequency
                 </label>
                 <select
                   value={formData.frequency}
                   onChange={e => setFormData({ ...formData, frequency: e.target.value })}
-                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                 >
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
@@ -208,13 +208,13 @@ export default function EmailReports() {
               </div>
               {formData.frequency === 'weekly' && (
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                     Day of Week
                   </label>
                   <select
                     value={formData.day_of_week}
                     onChange={e => setFormData({ ...formData, day_of_week: e.target.value })}
-                    className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                    className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                   >
                     {DAY_NAMES.map((day, i) => (
                       <option key={day} value={i}>{day}</option>
@@ -224,13 +224,13 @@ export default function EmailReports() {
               )}
               {formData.frequency === 'monthly' && (
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                     Day of Month
                   </label>
                   <select
                     value={formData.day_of_month}
                     onChange={e => setFormData({ ...formData, day_of_month: e.target.value })}
-                    className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                    className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                   >
                     {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
                       <option key={day} value={day}>{day}</option>
@@ -243,14 +243,14 @@ export default function EmailReports() {
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {createMutation.isPending ? 'Creating...' : 'Create Schedule'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                className="px-4 py-2 text-surface-600 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded-lg hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
               >
                 Cancel
               </button>
@@ -269,7 +269,7 @@ export default function EmailReports() {
             return (
               <div
                 key={report.id}
-                className={`bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-6 ${
+                className={`bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-6 ${
                   !report.is_active ? 'opacity-60' : ''
                 }`}
               >
@@ -279,11 +279,11 @@ export default function EmailReports() {
                       <Icon className={`w-5 h-5 ${config.color}`} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-stone-900 dark:text-white">{config.label}</h3>
+                      <h3 className="font-semibold text-surface-900 dark:text-white">{config.label}</h3>
                       <span className={`inline-block mt-0.5 text-xs px-2 py-0.5 rounded-full ${
                         report.is_active
                           ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                          : 'bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400'
+                          : 'bg-surface-100 dark:bg-surface-700 text-surface-500 dark:text-surface-400'
                       }`}>
                         {report.is_active ? 'Active' : 'Inactive'}
                       </span>
@@ -291,42 +291,42 @@ export default function EmailReports() {
                   </div>
                   <button
                     onClick={() => updateMutation.mutate({ id: report.id, data: { is_active: !report.is_active } })}
-                    className="p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+                    className="p-1 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
                     aria-label={report.is_active ? 'Deactivate report' : 'Activate report'}
                     title={report.is_active ? 'Deactivate' : 'Activate'}
                   >
                     {report.is_active ? (
-                      <ToggleRight className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+                      <ToggleRight className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                     ) : (
-                      <ToggleLeft className="w-6 h-6 text-stone-400 dark:text-stone-500" />
+                      <ToggleLeft className="w-6 h-6 text-surface-400 dark:text-surface-500" />
                     )}
                   </button>
                 </div>
 
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
+                  <div className="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-400">
                     <Clock className="w-4 h-4 flex-shrink-0" />
                     <span>{getScheduleDescription(report)}</span>
                   </div>
                   {report.last_sent && (
-                    <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
+                    <div className="flex items-center gap-2 text-sm text-surface-500 dark:text-surface-400">
                       <Mail className="w-4 h-4 flex-shrink-0" />
                       <span>Last sent {format(parseISO(report.last_sent), 'MMM d, yyyy h:mm a')}</span>
                     </div>
                   )}
                   {!report.last_sent && (
-                    <div className="flex items-center gap-2 text-sm text-stone-400 dark:text-stone-500">
+                    <div className="flex items-center gap-2 text-sm text-surface-400 dark:text-surface-500">
                       <Mail className="w-4 h-4 flex-shrink-0" />
                       <span>Never sent</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 pt-3 border-t border-stone-100 dark:border-stone-700">
+                <div className="flex items-center gap-2 pt-3 border-t border-surface-100 dark:border-surface-700">
                   <button
                     onClick={() => sendNowMutation.mutate(report.id)}
                     disabled={sendNowMutation.isPending}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-800 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 disabled:opacity-50 transition-colors"
                     aria-label="Send report now"
                   >
                     <Send className="w-3.5 h-3.5" />
@@ -347,15 +347,15 @@ export default function EmailReports() {
           })}
         </div>
       ) : (
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-12 text-center">
-          <Mail className="w-12 h-12 text-stone-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-stone-900 dark:text-white mb-2">No scheduled reports</h3>
-          <p className="text-stone-500 dark:text-stone-400 mb-4">
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-12 text-center">
+          <Mail className="w-12 h-12 text-surface-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-surface-900 dark:text-white mb-2">No scheduled reports</h3>
+          <p className="text-surface-500 dark:text-surface-400 mb-4">
             Set up automated email reports to stay on top of your finances.
           </p>
           <button
             onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
             Create Your First Report
           </button>
@@ -363,8 +363,8 @@ export default function EmailReports() {
       )}
 
       {/* Info Card */}
-      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-6">
-        <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">What's included in each report?</h3>
+      <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-6">
+        <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">What's included in each report?</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Object.entries(REPORT_TYPES).map(([key, config]) => {
             const Icon = config.icon;
@@ -374,8 +374,8 @@ export default function EmailReports() {
                   <Icon className={`w-4 h-4 ${config.color}`} />
                 </div>
                 <div>
-                  <p className="font-medium text-stone-900 dark:text-white text-sm">{config.label}</p>
-                  <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{config.description}</p>
+                  <p className="font-medium text-surface-900 dark:text-white text-sm">{config.label}</p>
+                  <p className="text-sm text-surface-500 dark:text-surface-400 mt-0.5">{config.description}</p>
                 </div>
               </div>
             );

@@ -22,24 +22,24 @@ const VISIBLE_DAY_LABELS = [1, 3, 5]; // Mon, Wed, Fri
 
 function getColorClass(amount: number, max: number): string {
   if (amount === 0 || max === 0) {
-    return 'bg-stone-100 dark:bg-stone-800';
+    return 'bg-surface-100 dark:bg-surface-800';
   }
   const ratio = amount / max;
-  if (ratio <= 0.2) return 'bg-teal-100 dark:bg-teal-900';
-  if (ratio <= 0.4) return 'bg-teal-200 dark:bg-teal-800';
-  if (ratio <= 0.6) return 'bg-teal-300 dark:bg-teal-700';
-  if (ratio <= 0.8) return 'bg-teal-400 dark:bg-teal-600';
-  return 'bg-teal-500 dark:bg-teal-500';
+  if (ratio <= 0.2) return 'bg-primary-100 dark:bg-primary-900';
+  if (ratio <= 0.4) return 'bg-primary-200 dark:bg-primary-800';
+  if (ratio <= 0.6) return 'bg-primary-300 dark:bg-primary-700';
+  if (ratio <= 0.8) return 'bg-primary-400 dark:bg-primary-600';
+  return 'bg-primary-500 dark:bg-primary-500';
 }
 
 function getLegendClasses(): string[] {
   return [
-    'bg-stone-100 dark:bg-stone-800',
-    'bg-teal-100 dark:bg-teal-900',
-    'bg-teal-200 dark:bg-teal-800',
-    'bg-teal-300 dark:bg-teal-700',
-    'bg-teal-400 dark:bg-teal-600',
-    'bg-teal-500 dark:bg-teal-500',
+    'bg-surface-100 dark:bg-surface-800',
+    'bg-primary-100 dark:bg-primary-900',
+    'bg-primary-200 dark:bg-primary-800',
+    'bg-primary-300 dark:bg-primary-700',
+    'bg-primary-400 dark:bg-primary-600',
+    'bg-primary-500 dark:bg-primary-500',
   ];
 }
 
@@ -142,7 +142,7 @@ export default function SpendingHeatmap({ data }: SpendingHeatmapProps) {
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="absolute z-10 px-3 py-2 text-xs font-medium bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-lg shadow-lg pointer-events-none whitespace-nowrap"
+          className="absolute z-10 px-3 py-2 text-xs font-medium bg-surface-900 dark:bg-surface-100 text-white dark:text-surface-900 rounded-lg shadow-lg pointer-events-none whitespace-nowrap"
           style={{
             left: tooltip.x,
             top: tooltip.y,
@@ -161,7 +161,7 @@ export default function SpendingHeatmap({ data }: SpendingHeatmapProps) {
             {monthLabels.map((m, i) => (
               <div
                 key={`${m.label}-${i}`}
-                className="text-xs text-stone-500 dark:text-stone-400"
+                className="text-xs text-surface-500 dark:text-surface-400"
                 style={{
                   position: 'relative',
                   left: `${m.weekIndex * 14}px`,
@@ -185,7 +185,7 @@ export default function SpendingHeatmap({ data }: SpendingHeatmapProps) {
                   key={label}
                   className="h-[11px] flex items-center justify-end pr-1"
                 >
-                  <span className="text-[10px] text-stone-500 dark:text-stone-400 leading-none">
+                  <span className="text-[10px] text-surface-500 dark:text-surface-400 leading-none">
                     {VISIBLE_DAY_LABELS.includes(i) ? label : ''}
                   </span>
                 </div>
@@ -213,14 +213,14 @@ export default function SpendingHeatmap({ data }: SpendingHeatmapProps) {
 
           {/* Legend */}
           <div className="flex items-center gap-2 mt-2 ml-8">
-            <span className="text-xs text-stone-500 dark:text-stone-400">Less</span>
+            <span className="text-xs text-surface-500 dark:text-surface-400">Less</span>
             {getLegendClasses().map((cls, i) => (
               <div
                 key={i}
                 className={`w-[11px] h-[11px] rounded-sm ${cls}`}
               />
             ))}
-            <span className="text-xs text-stone-500 dark:text-stone-400">More</span>
+            <span className="text-xs text-surface-500 dark:text-surface-400">More</span>
           </div>
         </div>
       </div>

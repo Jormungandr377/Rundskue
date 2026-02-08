@@ -56,13 +56,13 @@ export default function Budgets() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Budgets</h1>
-          <p className="text-stone-500">Track your spending against your budget</p>
+          <h1 className="text-2xl font-bold text-surface-900">Budgets</h1>
+          <p className="text-surface-500">Track your spending against your budget</p>
         </div>
         {!budget && (
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700"
           >
             <Plus className="w-5 h-5" />
             Create Budget
@@ -74,17 +74,17 @@ export default function Budgets() {
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={handlePrevMonth}
-          className="p-2 hover:bg-stone-100 rounded-lg"
+          className="p-2 hover:bg-surface-100 rounded-lg"
           aria-label="Previous month"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h2 className="text-xl font-semibold text-stone-900 w-48 text-center">
+        <h2 className="text-xl font-semibold text-surface-900 w-48 text-center">
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <button
           onClick={handleNextMonth}
-          className="p-2 hover:bg-stone-100 rounded-lg"
+          className="p-2 hover:bg-surface-100 rounded-lg"
           aria-label="Next month"
         >
           <ChevronRight className="w-5 h-5" />
@@ -93,28 +93,28 @@ export default function Budgets() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         </div>
       ) : budget ? (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card p-6">
-              <p className="text-sm text-stone-500">Total Budgeted</p>
-              <p className="text-2xl font-bold text-stone-900">
+              <p className="text-sm text-surface-500">Total Budgeted</p>
+              <p className="text-2xl font-bold text-surface-900">
                 {formatCurrency(budget.total_budgeted || 0)}
               </p>
             </div>
             <div className="card p-6">
-              <p className="text-sm text-stone-500">Total Spent</p>
+              <p className="text-sm text-surface-500">Total Spent</p>
               <p className={`text-2xl font-bold ${
-                (budget.total_spent || 0) > (budget.total_budgeted || 0) ? 'text-red-600' : 'text-stone-900'
+                (budget.total_spent || 0) > (budget.total_budgeted || 0) ? 'text-red-600' : 'text-surface-900'
               }`}>
                 {formatCurrency(budget.total_spent || 0)}
               </p>
             </div>
             <div className="card p-6">
-              <p className="text-sm text-stone-500">Remaining</p>
+              <p className="text-sm text-surface-500">Remaining</p>
               <p className={`text-2xl font-bold ${
                 (budget.total_budgeted || 0) - (budget.total_spent || 0) < 0 ? 'text-red-600' : 'text-emerald-600'
               }`}>
@@ -125,12 +125,12 @@ export default function Budgets() {
 
           {/* Budget Items */}
           <div className="card">
-            <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-stone-900">{budget.name}</h3>
+            <div className="px-6 py-4 border-b border-surface-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-surface-900">{budget.name}</h3>
               <div className="flex gap-2">
                 <button
                   onClick={() => setEditingBudget(budget)}
-                  className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg"
+                  className="p-2 text-surface-400 hover:text-surface-600 hover:bg-surface-100 rounded-lg"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
@@ -140,13 +140,13 @@ export default function Budgets() {
                       deleteMutation.mutate(budget.id);
                     }
                   }}
-                  className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                  className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <div className="divide-y divide-stone-100">
+            <div className="divide-y divide-surface-100">
               {(budget.items || []).map((item) => {
                 const budgeted = item.budgeted ?? item.amount ?? 0;
                 const rollover = item.rollover_amount ?? 0;
@@ -158,21 +158,21 @@ export default function Budgets() {
                 return (
                   <div key={item.id} className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-stone-900 dark:text-white">
+                      <span className="font-medium text-surface-900 dark:text-white">
                         {item.category_name || item.category?.name || 'Unknown Category'}
                       </span>
                       <div className="text-right">
-                        <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-stone-600 dark:text-stone-300'}>
+                        <span className={isOverBudget ? 'text-red-600 font-semibold' : 'text-surface-600 dark:text-surface-300'}>
                           {formatCurrency(spent)}
                         </span>
-                        <span className="text-stone-400"> / </span>
-                        <span className="text-stone-900 dark:text-white">{formatCurrency(effective)}</span>
+                        <span className="text-surface-400"> / </span>
+                        <span className="text-surface-900 dark:text-white">{formatCurrency(effective)}</span>
                         {rollover > 0 && (
-                          <span className="text-xs text-teal-600 ml-1">(+{formatCurrency(rollover)} rollover)</span>
+                          <span className="text-xs text-primary-600 ml-1">(+{formatCurrency(rollover)} rollover)</span>
                         )}
                       </div>
                     </div>
-                    <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
+                    <div className="w-full bg-surface-200 dark:bg-surface-700 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all ${
                           isOverBudget ? 'bg-red-500' : percentage > 80 ? 'bg-yellow-500' : 'bg-emerald-500'
@@ -193,13 +193,13 @@ export default function Budgets() {
         </>
       ) : (
         <div className="card p-12 text-center">
-          <h3 className="text-lg font-medium text-stone-900 mb-2">No budget for this month</h3>
-          <p className="text-stone-500 mb-4">
+          <h3 className="text-lg font-medium text-surface-900 mb-2">No budget for this month</h3>
+          <p className="text-surface-500 mb-4">
             Create a budget to start tracking your spending.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700"
           >
             <Plus className="w-5 h-5 mr-2" />
             Create Budget
@@ -267,25 +267,25 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
-        <div className="p-6 border-b border-stone-200">
-          <h3 className="text-lg font-semibold text-stone-900">Create Budget</h3>
+        <div className="p-6 border-b border-surface-200">
+          <h3 className="text-lg font-semibold text-surface-900">Create Budget</h3>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label className="block text-sm font-medium text-surface-700 mb-1">
               Budget Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-2 border border-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">
+            <label className="block text-sm font-medium text-surface-700 mb-2">
               Budget Items
             </label>
             <div className="space-y-2">
@@ -294,7 +294,7 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
                   <select
                     value={item.category_id}
                     onChange={(e) => handleItemChange(index, 'category_id', Number(e.target.value))}
-                    className="flex-1 px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="flex-1 px-4 py-2 border border-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     {categories.filter(c => !c.is_income).map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -305,13 +305,13 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
                     placeholder="Amount"
                     value={item.amount}
                     onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
-                    className="w-32 px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-32 px-4 py-2 border border-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                   {items.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="p-2 text-stone-400 hover:text-red-600"
+                      className="p-2 text-surface-400 hover:text-red-600"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -322,7 +322,7 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
             <button
               type="button"
               onClick={handleAddItem}
-              className="mt-2 text-sm text-teal-600 hover:text-teal-700"
+              className="mt-2 text-sm text-primary-600 hover:text-primary-700"
             >
               + Add Category
             </button>
@@ -332,13 +332,13 @@ function CreateBudgetModal({ profileId, month, categories, onClose, onCreate }: 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-lg"
+              className="px-4 py-2 text-surface-600 hover:bg-surface-100 rounded-xl"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+              className="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700"
             >
               Create Budget
             </button>

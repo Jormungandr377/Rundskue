@@ -145,7 +145,7 @@ export default function Webhooks() {
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 rounded-full">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-surface-100 dark:bg-surface-700 text-surface-500 dark:text-surface-400 rounded-full">
         Inactive
       </span>
     );
@@ -159,12 +159,12 @@ export default function Webhooks() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Webhooks</h1>
-          <p className="text-stone-500 dark:text-stone-400">Receive real-time notifications when events occur</p>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Webhooks</h1>
+          <p className="text-surface-500 dark:text-surface-400">Receive real-time notifications when events occur</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Webhook
@@ -173,11 +173,11 @@ export default function Webhooks() {
 
       {/* Create Form */}
       {showCreate && (
-        <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-6">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-white mb-4">New Webhook</h3>
+        <div className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-6">
+          <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">New Webhook</h3>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                 Endpoint URL
               </label>
               <input
@@ -186,11 +186,11 @@ export default function Webhooks() {
                 value={form.url}
                 onChange={(e) => setForm({ ...form, url: e.target.value })}
                 placeholder="https://your-server.com/webhook"
-                className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg dark:bg-stone-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg dark:bg-surface-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                 Events
               </label>
               <div className="flex flex-wrap gap-3">
@@ -203,9 +203,9 @@ export default function Webhooks() {
                       type="checkbox"
                       checked={form.events.includes(event.value)}
                       onChange={() => toggleEvent(event.value)}
-                      className="w-4 h-4 rounded border-stone-300 dark:border-stone-600 text-teal-600 focus:ring-teal-500 dark:bg-stone-700"
+                      className="w-4 h-4 rounded border-surface-300 dark:border-surface-600 text-primary-600 focus:ring-primary-500 dark:bg-surface-700"
                     />
-                    <span className="text-sm text-stone-700 dark:text-stone-300">{event.label}</span>
+                    <span className="text-sm text-surface-700 dark:text-surface-300">{event.label}</span>
                   </label>
                 ))}
               </div>
@@ -214,7 +214,7 @@ export default function Webhooks() {
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {createMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                 Create Webhook
@@ -222,7 +222,7 @@ export default function Webhooks() {
               <button
                 type="button"
                 onClick={() => { setShowCreate(false); setForm({ url: '', events: [] }); }}
-                className="px-4 py-2 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-surface-600 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -234,20 +234,20 @@ export default function Webhooks() {
       {/* Webhook List */}
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 text-teal-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
         </div>
       ) : webhooks && webhooks.length > 0 ? (
         <div className="space-y-4">
           {webhooks.map((webhook) => (
             <div
               key={webhook.id}
-              className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 p-6"
+              className="bg-white dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 p-6"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    <Globe className="w-5 h-5 text-stone-400 flex-shrink-0" />
-                    <p className="font-medium text-stone-900 dark:text-white truncate" title={webhook.url}>
+                    <Globe className="w-5 h-5 text-surface-400 flex-shrink-0" />
+                    <p className="font-medium text-surface-900 dark:text-white truncate" title={webhook.url}>
                       {webhook.url}
                     </p>
                     {getStatusBadge(webhook)}
@@ -257,16 +257,16 @@ export default function Webhooks() {
                     {webhook.events.map((event) => (
                       <span
                         key={event}
-                        className="px-2 py-0.5 text-xs font-medium bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 rounded-full"
+                        className="px-2 py-0.5 text-xs font-medium bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full"
                       >
                         {getEventLabel(event)}
                       </span>
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-stone-500 dark:text-stone-400">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-surface-500 dark:text-surface-400">
                     <span>
-                      Secret: <code className="text-xs bg-stone-100 dark:bg-stone-700 px-1.5 py-0.5 rounded">{webhook.secret_masked}</code>
+                      Secret: <code className="text-xs bg-surface-100 dark:bg-surface-700 px-1.5 py-0.5 rounded">{webhook.secret_masked}</code>
                     </span>
                     {webhook.last_triggered && (
                       <span>
@@ -287,12 +287,12 @@ export default function Webhooks() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button
                     onClick={() => handleToggle(webhook)}
-                    className="p-2 text-stone-400 hover:text-teal-500 transition-colors"
+                    className="p-2 text-surface-400 hover:text-primary-500 transition-colors"
                     aria-label={webhook.is_active ? 'Deactivate webhook' : 'Activate webhook'}
                     title={webhook.is_active ? 'Deactivate' : 'Activate'}
                   >
                     {webhook.is_active ? (
-                      <ToggleRight className="w-5 h-5 text-teal-500" />
+                      <ToggleRight className="w-5 h-5 text-primary-500" />
                     ) : (
                       <ToggleLeft className="w-5 h-5" />
                     )}
@@ -300,7 +300,7 @@ export default function Webhooks() {
                   <button
                     onClick={() => handleTest(webhook.id)}
                     disabled={testingId === webhook.id}
-                    className="p-2 text-stone-400 hover:text-teal-500 disabled:opacity-50 transition-colors"
+                    className="p-2 text-surface-400 hover:text-primary-500 disabled:opacity-50 transition-colors"
                     aria-label="Send test webhook"
                     title="Send test"
                   >
@@ -312,7 +312,7 @@ export default function Webhooks() {
                   </button>
                   <button
                     onClick={() => deleteMutation.mutate(webhook.id)}
-                    className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-surface-400 hover:text-red-500 transition-colors"
                     aria-label="Delete webhook"
                     title="Delete"
                   >
@@ -325,14 +325,14 @@ export default function Webhooks() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Zap className="w-12 h-12 text-stone-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-stone-900 dark:text-white mb-2">No webhooks configured</h3>
-          <p className="text-stone-500 dark:text-stone-400 mb-4">
+          <Zap className="w-12 h-12 text-surface-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-surface-900 dark:text-white mb-2">No webhooks configured</h3>
+          <p className="text-surface-500 dark:text-surface-400 mb-4">
             Add a webhook to receive real-time notifications when events occur in your account.
           </p>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
             Add Your First Webhook
           </button>

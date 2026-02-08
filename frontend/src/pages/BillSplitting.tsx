@@ -256,7 +256,7 @@ export default function BillSplitting() {
   if (splitsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
       </div>
     )
   }
@@ -274,14 +274,14 @@ export default function BillSplitting() {
       {/* ----------------------------------------------------------------- */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Bill Splitting</h1>
-          <p className="text-stone-500 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Bill Splitting</h1>
+          <p className="text-surface-500 dark:text-surface-400">
             Split expenses and track who owes what
           </p>
         </div>
         <button
           onClick={openNewForm}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           New Split
@@ -293,8 +293,8 @@ export default function BillSplitting() {
       {/* ----------------------------------------------------------------- */}
       {!balancesLoading && balances.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
-            <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+          <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-3 flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             Balances
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -304,9 +304,9 @@ export default function BillSplitting() {
                 <div key={balance.name} className="card p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-stone-900 dark:text-white">{balance.name}</p>
+                      <p className="font-medium text-surface-900 dark:text-white">{balance.name}</p>
                       {balance.email && (
-                        <p className="text-xs text-stone-400 dark:text-stone-500">{balance.email}</p>
+                        <p className="text-xs text-surface-400 dark:text-surface-500">{balance.email}</p>
                       )}
                     </div>
                     <div className="text-right">
@@ -319,7 +319,7 @@ export default function BillSplitting() {
                       >
                         {formatCurrency(Math.abs(balance.amount))}
                       </p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400">
+                      <p className="text-xs text-surface-500 dark:text-surface-400">
                         {owesYou ? 'owes you' : 'you owe'}
                       </p>
                     </div>
@@ -337,12 +337,12 @@ export default function BillSplitting() {
       {showForm && (
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white">
               {editingSplit ? 'Edit Split' : 'Create New Split'}
             </h3>
             <button
               onClick={resetForm}
-              className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+              className="p-1 text-surface-400 hover:text-surface-600 dark:hover:text-surface-300"
               aria-label="Close form"
             >
               <X className="w-5 h-5" />
@@ -353,7 +353,7 @@ export default function BillSplitting() {
             {/* Bill info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                   Description
                 </label>
                 <input
@@ -362,11 +362,11 @@ export default function BillSplitting() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="e.g., Dinner at Mario's"
-                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                   Total Amount
                 </label>
                 <input
@@ -377,11 +377,11 @@ export default function BillSplitting() {
                   value={totalAmount}
                   onChange={(e) => setTotalAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
                   Date
                 </label>
                 <input
@@ -389,7 +389,7 @@ export default function BillSplitting() {
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                 />
               </div>
             </div>
@@ -402,7 +402,7 @@ export default function BillSplitting() {
                 aria-checked={splitEqually}
                 onClick={() => setSplitEqually(!splitEqually)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  splitEqually ? 'bg-teal-600' : 'bg-stone-300 dark:bg-stone-600'
+                  splitEqually ? 'bg-primary-600' : 'bg-surface-300 dark:bg-surface-600'
                 }`}
               >
                 <span
@@ -411,11 +411,11 @@ export default function BillSplitting() {
                   }`}
                 />
               </button>
-              <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
+              <span className="text-sm font-medium text-surface-700 dark:text-surface-300">
                 Split Equally
               </span>
               {splitEqually && parsedTotal > 0 && validParticipants.length > 0 && (
-                <span className="text-sm text-teal-600 dark:text-teal-400">
+                <span className="text-sm text-primary-600 dark:text-primary-400">
                   ({formatCurrency(equalShare)} each)
                 </span>
               )}
@@ -423,7 +423,7 @@ export default function BillSplitting() {
 
             {/* Participants */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                 Participants
               </label>
               <div className="space-y-3">
@@ -436,17 +436,17 @@ export default function BillSplitting() {
                         value={p.name}
                         onChange={(e) => updateParticipant(i, 'name', e.target.value)}
                         placeholder="Name"
-                        className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                        className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                       />
                       <input
                         type="email"
                         value={p.email}
                         onChange={(e) => updateParticipant(i, 'email', e.target.value)}
                         placeholder="Email (optional)"
-                        className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                        className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                       />
                       {splitEqually ? (
-                        <div className="flex items-center px-3 py-2 bg-stone-50 dark:bg-stone-600 border border-stone-200 dark:border-stone-600 rounded-lg text-stone-500 dark:text-stone-300 text-sm">
+                        <div className="flex items-center px-3 py-2 bg-surface-50 dark:bg-surface-600 border border-surface-200 dark:border-surface-600 rounded-lg text-surface-500 dark:text-surface-300 text-sm">
                           {parsedTotal > 0 && p.name.trim()
                             ? formatCurrency(equalShare)
                             : '--'}
@@ -459,7 +459,7 @@ export default function BillSplitting() {
                           value={p.share_amount}
                           onChange={(e) => updateParticipant(i, 'share_amount', e.target.value)}
                           placeholder="Share amount"
-                          className="w-full px-3 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                          className="w-full px-3 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                         />
                       )}
                     </div>
@@ -467,7 +467,7 @@ export default function BillSplitting() {
                       type="button"
                       onClick={() => removeParticipant(i)}
                       disabled={participants.length <= 2}
-                      className="mt-2 p-1 text-stone-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="mt-2 p-1 text-surface-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       aria-label={`Remove participant ${i + 1}`}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -479,7 +479,7 @@ export default function BillSplitting() {
               <button
                 type="button"
                 onClick={addParticipant}
-                className="mt-3 flex items-center gap-1.5 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                className="mt-3 flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
               >
                 <UserPlus className="w-4 h-4" />
                 Add Participant
@@ -491,14 +491,14 @@ export default function BillSplitting() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {isPending ? 'Creating...' : editingSplit ? 'Update Split' : 'Create Split'}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-4 py-2 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                className="px-4 py-2 text-surface-600 dark:text-surface-400 border border-surface-200 dark:border-surface-600 rounded-lg hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors"
               >
                 Cancel
               </button>
@@ -511,17 +511,17 @@ export default function BillSplitting() {
       {/* Split History                                                     */}
       {/* ----------------------------------------------------------------- */}
       <div>
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-white mb-3 flex items-center gap-2">
-          <SplitSquareHorizontal className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+        <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-3 flex items-center gap-2">
+          <SplitSquareHorizontal className="w-5 h-5 text-primary-600 dark:text-primary-400" />
           Split History
         </h2>
 
         {splits.length === 0 ? (
           <div className="card p-6">
             <div className="text-center py-8">
-              <SplitSquareHorizontal className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
-              <p className="text-stone-500 dark:text-stone-400">No splits yet</p>
-              <p className="text-sm text-stone-400 dark:text-stone-500">
+              <SplitSquareHorizontal className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-3" />
+              <p className="text-surface-500 dark:text-surface-400">No splits yet</p>
+              <p className="text-sm text-surface-400 dark:text-surface-500">
                 Create your first split to start tracking shared expenses
               </p>
             </div>
@@ -537,10 +537,10 @@ export default function BillSplitting() {
                   {/* Split header */}
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-semibold text-stone-900 dark:text-white text-lg">
+                      <h3 className="font-semibold text-surface-900 dark:text-white text-lg">
                         {split.description}
                       </h3>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-stone-500 dark:text-stone-400">
+                      <div className="flex items-center gap-3 mt-1 text-sm text-surface-500 dark:text-surface-400">
                         <span className="flex items-center gap-1">
                           <DollarSign className="w-3.5 h-3.5" />
                           {formatCurrency(split.total_amount)}
@@ -563,14 +563,14 @@ export default function BillSplitting() {
                       )}
                       <button
                         onClick={() => loadSplitForEdit(split)}
-                        className="p-1.5 text-stone-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
+                        className="p-1.5 text-surface-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-100 dark:hover:bg-surface-700 rounded-lg transition-colors"
                         aria-label={`Edit split ${split.description}`}
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => deleteMutation.mutate(split.id)}
-                        className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-1.5 text-surface-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                         aria-label={`Delete split ${split.description}`}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -579,7 +579,7 @@ export default function BillSplitting() {
                   </div>
 
                   {/* Participants list */}
-                  <div className="divide-y divide-stone-100 dark:divide-stone-700">
+                  <div className="divide-y divide-surface-100 dark:divide-surface-700">
                     {split.participants.map((participant) => (
                       <div
                         key={participant.id}
@@ -598,7 +598,7 @@ export default function BillSplitting() {
                             className={`transition-colors ${
                               participant.is_paid
                                 ? 'text-emerald-500 cursor-default'
-                                : 'text-stone-300 dark:text-stone-600 hover:text-teal-500 dark:hover:text-teal-400 cursor-pointer'
+                                : 'text-surface-300 dark:text-surface-600 hover:text-primary-500 dark:hover:text-primary-400 cursor-pointer'
                             }`}
                             aria-label={
                               participant.is_paid
@@ -616,14 +616,14 @@ export default function BillSplitting() {
                             <p
                               className={`font-medium ${
                                 participant.is_paid
-                                  ? 'text-stone-400 dark:text-stone-500 line-through'
-                                  : 'text-stone-900 dark:text-white'
+                                  ? 'text-surface-400 dark:text-surface-500 line-through'
+                                  : 'text-surface-900 dark:text-white'
                               }`}
                             >
                               {participant.name}
                             </p>
                             {participant.email && (
-                              <p className="text-xs text-stone-400 dark:text-stone-500">
+                              <p className="text-xs text-surface-400 dark:text-surface-500">
                                 {participant.email}
                               </p>
                             )}
@@ -633,8 +633,8 @@ export default function BillSplitting() {
                           <span
                             className={`font-semibold ${
                               participant.is_paid
-                                ? 'text-stone-400 dark:text-stone-500'
-                                : 'text-stone-900 dark:text-white'
+                                ? 'text-surface-400 dark:text-surface-500'
+                                : 'text-surface-900 dark:text-white'
                             }`}
                           >
                             {formatCurrency(participant.share_amount)}
@@ -655,7 +655,7 @@ export default function BillSplitting() {
 
                   {/* Progress bar */}
                   <div className="mt-4">
-                    <div className="flex justify-between text-xs text-stone-500 dark:text-stone-400 mb-1">
+                    <div className="flex justify-between text-xs text-surface-500 dark:text-surface-400 mb-1">
                       <span>
                         {paidCount} of {split.participants.length} paid
                       </span>
@@ -663,9 +663,9 @@ export default function BillSplitting() {
                         {Math.round((paidCount / split.participants.length) * 100)}%
                       </span>
                     </div>
-                    <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
+                    <div className="w-full bg-surface-200 dark:bg-surface-700 rounded-full h-2">
                       <div
-                        className="h-2 rounded-full bg-teal-600 dark:bg-teal-500 transition-all duration-300"
+                        className="h-2 rounded-full bg-primary-600 dark:bg-primary-500 transition-all duration-300"
                         style={{
                           width: `${(paidCount / split.participants.length) * 100}%`,
                         }}

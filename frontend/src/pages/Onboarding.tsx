@@ -46,7 +46,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-indigo-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-indigo-50 flex items-center justify-center px-4">
       <div className="max-w-lg w-full">
         {/* Progress indicators */}
         <div className="flex items-center justify-center gap-2 mb-8">
@@ -57,8 +57,8 @@ export default function Onboarding() {
                   i < step
                     ? 'bg-emerald-500 text-white'
                     : i === step
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-stone-200 text-stone-500'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-surface-200 text-surface-500'
                 }`}
               >
                 {i < step ? <Check className="w-4 h-4" /> : i + 1}
@@ -66,7 +66,7 @@ export default function Onboarding() {
               {i < STEPS.length - 1 && (
                 <div
                   className={`w-12 h-0.5 mx-1 transition-colors ${
-                    i < step ? 'bg-emerald-500' : 'bg-stone-200'
+                    i < step ? 'bg-emerald-500' : 'bg-surface-200'
                   }`}
                 />
               )}
@@ -74,17 +74,17 @@ export default function Onboarding() {
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-stone-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg border border-surface-100 overflow-hidden">
           {/* Step 0: Welcome */}
           {step === 0 && (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Wallet className="w-8 h-8 text-teal-600" />
+              <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Wallet className="w-8 h-8 text-primary-600" />
               </div>
-              <h1 className="text-2xl font-bold text-stone-900 mb-2">
+              <h1 className="text-2xl font-bold text-surface-900 mb-2">
                 Welcome to Finance Tracker
               </h1>
-              <p className="text-stone-500 mb-8">
+              <p className="text-surface-500 mb-8">
                 Your personal finance dashboard. Track spending, set budgets, and reach your savings goals.
               </p>
 
@@ -95,11 +95,11 @@ export default function Onboarding() {
                   { icon: Shield, label: 'Secure', desc: 'Bank-level encryption' },
                   { icon: LayoutDashboard, label: 'Dashboard', desc: 'All your finances at a glance' },
                 ].map(({ icon: Icon, label, desc }) => (
-                  <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-stone-50">
-                    <Icon className="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0" />
+                  <div key={label} className="flex items-start gap-3 p-3 rounded-lg bg-surface-50">
+                    <Icon className="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-stone-900">{label}</p>
-                      <p className="text-xs text-stone-500">{desc}</p>
+                      <p className="text-sm font-medium text-surface-900">{label}</p>
+                      <p className="text-xs text-surface-500">{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -107,7 +107,7 @@ export default function Onboarding() {
 
               <button
                 onClick={() => setStep(1)}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
               >
                 Get Started
                 <ArrowRight className="w-4 h-4" />
@@ -118,19 +118,19 @@ export default function Onboarding() {
           {/* Step 1: Create Profile */}
           {step === 1 && (
             <div className="p-8">
-              <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <User className="w-6 h-6 text-teal-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                <User className="w-6 h-6 text-primary-600" />
               </div>
-              <h2 className="text-xl font-bold text-stone-900 text-center mb-2">
+              <h2 className="text-xl font-bold text-surface-900 text-center mb-2">
                 Create Your Profile
               </h2>
-              <p className="text-stone-500 text-center mb-6">
+              <p className="text-surface-500 text-center mb-6">
                 This helps organize your accounts and data.
               </p>
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="profileName" className="block text-sm font-medium text-stone-700 mb-1">
+                  <label htmlFor="profileName" className="block text-sm font-medium text-surface-700 mb-1">
                     Your Name
                   </label>
                   <input
@@ -140,7 +140,7 @@ export default function Onboarding() {
                     value={profileName}
                     onChange={(e) => setProfileName(e.target.value)}
                     placeholder="e.g., John Doe"
-                    className="w-full px-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
+                    className="w-full px-4 py-2.5 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && profileName.trim()) handleCreateProfile();
@@ -151,7 +151,7 @@ export default function Onboarding() {
                 <button
                   onClick={handleCreateProfile}
                   disabled={!profileName.trim() || isCreating}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isCreating ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -172,24 +172,24 @@ export default function Onboarding() {
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-6">
                 <Check className="w-6 h-6 text-emerald-600" />
               </div>
-              <h2 className="text-xl font-bold text-stone-900 mb-2">
+              <h2 className="text-xl font-bold text-surface-900 mb-2">
                 Profile Created!
               </h2>
-              <p className="text-stone-500 mb-8">
+              <p className="text-surface-500 mb-8">
                 Connect your bank account to automatically import transactions, or skip and explore the app first.
               </p>
 
               <div className="space-y-3">
                 <button
                   onClick={goToLinkAccount}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
                 >
                   <Link2 className="w-4 h-4" />
                   Connect Bank Account
                 </button>
                 <button
                   onClick={goToDashboard}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-stone-200 text-stone-700 rounded-lg hover:bg-stone-50 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-surface-200 text-surface-700 rounded-lg hover:bg-surface-50 transition-colors"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   Skip to Dashboard

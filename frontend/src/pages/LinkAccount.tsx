@@ -110,19 +110,19 @@ export default function LinkAccount() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900">Link Account</h1>
-        <p className="text-stone-500">Connect your bank accounts using Plaid</p>
+        <h1 className="text-2xl font-bold text-surface-900">Link Account</h1>
+        <p className="text-surface-500">Connect your bank accounts using Plaid</p>
       </div>
 
       {/* Profile Selection */}
       <div className="card p-6">
-        <label className="block text-sm font-medium text-stone-700 mb-2">
+        <label className="block text-sm font-medium text-surface-700 mb-2">
           Link accounts to profile:
         </label>
         <select
           value={selectedProfileId || ''}
           onChange={(e) => setSelectedProfileId(Number(e.target.value))}
-          className="w-full max-w-xs px-4 py-2 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="w-full max-w-xs px-4 py-2 border border-surface-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           {profileList?.map((profile) => (
             <option key={profile.id} value={profile.id}>
@@ -134,15 +134,15 @@ export default function LinkAccount() {
 
       {/* Link New Account */}
       <div className="card p-8 text-center">
-        <Link2 className="w-16 h-16 text-teal-600 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-stone-900 mb-2">Connect a New Bank</h2>
-        <p className="text-stone-500 mb-6 max-w-md mx-auto">
+        <Link2 className="w-16 h-16 text-primary-600 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold text-surface-900 mb-2">Connect a New Bank</h2>
+        <p className="text-surface-500 mb-6 max-w-md mx-auto">
           Securely link your bank accounts to automatically import transactions and track balances.
         </p>
         <button
           onClick={handleStartLink}
           disabled={!selectedProfileId || linkTokenMutation.isPending}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {linkTokenMutation.isPending ? (
             <>
@@ -160,20 +160,20 @@ export default function LinkAccount() {
 
       {/* Linked Banks */}
       <div className="card">
-        <div className="p-4 border-b border-stone-200">
-          <h3 className="font-semibold text-stone-900">Linked Banks</h3>
+        <div className="p-4 border-b border-surface-200">
+          <h3 className="font-semibold text-surface-900">Linked Banks</h3>
         </div>
         {itemsLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
           </div>
         ) : plaidItems?.length === 0 ? (
-          <div className="p-8 text-center text-stone-500">
-            <Building2 className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+          <div className="p-8 text-center text-surface-500">
+            <Building2 className="w-12 h-12 mx-auto mb-4 text-surface-300" />
             <p>No banks linked yet</p>
           </div>
         ) : (
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-surface-100">
             {plaidItems?.map((item) => (
               <div key={item.id} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -181,8 +181,8 @@ export default function LinkAccount() {
                     <Building2 className={`w-6 h-6 ${item.is_active ? 'text-emerald-600' : 'text-red-600'}`} />
                   </div>
                   <div>
-                    <p className="font-medium text-stone-900">{item.institution_name || 'Unknown Bank'}</p>
-                    <div className="flex items-center gap-3 text-sm text-stone-500">
+                    <p className="font-medium text-surface-900">{item.institution_name || 'Unknown Bank'}</p>
+                    <div className="flex items-center gap-3 text-sm text-surface-500">
                       <span>{item.account_count} account{item.account_count !== 1 ? 's' : ''}</span>
                       {item.last_sync && (
                         <span>Last synced: {format(parseISO(item.last_sync), 'MMM d, h:mm a')}</span>
@@ -211,14 +211,14 @@ export default function LinkAccount() {
                   <button
                     onClick={() => handleSync(item.id)}
                     disabled={!item.is_active || syncing === item.id}
-                    className="p-2 text-stone-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg disabled:opacity-50"
+                    className="p-2 text-surface-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg disabled:opacity-50"
                     title="Sync now"
                   >
                     <RefreshCw className={`w-5 h-5 ${syncing === item.id ? 'animate-spin' : ''}`} />
                   </button>
                   <button
                     onClick={() => handleDelete(item.id, item.institution_name || '')}
-                    className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                    className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                     title="Remove"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -238,7 +238,7 @@ export default function LinkAccount() {
               queryClient.invalidateQueries({ queryKey: ['accounts'] });
               queryClient.invalidateQueries({ queryKey: ['transactions'] });
             })}
-            className="flex items-center gap-2 px-4 py-2 text-teal-600 hover:bg-teal-50 rounded-lg"
+            className="flex items-center gap-2 px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg"
           >
             <RefreshCw className="w-5 h-5" />
             Sync All Banks

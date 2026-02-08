@@ -52,14 +52,14 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     success: <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />,
     error: <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />,
     warning: <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />,
-    info: <Info className="w-5 h-5 text-teal-500 flex-shrink-0" />,
+    info: <Info className="w-5 h-5 text-primary-500 flex-shrink-0" />,
   }
 
   const bgColors = {
     success: 'bg-emerald-50 border-green-200',
     error: 'bg-red-50 border-red-200',
     warning: 'bg-amber-50 border-amber-200',
-    info: 'bg-teal-50 border-teal-200',
+    info: 'bg-primary-50 border-primary-200',
   }
 
   return (
@@ -68,10 +68,10 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       role="alert"
     >
       {icons[toast.type]}
-      <p className="text-sm text-stone-800 flex-1">{toast.message}</p>
+      <p className="text-sm text-surface-800 flex-1">{toast.message}</p>
       <button
         onClick={onClose}
-        className="text-stone-400 hover:text-stone-600 flex-shrink-0"
+        className="text-surface-400 hover:text-surface-600 flex-shrink-0"
       >
         <X className="w-4 h-4" />
       </button>

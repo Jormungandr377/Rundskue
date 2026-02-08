@@ -106,8 +106,8 @@ export default function Transactions() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Transactions</h1>
-          <p className="text-stone-500 dark:text-stone-400">
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Transactions</h1>
+          <p className="text-surface-500 dark:text-surface-400">
             {txnData?.total || 0} transactions found
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function Transactions() {
           <button
             onClick={handleExportCsv}
             disabled={exporting}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 disabled:opacity-50 transition-colors"
           >
             <Download className="w-4 h-4" />
             CSV
@@ -123,7 +123,7 @@ export default function Transactions() {
           <button
             onClick={handleExportExcel}
             disabled={exporting}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-300 disabled:opacity-50 transition-colors"
           >
             <Download className="w-4 h-4" />
             Excel
@@ -136,13 +136,13 @@ export default function Transactions() {
         <div className="flex flex-wrap gap-4">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search transactions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+              className="w-full pl-10 pr-4 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function Transactions() {
           <select
             value={selectedAccount || ''}
             onChange={(e) => setSelectedAccount(e.target.value ? Number(e.target.value) : null)}
-            className="px-4 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+            className="px-4 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
           >
             <option value="">All Accounts</option>
             {accountList?.map((acc) => (
@@ -164,7 +164,7 @@ export default function Transactions() {
           <select
             value={selectedCategory || ''}
             onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
-            className="px-4 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+            className="px-4 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
           >
             <option value="">All Categories</option>
             {categoryList?.map((cat) => (
@@ -179,14 +179,14 @@ export default function Transactions() {
             type="date"
             value={dateRange.start}
             onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-            className="px-4 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+            className="px-4 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
           />
-          <span className="self-center text-stone-400">to</span>
+          <span className="self-center text-surface-400">to</span>
           <input
             type="date"
             value={dateRange.end}
             onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-            className="px-4 py-2 border border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+            className="px-4 py-2 border border-surface-200 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
           />
         </div>
       </div>
@@ -195,35 +195,35 @@ export default function Transactions() {
       <div className="card overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-stone-50 dark:bg-stone-700/50 border-b border-stone-200 dark:border-stone-700">
+              <thead className="bg-surface-50 dark:bg-surface-700/50 border-b border-surface-200 dark:border-surface-700">
                 <tr>
-                  <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Description</th>
-                  <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300 hidden md:table-cell">Account</th>
-                  <th className="text-left py-3 px-4 font-medium text-stone-600 dark:text-stone-300 hidden lg:table-cell">Category</th>
-                  <th className="text-right py-3 px-4 font-medium text-stone-600 dark:text-stone-300">Amount</th>
-                  <th className="text-center py-3 px-4 font-medium text-stone-600 dark:text-stone-300 w-20">Actions</th>
+                  <th className="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-300">Date</th>
+                  <th className="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-300">Description</th>
+                  <th className="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-300 hidden md:table-cell">Account</th>
+                  <th className="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-300 hidden lg:table-cell">Category</th>
+                  <th className="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-300">Amount</th>
+                  <th className="text-center py-3 px-4 font-medium text-surface-600 dark:text-surface-300 w-20">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {txnData?.transactions?.map((txn) => (
                   <tr
                     key={txn.id}
-                    className={`border-b border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/30 ${
+                    className={`border-b border-surface-100 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-700/30 ${
                       txn.is_excluded ? 'opacity-50' : ''
                     } ${txn.is_transfer ? 'bg-purple-50 dark:bg-purple-900/10' : ''}`}
                   >
-                    <td className="py-3 px-4 text-stone-600 dark:text-stone-400 whitespace-nowrap">
+                    <td className="py-3 px-4 text-surface-600 dark:text-surface-400 whitespace-nowrap">
                       {format(parseISO(txn.date), 'MMM d, yyyy')}
                     </td>
                     <td className="py-3 px-4">
                       <div>
-                        <p className="font-medium text-stone-900 dark:text-white">
+                        <p className="font-medium text-surface-900 dark:text-white">
                           {txn.custom_name || txn.merchant_name || txn.name}
                         </p>
                         {txn.pending && (
@@ -233,14 +233,14 @@ export default function Transactions() {
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-stone-600 dark:text-stone-400 hidden md:table-cell">
+                    <td className="py-3 px-4 text-surface-600 dark:text-surface-400 hidden md:table-cell">
                       {txn.account?.display_name || txn.account?.name || '-'}
                     </td>
                     <td className="py-3 px-4 hidden lg:table-cell">
                       <select
                         value={txn.category_id || ''}
                         onChange={(e) => handleCategoryChange(txn.id, Number(e.target.value))}
-                        className="text-sm border border-stone-200 dark:border-stone-600 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-stone-700 dark:text-white"
+                        className="text-sm border border-surface-200 dark:border-surface-600 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-surface-700 dark:text-white"
                       >
                         <option value="">Uncategorized</option>
                         {categoryList?.map((cat) => (
@@ -251,7 +251,7 @@ export default function Transactions() {
                       </select>
                     </td>
                     <td className={`py-3 px-4 text-right font-semibold whitespace-nowrap ${
-                      txn.amount < 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-white'
+                      txn.amount < 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-surface-900 dark:text-white'
                     }`}>
                       {txn.amount < 0 ? '+' : '-'}{formatCurrency(txn.amount)}
                     </td>
@@ -262,8 +262,8 @@ export default function Transactions() {
                           aria-label={txn.is_excluded ? 'Include in reports' : 'Exclude from reports'}
                           className={`p-1 rounded ${
                             txn.is_excluded
-                              ? 'bg-stone-200 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
-                              : 'hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-400'
+                              ? 'bg-surface-200 dark:bg-surface-600 text-surface-600 dark:text-surface-300'
+                              : 'hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-400'
                           }`}
                         >
                           <X className="w-4 h-4" />
@@ -274,7 +274,7 @@ export default function Transactions() {
                           className={`p-1 rounded ${
                             txn.is_transfer
                               ? 'bg-purple-200 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400'
-                              : 'hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-400'
+                              : 'hover:bg-surface-100 dark:hover:bg-surface-700 text-surface-400'
                           }`}
                         >
                           <ArrowLeftRight className="w-4 h-4" />
@@ -290,21 +290,21 @@ export default function Transactions() {
 
         {/* Pagination */}
         {txnData && txnData.total_pages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-stone-200 dark:border-stone-700">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-surface-200 dark:border-surface-700">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-surface-600 dark:text-surface-300 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span className="text-sm text-stone-600 dark:text-stone-400">
+            <span className="text-sm text-surface-600 dark:text-surface-400">
               Page {page} of {txnData.total_pages}
             </span>
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= txnData.total_pages}
-              className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-surface-600 dark:text-surface-300 bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-600 rounded-xl hover:bg-surface-50 dark:hover:bg-surface-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

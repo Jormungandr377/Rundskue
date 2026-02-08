@@ -98,8 +98,8 @@ export default function Profiles() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-stone-900">Profiles</h1>
-          <p className="text-stone-600 mt-1">
+          <h1 className="text-2xl font-bold text-surface-900">Profiles</h1>
+          <p className="text-surface-600 mt-1">
             Manage financial profiles for different people or purposes
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function Profiles() {
         {profiles?.map((profile) => (
           <div
             key={profile.id}
-            className="bg-white rounded-lg shadow-sm border border-stone-200 p-6 hover:shadow-md transition-shadow"
+            className="bg-white rounded-lg shadow-sm border border-surface-200 p-6 hover:shadow-md transition-shadow"
           >
             {editingProfile?.id === profile.id ? (
               /* Edit Mode */
@@ -128,7 +128,7 @@ export default function Profiles() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Profile name"
                   autoFocus
                 />
@@ -139,14 +139,14 @@ export default function Profiles() {
                     onChange={(e) =>
                       setFormData({ ...formData, is_primary: e.target.checked })
                     }
-                    className="w-4 h-4 text-primary-600 border-stone-300 rounded focus:ring-primary-500"
+                    className="w-4 h-4 text-primary-600 border-surface-300 rounded focus:ring-primary-500"
                   />
-                  <span className="text-sm text-stone-700">Primary profile</span>
+                  <span className="text-sm text-surface-700">Primary profile</span>
                 </label>
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={cancelEdit}
-                    className="p-2 text-stone-600 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors"
+                    className="p-2 text-surface-600 hover:text-surface-800 hover:bg-surface-100 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -168,13 +168,13 @@ export default function Profiles() {
                       <User className="w-6 h-6 text-primary-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+                      <h3 className="font-semibold text-surface-900 flex items-center gap-2">
                         {profile.name}
                         {profile.is_primary && (
                           <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                         )}
                       </h3>
-                      <p className="text-sm text-stone-500">
+                      <p className="text-sm text-surface-500">
                         {profile.email || 'No email set'}
                       </p>
                     </div>
@@ -182,7 +182,7 @@ export default function Profiles() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => startEdit(profile)}
-                      className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+                      className="p-2 text-surface-400 hover:text-surface-600 hover:bg-surface-100 rounded-lg transition-colors"
                       title="Edit profile"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -190,7 +190,7 @@ export default function Profiles() {
                     {!profile.is_primary && (
                       <button
                         onClick={() => setDeleteConfirm(profile.id)}
-                        className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete profile"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -200,17 +200,17 @@ export default function Profiles() {
                 </div>
 
                 {/* Profile Stats */}
-                <div className="mt-4 pt-4 border-t border-stone-100">
+                <div className="mt-4 pt-4 border-t border-surface-100">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-stone-500">TSP Contribution</span>
-                      <p className="font-medium text-stone-900">
+                      <span className="text-surface-500">TSP Contribution</span>
+                      <p className="font-medium text-surface-900">
                         {profile.tsp_contribution_pct || 0}%
                       </p>
                     </div>
                     <div>
-                      <span className="text-stone-500">Base Pay</span>
-                      <p className="font-medium text-stone-900">
+                      <span className="text-surface-500">Base Pay</span>
+                      <p className="font-medium text-surface-900">
                         {profile.base_pay ? `$${Number(profile.base_pay).toLocaleString()}` : 'Not set'}
                       </p>
                     </div>
@@ -226,7 +226,7 @@ export default function Profiles() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="px-3 py-1 text-sm text-stone-600 hover:text-stone-800"
+                        className="px-3 py-1 text-sm text-surface-600 hover:text-surface-800"
                       >
                         Cancel
                       </button>
@@ -247,12 +247,12 @@ export default function Profiles() {
 
         {/* Empty State */}
         {profiles?.length === 0 && (
-          <div className="col-span-full text-center py-12 bg-stone-50 rounded-lg border-2 border-dashed border-stone-300">
-            <User className="w-12 h-12 text-stone-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-stone-900 mb-2">
+          <div className="col-span-full text-center py-12 bg-surface-50 rounded-lg border-2 border-dashed border-surface-300">
+            <User className="w-12 h-12 text-surface-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-surface-900 mb-2">
               No profiles yet
             </h3>
-            <p className="text-stone-500 mb-4">
+            <p className="text-surface-500 mb-4">
               Create a profile to start tracking your finances
             </p>
             <button
@@ -270,18 +270,18 @@ export default function Profiles() {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
-            <div className="p-6 border-b border-stone-200">
-              <h2 className="text-xl font-semibold text-stone-900">
+            <div className="p-6 border-b border-surface-200">
+              <h2 className="text-xl font-semibold text-surface-900">
                 Create New Profile
               </h2>
-              <p className="text-sm text-stone-500 mt-1">
+              <p className="text-sm text-surface-500 mt-1">
                 Add a profile to track finances for yourself or someone else
               </p>
             </div>
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-surface-700 mb-1">
                   Profile Name
                 </label>
                 <input
@@ -290,7 +290,7 @@ export default function Profiles() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 border border-surface-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   placeholder="e.g., Personal, Joint, Business"
                   autoFocus
                 />
@@ -303,9 +303,9 @@ export default function Profiles() {
                   onChange={(e) =>
                     setFormData({ ...formData, is_primary: e.target.checked })
                   }
-                  className="w-4 h-4 text-primary-600 border-stone-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-600 border-surface-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-stone-700">
+                <span className="text-sm text-surface-700">
                   Set as primary profile
                 </span>
               </label>
@@ -317,13 +317,13 @@ export default function Profiles() {
               )}
             </div>
 
-            <div className="p-6 border-t border-stone-200 flex justify-end gap-3">
+            <div className="p-6 border-t border-surface-200 flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowCreateModal(false);
                   resetForm();
                 }}
-                className="px-4 py-2 text-stone-700 hover:text-stone-900"
+                className="px-4 py-2 text-surface-700 hover:text-surface-900"
               >
                 Cancel
               </button>
