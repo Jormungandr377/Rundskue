@@ -1,8 +1,10 @@
 """Auto-categorization rules router."""
-from typing import List, Optional
+from typing import List, Optional, Dict
+from collections import Counter
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel, Field
 
 from ..database import get_db
@@ -261,3 +263,200 @@ async def apply_rules(
 
     db.commit()
     return ApplyResult(categorized=categorized, skipped=skipped)
+
+
+# ============================================================================
+# Smart Categorization (Phase 8)
+# ============================================================================
+
+class SuggestionResponse(BaseModel):
+    transaction_id: int
+    transaction_name: str
+    merchant_name: Optional[str] = None
+    suggested_category_id: Optional[int] = None
+    suggested_category_name: Optional[str] = None
+    confidence: str  # high, medium, low
+    source: str  # rule, history, plaid
+
+
+@router.get("/suggestions", response_model=List[SuggestionResponse])
+async def get_suggestions(
+    limit: int = 50,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Get category suggestions for uncategorized transactions."""
+    profile = get_user_profile(db, current_user)
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Get uncategorized transactions
+    uncategorized = db.query(Transaction).join(Account).filter(
+        Account.profile_id.in_(profile_ids),
+        Transaction.category_id.is_(None),
+        Transaction.is_excluded == False,
+    ).order_by(Transaction.date.desc()).limit(limit).all()
+
+    # Get active rules
+    rules = db.query(CategoryRule).filter(
+        CategoryRule.profile_id == profile.id,
+        CategoryRule.is_active == True,
+    ).order_by(CategoryRule.priority.desc()).all()
+
+    # Build merchant -> category frequency map from categorized transactions
+    categorized_txns = db.query(
+        Transaction.merchant_name,
+        Transaction.category_id,
+        func.count(Transaction.id).label("cnt"),
+    ).join(Account).filter(
+        Account.profile_id.in_(profile_ids),
+        Transaction.category_id.isnot(None),
+        Transaction.merchant_name.isnot(None),
+    ).group_by(
+        Transaction.merchant_name,
+        Transaction.category_id,
+    ).all()
+
+    merchant_category_map: Dict[str, List[tuple]] = {}
+    for merchant, cat_id, cnt in categorized_txns:
+        key = (merchant or "").lower().strip()
+        if key:
+            if key not in merchant_category_map:
+                merchant_category_map[key] = []
+            merchant_category_map[key].append((cat_id, cnt))
+
+    # Plaid category mapping (from categorization service)
+    from ..services.categorization import categorize_transaction as plaid_categorize
+
+    suggestions = []
+    for txn in uncategorized:
+        suggested_cat_id = None
+        confidence = "low"
+        source = "plaid"
+
+        # 1. Try rules first (highest confidence)
+        for rule in rules:
+            if matches_rule(rule, txn):
+                suggested_cat_id = rule.category_id
+                confidence = "high"
+                source = "rule"
+                break
+
+        # 2. Try merchant history (medium-high confidence)
+        if not suggested_cat_id:
+            merchant_key = ((txn.merchant_name or txn.name) or "").lower().strip()
+            if merchant_key in merchant_category_map:
+                # Pick the most frequent category for this merchant
+                candidates = merchant_category_map[merchant_key]
+                candidates.sort(key=lambda x: x[1], reverse=True)
+                if candidates:
+                    suggested_cat_id = candidates[0][0]
+                    total = sum(c[1] for c in candidates)
+                    top_count = candidates[0][1]
+                    confidence = "high" if top_count / total > 0.8 else "medium"
+                    source = "history"
+
+        # 3. Try Plaid-based categorization (low confidence)
+        if not suggested_cat_id:
+            plaid_cats = txn.plaid_category if txn.plaid_category else None
+            result = plaid_categorize(db, txn.merchant_name or txn.name, plaid_cats)
+            if result:
+                # Check it's not just "Uncategorized"
+                cat = db.query(Category).filter(Category.id == result).first()
+                if cat and cat.name != "Uncategorized":
+                    suggested_cat_id = result
+                    confidence = "low"
+                    source = "plaid"
+
+        if suggested_cat_id:
+            cat = db.query(Category).filter(Category.id == suggested_cat_id).first()
+            suggestions.append(SuggestionResponse(
+                transaction_id=txn.id,
+                transaction_name=txn.custom_name or txn.name,
+                merchant_name=txn.merchant_name,
+                suggested_category_id=suggested_cat_id,
+                suggested_category_name=cat.name if cat else None,
+                confidence=confidence,
+                source=source,
+            ))
+
+    return suggestions
+
+
+class LearnRequest(BaseModel):
+    transaction_id: int
+    category_id: int
+
+
+class LearnResponse(BaseModel):
+    categorized: bool
+    rule_created: bool
+    rule_id: Optional[int] = None
+
+
+@router.post("/learn", response_model=LearnResponse)
+async def learn_from_categorization(
+    data: LearnRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Learn from manual categorization - auto-create rule if merchant appears 3+ times."""
+    profile = get_user_profile(db, current_user)
+    profile_ids = [p.id for p in current_user.profiles]
+
+    # Get the transaction
+    txn = db.query(Transaction).join(Account).filter(
+        Transaction.id == data.transaction_id,
+        Account.profile_id.in_(profile_ids),
+    ).first()
+    if not txn:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    # Verify category exists
+    cat = db.query(Category).filter(Category.id == data.category_id).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # Categorize the transaction
+    txn.category_id = data.category_id
+    rule_created = False
+    rule_id = None
+
+    # Check if this merchant appears 3+ times and doesn't have a rule yet
+    merchant = txn.merchant_name or txn.name
+    if merchant:
+        merchant_lower = merchant.lower().strip()
+
+        # Count how many transactions have this merchant
+        merchant_count = db.query(func.count(Transaction.id)).join(Account).filter(
+            Account.profile_id.in_(profile_ids),
+            func.lower(func.coalesce(Transaction.merchant_name, Transaction.name)).like(f"%{merchant_lower}%"),
+        ).scalar() or 0
+
+        if merchant_count >= 3:
+            # Check if a rule already exists for this merchant+category
+            existing_rule = db.query(CategoryRule).filter(
+                CategoryRule.profile_id == profile.id,
+                func.lower(CategoryRule.match_value) == merchant_lower,
+                CategoryRule.category_id == data.category_id,
+            ).first()
+
+            if not existing_rule:
+                new_rule = CategoryRule(
+                    profile_id=profile.id,
+                    category_id=data.category_id,
+                    match_field="merchant_name" if txn.merchant_name else "name",
+                    match_type="contains",
+                    match_value=merchant_lower,
+                    priority=5,
+                )
+                db.add(new_rule)
+                db.flush()
+                rule_created = True
+                rule_id = new_rule.id
+
+    db.commit()
+    return LearnResponse(
+        categorized=True,
+        rule_created=rule_created,
+        rule_id=rule_id,
+    )

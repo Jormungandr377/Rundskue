@@ -826,3 +826,50 @@ class SplitParticipant(Base):
     paid_at = Column(DateTime, nullable=True)
 
     split_expense = relationship("SplitExpense", back_populates="participants")
+
+
+# ============================================================================
+# Phase 8: Automation
+# ============================================================================
+
+class ScheduledReport(Base):
+    """Scheduled email report configuration."""
+    __tablename__ = "scheduled_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    report_type = Column(String(30), nullable=False)  # weekly_summary, monthly_summary, budget_status
+    frequency = Column(String(20), nullable=False)  # weekly, monthly
+    day_of_week = Column(Integer, nullable=True)  # 0=Monday..6=Sunday (for weekly)
+    day_of_month = Column(Integer, nullable=True)  # 1-28 (for monthly)
+    is_active = Column(Boolean, default=True)
+    last_sent = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("ix_scheduled_reports_user_active", "user_id", "is_active"),
+    )
+
+
+class Webhook(Base):
+    """Webhook endpoint for event notifications."""
+    __tablename__ = "webhooks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    url = Column(String(500), nullable=False)
+    events = Column(JSON, nullable=False)  # list of event type strings
+    secret = Column(String(255), nullable=False)  # HMAC signing secret
+    is_active = Column(Boolean, default=True)
+    last_triggered = Column(DateTime, nullable=True)
+    failure_count = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("ix_webhooks_user_active", "user_id", "is_active"),
+    )

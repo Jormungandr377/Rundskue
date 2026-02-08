@@ -28,6 +28,8 @@ import {
   Briefcase,
   BarChart3,
   Split,
+  Globe,
+  Mail,
 } from 'lucide-react'
 
 // Auth (loaded eagerly - needed immediately)
@@ -70,6 +72,8 @@ const InvestmentsPage = lazy(() => import('./pages/Investments'))
 const YearInReview = lazy(() => import('./pages/YearInReview'))
 const MerchantAnalysis = lazy(() => import('./pages/MerchantAnalysis'))
 const BillSplitting = lazy(() => import('./pages/BillSplitting'))
+const WebhooksPage = lazy(() => import('./pages/Webhooks'))
+const EmailReportsPage = lazy(() => import('./pages/EmailReports'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
 const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
@@ -141,6 +145,8 @@ const navItems = [
   { path: '/reports', icon: TrendingUp, label: 'Reports' },
   { path: '/planning', icon: Calculator, label: 'Financial Planning' },
   { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
+  { path: '/webhooks', icon: Globe, label: 'Webhooks' },
+  { path: '/email-reports', icon: Mail, label: 'Email Reports' },
 ]
 
 // Theme toggle button
@@ -451,6 +457,8 @@ function AuthenticatedLayout() {
               <Route path="/year-in-review" element={<YearInReview />} />
               <Route path="/merchant-analysis" element={<MerchantAnalysis />} />
               <Route path="/bill-splitting" element={<BillSplitting />} />
+              <Route path="/webhooks" element={<WebhooksPage />} />
+              <Route path="/email-reports" element={<EmailReportsPage />} />
               <Route path="/planning" element={<FinancialPlanning />} />
               <Route path="/link-account" element={<LinkAccount />} />
               <Route path="/profiles" element={<Profiles />} />

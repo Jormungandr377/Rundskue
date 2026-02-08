@@ -24,7 +24,7 @@ from .config import get_settings
 from .routers import plaid, accounts, transactions, budgets, analytics, profiles
 from .routers import tsp, auth, recurring, export, goals, notifications, categorization, sessions
 from .routers import admin, envelopes, subscriptions, cashflow, paycheck, savings_rules
-from .routers import debt, credit, investments, splits
+from .routers import debt, credit, investments, splits, webhooks, reports
 from .services.sync_service import sync_all_items
 from .init_db import init_db
 
@@ -242,6 +242,8 @@ app.include_router(debt.router, prefix="/api/debt", tags=["Debt"])
 app.include_router(credit.router, prefix="/api/credit-score", tags=["Credit Score"])
 app.include_router(investments.router, prefix="/api/investments", tags=["Investments"])
 app.include_router(splits.router, prefix="/api/splits", tags=["Bill Splitting"])
+app.include_router(webhooks.router, prefix="/api/webhooks", tags=["Webhooks"])
+app.include_router(reports.router, prefix="/api/reports", tags=["Reports"])
 
 
 @app.get("/")

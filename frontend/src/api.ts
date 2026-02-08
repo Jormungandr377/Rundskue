@@ -279,6 +279,10 @@ export const categorization = {
   deleteRule: (id: number) => client.delete(`/categorization/rules/${id}`),
   applyRules: (uncategorizedOnly = true) =>
     client.post<{ categorized: number; skipped: number }>('/categorization/apply', null, { params: { uncategorized_only: uncategorizedOnly } }).then(r => r.data),
+  suggestions: (limit = 50) =>
+    client.get<{ transaction_id: number; transaction_name: string; merchant_name?: string; suggested_category_id?: number; suggested_category_name?: string; confidence: string; source: string }[]>('/categorization/suggestions', { params: { limit } }).then(r => r.data),
+  learn: (transactionId: number, categoryId: number) =>
+    client.post<{ categorized: boolean; rule_created: boolean; rule_id?: number }>('/categorization/learn', { transaction_id: transactionId, category_id: categoryId }).then(r => r.data),
 };
 
 // Sessions
@@ -385,6 +389,30 @@ export const investmentsApi = {
     client.get<PortfolioSummary>('/investments/summary').then(r => r.data),
 };
 
+// Webhooks
+export const webhooksApi = {
+  list: () => client.get('/webhooks').then(r => r.data),
+  create: (data: { url: string; events: string[] }) =>
+    client.post('/webhooks', data).then(r => r.data),
+  update: (id: number, data: { url?: string; events?: string[]; is_active?: boolean }) =>
+    client.put(`/webhooks/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/webhooks/${id}`),
+  test: (id: number) =>
+    client.post(`/webhooks/${id}/test`).then(r => r.data),
+};
+
+// Scheduled Reports
+export const scheduledReports = {
+  list: () => client.get('/reports/scheduled').then(r => r.data),
+  create: (data: { report_type: string; frequency: string; day_of_week?: number; day_of_month?: number }) =>
+    client.post('/reports/scheduled', data).then(r => r.data),
+  update: (id: number, data: { is_active?: boolean; frequency?: string; day_of_week?: number; day_of_month?: number }) =>
+    client.put(`/reports/scheduled/${id}`, data).then(r => r.data),
+  delete: (id: number) => client.delete(`/reports/scheduled/${id}`),
+  sendNow: (id: number) =>
+    client.post(`/reports/scheduled/${id}/send-now`).then(r => r.data),
+};
+
 // Combined API object for easy importing
 export const api = {
   profiles,
@@ -409,6 +437,8 @@ export const api = {
   debt,
   creditScore,
   investmentsApi,
+  webhooksApi,
+  scheduledReports,
 };
 
 export default api;
