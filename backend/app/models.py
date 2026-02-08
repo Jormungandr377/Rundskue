@@ -772,3 +772,57 @@ class FinancialHealthSnapshot(Base):
     __table_args__ = (
         Index("ix_financial_health_user_date", "user_id", "date"),
     )
+
+
+# ============================================================================
+# Phase 7: Social & Shared
+# ============================================================================
+
+class SharedBudget(Base):
+    """Sharing a budget with another profile."""
+    __tablename__ = "shared_budgets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    budget_id = Column(Integer, ForeignKey("budgets.id"), nullable=False, index=True)
+    shared_with_profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    permission = Column(String(10), default="view")  # view, edit
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    budget = relationship("Budget")
+    shared_with_profile = relationship("Profile")
+
+
+class SplitExpense(Base):
+    """Bill splitting expense."""
+    __tablename__ = "split_expenses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False, index=True)
+    transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=True)
+    description = Column(String(255), nullable=False)
+    total_amount = Column(Numeric(14, 2), nullable=False)
+    date = Column(Date, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    profile = relationship("Profile")
+    participants = relationship("SplitParticipant", back_populates="split_expense", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_split_expenses_profile", "profile_id"),
+    )
+
+
+class SplitParticipant(Base):
+    """Participant in a bill split."""
+    __tablename__ = "split_participants"
+
+    id = Column(Integer, primary_key=True, index=True)
+    split_expense_id = Column(Integer, ForeignKey("split_expenses.id"), nullable=False, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(255), nullable=True)
+    share_amount = Column(Numeric(14, 2), nullable=False)
+    is_paid = Column(Boolean, default=False)
+    paid_at = Column(DateTime, nullable=True)
+
+    split_expense = relationship("SplitExpense", back_populates="participants")

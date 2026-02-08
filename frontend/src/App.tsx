@@ -27,6 +27,7 @@ import {
   Wallet,
   Briefcase,
   BarChart3,
+  Split,
 } from 'lucide-react'
 
 // Auth (loaded eagerly - needed immediately)
@@ -68,6 +69,7 @@ const NetWorthPage = lazy(() => import('./pages/NetWorth'))
 const InvestmentsPage = lazy(() => import('./pages/Investments'))
 const YearInReview = lazy(() => import('./pages/YearInReview'))
 const MerchantAnalysis = lazy(() => import('./pages/MerchantAnalysis'))
+const BillSplitting = lazy(() => import('./pages/BillSplitting'))
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const SecurityPolicy = lazy(() => import('./pages/SecurityPolicy'))
 const DataRetentionPolicy = lazy(() => import('./pages/DataRetentionPolicy'))
@@ -135,6 +137,7 @@ const navItems = [
   { path: '/debt', icon: CreditCard, label: 'Debt Payoff' },
   { path: '/investments', icon: Briefcase, label: 'Investments' },
   { path: '/net-worth', icon: BarChart3, label: 'Net Worth' },
+  { path: '/bill-splitting', icon: Split, label: 'Bill Splitting' },
   { path: '/reports', icon: TrendingUp, label: 'Reports' },
   { path: '/planning', icon: Calculator, label: 'Financial Planning' },
   { path: '/rules', icon: Wand2, label: 'Auto-Categorize' },
@@ -447,6 +450,7 @@ function AuthenticatedLayout() {
               <Route path="/reports" element={<Reports />} />
               <Route path="/year-in-review" element={<YearInReview />} />
               <Route path="/merchant-analysis" element={<MerchantAnalysis />} />
+              <Route path="/bill-splitting" element={<BillSplitting />} />
               <Route path="/planning" element={<FinancialPlanning />} />
               <Route path="/link-account" element={<LinkAccount />} />
               <Route path="/profiles" element={<Profiles />} />

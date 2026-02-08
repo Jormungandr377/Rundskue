@@ -479,3 +479,33 @@ export interface PortfolioSummary {
   gain_loss_pct: number;
   holding_count: number;
 }
+
+// Bill Splitting
+export interface SplitParticipant {
+  id: number;
+  split_expense_id: number;
+  profile_id?: number;
+  name: string;
+  email?: string;
+  share_amount: number;
+  is_paid: boolean;
+  paid_at?: string;
+}
+
+export interface SplitExpense {
+  id: number;
+  profile_id: number;
+  transaction_id?: number;
+  description: string;
+  total_amount: number;
+  date: string;
+  participants: SplitParticipant[];
+}
+
+export interface SplitBalance {
+  name: string;
+  email?: string;
+  total_owed: number;
+  total_paid: number;
+  net_balance: number;
+}
